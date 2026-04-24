@@ -10,6 +10,7 @@ import {
   Salad,
   BarChart2,
   Settings,
+  Archive,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,7 +22,8 @@ import SettingsModal from '../SettingsModal';
 const ALL_NAV_ITEMS = [
   { to: '/personal/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/personal/alunos', label: 'Alunos', icon: Users },
-  { to: '/personal/treinos', label: 'Treinos', icon: Dumbbell },
+  { to: '/personal/historico-planos', label: 'Hist. Planos', icon: Archive },
+  { to: '/personal/exercicios', label: 'Exercícios', icon: Dumbbell },
   { to: '/personal/dietas', label: 'Dietas', icon: Salad },
   { to: '/personal/relatorios', label: 'Relatórios', icon: BarChart2 },
   { to: '/personal/chat', label: 'Chat', icon: MessageCircle },

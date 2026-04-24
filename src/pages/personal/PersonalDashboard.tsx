@@ -5,17 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 export default function PersonalDashboard() {
   const { user } = useAuth();
-  const { students, workouts, assignments, logs, unreadCount } = useApp();
+  const { students, exercises, workoutSessions, unreadCount } = useApp();
   const navigate = useNavigate();
 
-  const myWorkouts = workouts.filter((w) => w.personalId === user?.id);
-  const myAssignments = assignments.filter((a) => a.personalId === user?.id);
   const unread = user ? unreadCount(user.id) : 0;
-
-  const recentLogs = logs
-    .filter((l) => myAssignments.some((a) => a.studentId === l.studentId))
-    .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
-    .slice(0, 5);
 
   const stats = [
     {
@@ -26,15 +19,15 @@ export default function PersonalDashboard() {
       action: () => navigate('/personal/alunos'),
     },
     {
-      label: 'Treinos criados',
-      value: myWorkouts.length,
+      label: 'Exercícios',
+      value: exercises.length,
       icon: Dumbbell,
       color: 'bg-indigo-50 text-indigo-600',
-      action: () => navigate('/personal/treinos'),
+      action: () => navigate('/personal/exercicios'),
     },
     {
-      label: 'Atribuições',
-      value: myAssignments.length,
+      label: 'Treinos realizados',
+      value: workoutSessions.length,
       icon: ClipboardList,
       color: 'bg-violet-50 text-violet-600',
       action: () => navigate('/personal/alunos'),
@@ -75,26 +68,29 @@ export default function PersonalDashboard() {
       {/* Recent activity */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5">
         <h2 className="font-semibold text-slate-700 dark:text-slate-200 mb-4">Treinos recentes dos alunos</h2>
-        {recentLogs.length === 0 ? (
+        {workoutSessions.length === 0 ? (
           <p className="text-slate-400 dark:text-slate-500 text-sm">Nenhum treino registrado ainda.</p>
         ) : (
           <ul className="flex flex-col gap-3">
-            {recentLogs.map((log) => {
-              const student = students.find((s) => s.id === log.studentId);
-              return (
-                <li key={log.id} className="flex items-center justify-between text-sm">
-                  <div>
-                    <span className="font-medium text-slate-700 dark:text-slate-200">{student?.name ?? 'Aluno'}</span>
-                    <span className="text-slate-400 mx-2">·</span>
-                    <span className="text-slate-600 dark:text-slate-300">{log.workoutName}</span>
-                  </div>
-                  <div className="text-xs text-slate-400 dark:text-slate-500">
-                    {new Date(log.completedAt).toLocaleDateString('pt-BR')}
-                    {log.durationMinutes && ` · ${log.durationMinutes} min`}
-                  </div>
-                </li>
-              );
-            })}
+            {[...workoutSessions]
+              .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
+              .slice(0, 5)
+              .map((session) => {
+                const student = students.find((s) => s.id === session.studentId);
+                return (
+                  <li key={session.id} className="flex items-center justify-between text-sm">
+                    <div>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{student?.name ?? 'Aluno'}</span>
+                      <span className="text-slate-400 mx-2">·</span>
+                      <span className="text-slate-600 dark:text-slate-300">{session.label}</span>
+                    </div>
+                    <div className="text-xs text-slate-400 dark:text-slate-500">
+                      {new Date(session.completedAt).toLocaleDateString('pt-BR')}
+                      {` · ${session.durationMinutes} min`}
+                    </div>
+                  </li>
+                );
+              })}
           </ul>
         )}
       </div>

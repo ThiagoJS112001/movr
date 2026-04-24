@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { Workout, WorkoutAssignment, WorkoutLog, Message, User, WorkoutExercise, Diet, DietAssignment, Meal, FoodItem } from '../types';
+import type { Workout, WorkoutAssignment, WorkoutLog, Message, User, WorkoutExercise, Diet, DietAssignment, Meal, FoodItem, Exercise, WeeklyDay, WeeklyPlan, WeeklyPlanArchive, WorkoutSession } from '../types';
 import {
   MOCK_WORKOUTS,
   MOCK_ASSIGNMENTS,
@@ -9,7 +9,9 @@ import {
   MOCK_USERS,
   MOCK_DIETS,
   MOCK_DIET_ASSIGNMENTS,
+  MOCK_EXERCISES,
 } from '../data/mockData';
+import { LS_DYNAMIC_USERS_KEY, LS_DYNAMIC_PASSWORDS_KEY } from '../lib/constants';
 
 interface AppContextType {
   // Data
@@ -18,6 +20,29 @@ interface AppContextType {
   assignments: WorkoutAssignment[];
   logs: WorkoutLog[];
   messages: Message[];
+
+  // Students
+  addStudent: (name: string, email: string, password: string) => User;
+
+  // Exercises (catalog)
+  exercises: Exercise[];
+  createExercise: (e: Omit<Exercise, 'id'>) => Exercise;
+  updateExercise: (id: string, data: Partial<Exercise>) => void;
+  deleteExercise: (id: string) => void;
+
+  // Weekly Plans
+  weeklyPlans: WeeklyPlan[];
+  setWeeklyPlan: (studentId: string, personalId: string, days: WeeklyDay[]) => void;
+  getWeeklyPlan: (studentId: string) => WeeklyPlan | undefined;
+
+  // Weekly Plan Archives
+  weeklyPlanArchives: WeeklyPlanArchive[];
+  archiveWeeklyPlan: (studentId: string, personalId: string, studentName: string) => void;
+  getWeeklyPlanArchives: (studentId?: string) => WeeklyPlanArchive[];
+
+  // Workout Sessions (new log)
+  workoutSessions: WorkoutSession[];
+  addWorkoutSession: (s: Omit<WorkoutSession, 'id'>) => void;
 
   // Workouts
   createWorkout: (w: Omit<Workout, 'id' | 'createdAt'>) => Workout;
@@ -74,8 +99,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [diets, setDiets] = useState<Diet[]>(MOCK_DIETS);
   const [dietAssignments, setDietAssignments] = useState<DietAssignment[]>(MOCK_DIET_ASSIGNMENTS);
   const [blockedStudentIds, setBlockedStudentIds] = useState<string[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>(MOCK_EXERCISES);
+  const [weeklyPlans, setWeeklyPlans] = useState<WeeklyPlan[]>([]);
+  const [weeklyPlanArchives, setWeeklyPlanArchives] = useState<WeeklyPlanArchive[]>([]);
+  const [workoutSessions, setWorkoutSessions] = useState<WorkoutSession[]>([]);
+  const [dynamicStudents, setDynamicStudents] = useState<User[]>(() => {
+    const stored = localStorage.getItem(LS_DYNAMIC_USERS_KEY);
+    return stored ? (JSON.parse(stored) as User[]) : [];
+  });
 
-  const students = MOCK_USERS.filter((u) => u.role === 'aluno');
+  const students = [
+    ...MOCK_USERS.filter((u) => u.role === 'aluno'),
+    ...dynamicStudents,
+  ];
+
+  function addStudent(name: string, email: string, password: string): User {
+    const newUser: User = {
+      id: uuidv4(),
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      role: 'aluno',
+    };
+
+    const updated = [...dynamicStudents, newUser];
+    setDynamicStudents(updated);
+    localStorage.setItem(LS_DYNAMIC_USERS_KEY, JSON.stringify(updated));
+
+    const passwords: Record<string, string> = JSON.parse(
+      localStorage.getItem(LS_DYNAMIC_PASSWORDS_KEY) ?? '{}'
+    );
+    passwords[newUser.email] = password;
+    localStorage.setItem(LS_DYNAMIC_PASSWORDS_KEY, JSON.stringify(passwords));
+
+    return newUser;
+  }
 
   function blockStudent(id: string) {
     setBlockedStudentIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
@@ -87,6 +144,62 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   function isStudentBlocked(id: string): boolean {
     return blockedStudentIds.includes(id);
+  }
+
+  // ── Exercises ─────────────────────────────────────────────────────────────────
+  function createExercise(e: Omit<Exercise, 'id'>): Exercise {
+    const newE: Exercise = { ...e, id: uuidv4() };
+    setExercises((prev) => [...prev, newE]);
+    return newE;
+  }
+
+  function updateExercise(id: string, data: Partial<Exercise>) {
+    setExercises((prev) => prev.map((e) => (e.id === id ? { ...e, ...data } : e)));
+  }
+
+  function deleteExercise(id: string) {
+    setExercises((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  // ── Weekly Plans ──────────────────────────────────────────────────────────────
+  function setWeeklyPlan(studentId: string, personalId: string, days: WeeklyDay[]) {
+    setWeeklyPlans((prev) => {
+      const existing = prev.find((p) => p.studentId === studentId && p.personalId === personalId);
+      if (existing) {
+        return prev.map((p) =>
+          p.id === existing.id ? { ...p, days, updatedAt: new Date().toISOString() } : p,
+        );
+      }
+      return [...prev, { id: uuidv4(), studentId, personalId, days, updatedAt: new Date().toISOString() }];
+    });
+  }
+
+  function getWeeklyPlan(studentId: string): WeeklyPlan | undefined {
+    return weeklyPlans.find((p) => p.studentId === studentId);
+  }
+
+  function archiveWeeklyPlan(studentId: string, personalId: string, studentName: string) {
+    const plan = weeklyPlans.find((p) => p.studentId === studentId && p.personalId === personalId);
+    if (!plan) return;
+    const archive: WeeklyPlanArchive = {
+      id: uuidv4(),
+      studentId: plan.studentId,
+      studentName,
+      personalId: plan.personalId,
+      days: plan.days.map((d) => ({ ...d, exerciseIds: [...d.exerciseIds] })),
+      archivedAt: new Date().toISOString(),
+    };
+    setWeeklyPlanArchives((prev) => [...prev, archive]);
+  }
+
+  function getWeeklyPlanArchives(studentId?: string): WeeklyPlanArchive[] {
+    if (!studentId) return weeklyPlanArchives;
+    return weeklyPlanArchives.filter((a) => a.studentId === studentId);
+  }
+
+  // ── Workout Sessions ──────────────────────────────────────────────────────────
+  function addWorkoutSession(s: Omit<WorkoutSession, 'id'>) {
+    setWorkoutSessions((prev) => [...prev, { ...s, id: uuidv4() }]);
   }
 
   // ── Workouts ────────────────────────────────────────────────────────────────
@@ -291,6 +404,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         assignments,
         logs,
         messages,
+        addStudent,
+        exercises,
+        createExercise,
+        updateExercise,
+        deleteExercise,
+        weeklyPlans,
+        setWeeklyPlan,
+        getWeeklyPlan,
+        weeklyPlanArchives,
+        archiveWeeklyPlan,
+        getWeeklyPlanArchives,
+        workoutSessions,
+        addWorkoutSession,
         createWorkout,
         updateWorkout,
         deleteWorkout,

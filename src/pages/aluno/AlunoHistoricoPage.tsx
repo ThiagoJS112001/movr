@@ -1,103 +1,96 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
-import { CheckCircle2, Clock, Dumbbell, ChevronDown, ChevronUp, Weight } from 'lucide-react';
+import { ChevronDown, ChevronUp, Dumbbell, Clock, CheckCircle2 } from 'lucide-react';
 
 export default function AlunoHistoricoPage() {
   const { user } = useAuth();
-  const { logs, workouts } = useApp();
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const { workoutSessions, exercises } = useApp();
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const myLogs = logs
-    .filter((l) => l.studentId === user?.id)
+  const mySessions = [...workoutSessions]
+    .filter((s) => s.studentId === user?.id)
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt));
 
-  return (
-    <div className="p-5 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Histórico de treinos</h1>
+  function toggle(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
 
-      {myLogs.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 dark:text-slate-500">
-          <Dumbbell size={40} className="mx-auto mb-3 opacity-30" />
+  return (
+    <div className="p-5 max-w-2xl mx-auto">
+      <div className="mb-5">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Histórico</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          {mySessions.length} treino{mySessions.length !== 1 ? 's' : ''} registrado{mySessions.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {mySessions.length === 0 ? (
+        <div className="flex flex-col items-center py-16 text-slate-400 dark:text-slate-500">
+          <Dumbbell size={36} className="mb-3 opacity-30" />
           <p className="text-sm">Nenhum treino registrado ainda.</p>
-          <p className="text-xs mt-1">Conclua um treino para aparecer aqui.</p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {myLogs.map((log) => {
-            const isOpen = expanded === log.id;
-            const workout = workouts.find((w) => w.id === log.workoutId);
-            const hasWeights = log.exerciseWeights && Object.keys(log.exerciseWeights).length > 0;
+        <div className="flex flex-col gap-2">
+          {mySessions.map((session) => {
+            const isExpanded = expanded.has(session.id);
+            const completedExercises = session.completedExerciseIds
+              .map((id) => exercises.find((e) => e.id === id))
+              .filter(Boolean) as typeof exercises;
+
             return (
-              <div key={log.id} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden">
-                {/* Header row */}
-                <div
-                  className="flex items-center gap-4 p-4 cursor-pointer"
-                  onClick={() => setExpanded(isOpen ? null : log.id)}
-                >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
-                    <CheckCircle2 size={20} className="text-emerald-600" />
+              <div
+                key={session.id}
+                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm"
+              >
+                <div className="flex items-center gap-3 px-4 py-3">
+                  <div className="w-9 h-9 shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
+                    <Dumbbell size={16} className="text-indigo-600 dark:text-indigo-400" />
                   </div>
+
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{log.workoutName}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                      {new Date(log.completedAt).toLocaleDateString('pt-BR', {
-                        weekday: 'long',
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+                      {session.label}
                     </p>
+                    <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+                      <span>{new Date(session.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                      <span className="flex items-center gap-0.5">
+                        <Clock size={10} />
+                        {session.durationMinutes} min
+                      </span>
+                      <span className="flex items-center gap-0.5">
+                        <CheckCircle2 size={10} />
+                        {session.completedExerciseIds.length} exercícios
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    {log.durationMinutes && (
-                      <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                        <Clock size={12} />
-                        {log.durationMinutes} min
-                      </div>
-                    )}
-                    <button className="text-slate-400">
-                      {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                    </button>
-                  </div>
+
+                  <button
+                    onClick={() => toggle(session.id)}
+                    className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shrink-0"
+                  >
+                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
                 </div>
 
-                {/* Expanded: exercises + weights */}
-                {isOpen && workout && (
-                  <div className="border-t border-slate-100 dark:border-slate-700 px-4 py-3">
-                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">
-                      Exercícios realizados
-                    </p>
-                    <div className="flex flex-col gap-1.5">
-                      {workout.exercises.map((ex) => {
-                        const wasCompleted = log.completedExercises.includes(ex.id);
-                        const kg = log.exerciseWeights?.[ex.id];
-                        return (
-                          <div
-                            key={ex.id}
-                            className={`flex items-center justify-between text-xs rounded-lg px-3 py-1.5 ${
-                              wasCompleted
-                                ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300'
-                                : 'bg-slate-50 dark:bg-slate-700/40 text-slate-400 dark:text-slate-500'
-                            }`}
-                          >
-                            <span className="font-medium">{ex.exerciseName}</span>
-                            {kg != null ? (
-                              <span className="flex items-center gap-1 font-semibold">
-                                <Weight size={10} />
-                                {kg} kg
-                              </span>
-                            ) : (
-                              wasCompleted && <span className="text-emerald-600 dark:text-emerald-400">✓</span>
-                            )}
+                {isExpanded && (
+                  <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700 pt-3">
+                    {completedExercises.length === 0 ? (
+                      <p className="text-xs text-slate-400 dark:text-slate-500">Nenhum exercício registrado.</p>
+                    ) : (
+                      <div className="flex flex-col gap-1.5">
+                        {completedExercises.map((ex) => (
+                          <div key={ex.id} className="flex items-center gap-2 text-sm">
+                            <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
+                            <span className="text-slate-700 dark:text-slate-200">{ex.name}</span>
+                            <span className="text-xs text-slate-400 dark:text-slate-500 ml-auto">{ex.muscleGroup}</span>
                           </div>
-                        );
-                      })}
-                    </div>
-                    {!hasWeights && (
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 italic">
-                        Sem registro de carga para este treino.
-                      </p>
+                        ))}
+                      </div>
                     )}
                   </div>
                 )}

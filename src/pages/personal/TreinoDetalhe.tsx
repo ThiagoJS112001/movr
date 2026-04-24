@@ -4,6 +4,7 @@ import { useApp } from '../../contexts/AppContext';
 import { MOCK_EXERCISES } from '../../data/mockData';
 import { ArrowLeft, Plus, Trash2, Edit2, Check, X, Image, Video } from 'lucide-react';
 import type { WorkoutExercise } from '../../types';
+import VideoModal from '../../components/VideoModal';
 
 export default function TreinoDetalhe() {
   const { id } = useParams<{ id: string }>();
@@ -308,6 +309,7 @@ function ExerciseCard({
   onImageUpload,
 }: ExerciseCardProps) {
   const [form, setForm] = useState({ ...ex });
+  const [videoOpen, setVideoOpen] = useState(false);
 
   if (editing) {
     return (
@@ -419,15 +421,16 @@ function ExerciseCard({
         <img src={ex.imageUrl} alt={ex.exerciseName} className="mt-3 rounded-xl h-32 w-full object-cover" />
       )}
       {ex.videoUrl && (
-        <a
-          href={ex.videoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 flex items-center gap-1 text-xs text-indigo-500 hover:underline"
+        <button
+          onClick={() => setVideoOpen(true)}
+          className="mt-2 flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
         >
           <Video size={12} />
           Ver vídeo
-        </a>
+        </button>
+      )}
+      {videoOpen && ex.videoUrl && (
+        <VideoModal url={ex.videoUrl} onClose={() => setVideoOpen(false)} />
       )}
     </div>
   );

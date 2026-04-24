@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { User } from '../types';
 import { MOCK_USERS, MOCK_PASSWORDS } from '../data/mockData';
-import { LS_USER_KEY } from '../lib/constants';
+import { LS_USER_KEY, LS_DYNAMIC_USERS_KEY, LS_DYNAMIC_PASSWORDS_KEY } from '../lib/constants';
 
 interface AuthContextType {
   user: User | null;
@@ -19,13 +19,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(email: string, password: string) {
     const normalizedEmail = email.toLowerCase().trim();
-    const expectedPassword = MOCK_PASSWORDS[normalizedEmail];
 
+    const mockPassword = MOCK_PASSWORDS[normalizedEmail];
+    const dynamicPasswords: Record<string, string> = JSON.parse(
+      localStorage.getItem(LS_DYNAMIC_PASSWORDS_KEY) ?? '{}'
+    );
+    const dynamicPassword = dynamicPasswords[normalizedEmail];
+
+    const expectedPassword = mockPassword ?? dynamicPassword;
     if (!expectedPassword || expectedPassword !== password) {
       return { success: false, error: 'E-mail ou senha inválidos.' };
     }
 
-    const found = MOCK_USERS.find((u) => u.email === normalizedEmail);
+    let found: User | undefined = MOCK_USERS.find((u) => u.email === normalizedEmail);
+    if (!found) {
+      const dynamicUsers: User[] = JSON.parse(
+        localStorage.getItem(LS_DYNAMIC_USERS_KEY) ?? '[]'
+      );
+      found = dynamicUsers.find((u) => u.email === normalizedEmail);
+    }
     if (!found) return { success: false, error: 'Usuário não encontrado.' };
 
     setUser(found);

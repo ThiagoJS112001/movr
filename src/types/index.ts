@@ -108,3 +108,38 @@ export interface DietAssignment {
   personalId: string;
   assignedAt: string;
 }
+
+// ── Weekly Workout Plan ────────────────────────────────────────────────────────
+export interface WeeklyDay {
+  dayOfWeek: string;   // 'segunda' | 'terca' | 'quarta' | 'quinta' | 'sexta' | 'sabado' | 'domingo'
+  label: string;       // e.g. 'Peito', 'Costas', 'Pernas' – empty means rest day
+  exerciseIds: string[];
+}
+
+export interface WeeklyPlan {
+  id: string;
+  studentId: string;
+  personalId: string;
+  days: WeeklyDay[];
+  updatedAt: string;
+}
+
+export interface WeeklyPlanArchive {
+  id: string;
+  studentId: string;
+  studentName: string;
+  personalId: string;
+  days: WeeklyDay[];
+  archivedAt: string;
+}
+
+// ── Workout Session (new student log) ─────────────────────────────────────────
+export interface WorkoutSession {
+  id: string;
+  studentId: string;
+  dayOfWeek: string;
+  label: string;
+  completedExerciseIds: string[];
+  durationMinutes: number;
+  completedAt: string;
+}

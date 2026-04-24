@@ -13,12 +13,14 @@ import AlunoLayout from './components/layout/AlunoLayout';
 // Personal pages
 import PersonalDashboard from './pages/personal/PersonalDashboard';
 import AlunosPage from './pages/personal/AlunosPage';
+import ExerciciosPage from './pages/personal/ExerciciosPage';
 import TreinosPage from './pages/personal/TreinosPage';
 import TreinoDetalhe from './pages/personal/TreinoDetalhe';
 import PersonalChatPage from './pages/personal/PersonalChatPage';
 import DietasPage from './pages/personal/DietasPage';
 import DietaDetalhe from './pages/personal/DietaDetalhe';
 import PersonalRelatoriosPage from './pages/personal/PersonalRelatoriosPage';
+import HistoricoPlanoPage from './pages/personal/HistoricoPlanoPage';
 
 // Aluno pages
 import AlunoDashboard from './pages/aluno/AlunoDashboard';
@@ -52,12 +54,14 @@ export default function App() {
           <Route element={<PersonalLayout />}>
             <Route path="/personal/dashboard" element={<PersonalDashboard />} />
             <Route path="/personal/alunos" element={<AlunosPage />} />
+            <Route path="/personal/exercicios" element={<ExerciciosPage />} />
             <Route path="/personal/treinos" element={<TreinosPage />} />
             <Route path="/personal/treinos/:id" element={<TreinoDetalhe />} />
             <Route path="/personal/dietas" element={<DietasPage />} />
             <Route path="/personal/dietas/:id" element={<DietaDetalhe />} />
             <Route path="/personal/chat" element={<PersonalChatPage />} />
             <Route path="/personal/relatorios" element={<PersonalRelatoriosPage />} />
+            <Route path="/personal/historico-planos" element={<HistoricoPlanoPage />} />
           </Route>
         </Route>
 
@@ -65,7 +69,7 @@ export default function App() {
         <Route element={<ProtectedRoute requiredRole="aluno" />}>
           <Route element={<AlunoLayout />}>
             <Route path="/aluno/dashboard" element={<AlunoDashboard />} />
-            <Route path="/aluno/treino/:assignmentId" element={<AlunoTreinoPage />} />
+            <Route path="/aluno/treino" element={<AlunoTreinoPage />} />
             <Route path="/aluno/historico" element={<AlunoHistoricoPage />} />
             <Route path="/aluno/dieta" element={<AlunoDietaPage />} />
             <Route path="/aluno/progresso" element={<AlunoProgressoPage />} />

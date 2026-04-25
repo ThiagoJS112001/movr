@@ -76,7 +76,7 @@ export default function HistoricoPlanoPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-5 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button
@@ -151,7 +151,7 @@ export default function HistoricoPlanoPage() {
           return (
             <div
               key={archive.id}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50"
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60"
             >
               {/* Card header */}
               <div className="flex items-start gap-3 px-4 py-3">

@@ -86,7 +86,7 @@ export default function ExerciciosPage() {
   }, {});
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-5 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
@@ -133,9 +133,9 @@ export default function ExerciciosPage() {
 
       {/* Empty state */}
       {filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
-          <Dumbbell size={40} className="mb-3 opacity-30" />
-          <p className="text-sm">Nenhum exercício encontrado.</p>
+        <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500 text-center">
+          <Dumbbell size={36} className="mb-3 opacity-30" />
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhum exercício encontrado.</p>
         </div>
       )}
 
@@ -143,46 +143,57 @@ export default function ExerciciosPage() {
       <div className="flex flex-col gap-6">
         {Object.entries(groupedExercises).map(([group, exList]) => (
           <div key={group}>
-            <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 px-1">
-              {group}
-            </h2>
-            <div className="flex flex-col gap-2">
+            {/* Section header */}
+            <div className="flex items-center gap-3 mb-3">
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${groupColor(group)}`}>
+                {group}
+              </span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">
+                {exList.length} exercício{exList.length !== 1 ? 's' : ''}
+              </span>
+              <div className="flex-1 h-px bg-slate-100 dark:bg-slate-700/60" />
+            </div>
+
+            {/* Exercise cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {exList.map((ex) => (
                 <div
                   key={ex.id}
-                  className="bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 px-4 py-3 flex items-center gap-3"
+                  className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/60 px-4 py-3 flex items-center gap-3 hover:border-indigo-200 dark:hover:border-indigo-700/50 hover:shadow-sm transition-all"
                 >
-                  <div className={`shrink-0 px-2 py-0.5 rounded-full text-xs font-semibold ${groupColor(ex.muscleGroup)}`}>
-                    {ex.muscleGroup}
+                  <div className="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-700/60 flex items-center justify-center shrink-0">
+                    <Dumbbell size={13} className="text-slate-400 dark:text-slate-500" />
                   </div>
                   <p className="flex-1 text-sm font-medium text-slate-800 dark:text-slate-100 truncate">
                     {ex.name}
                   </p>
-                  {ex.videoUrl && (
-                    <a
-                      href={ex.videoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
-                      title="Ver vídeo"
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    {ex.videoUrl && (
+                      <a
+                        href={ex.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                        title="Ver vídeo"
+                      >
+                        <Video size={13} />
+                      </a>
+                    )}
+                    <button
+                      onClick={() => openEdit(ex)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                      title="Editar"
                     >
-                      <Video size={14} />
-                    </a>
-                  )}
-                  <button
-                    onClick={() => openEdit(ex)}
-                    className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                    title="Editar"
-                  >
-                    <Edit2 size={13} />
-                  </button>
-                  <button
-                    onClick={() => setDeleteConfirm(ex)}
-                    className="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                    title="Excluir"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                      <Edit2 size={13} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(ex)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                      title="Excluir"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -211,7 +222,7 @@ export default function ExerciciosPage() {
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                   placeholder="Ex: Supino Reto"
-                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>
 
@@ -238,7 +249,7 @@ export default function ExerciciosPage() {
                   value={form.muscleGroup}
                   onChange={(e) => setForm((f) => ({ ...f, muscleGroup: e.target.value }))}
                   placeholder="Ou digite um grupo personalizado"
-                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>
 
@@ -251,7 +262,7 @@ export default function ExerciciosPage() {
                   value={form.videoUrl}
                   onChange={(e) => setForm((f) => ({ ...f, videoUrl: e.target.value }))}
                   placeholder="https://youtube.com/..."
-                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>
             </div>
@@ -259,14 +270,14 @@ export default function ExerciciosPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setModal(null)}
-                className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSave}
                 disabled={!form.name.trim() || !form.muscleGroup.trim()}
-                className="flex-1 bg-indigo-600 text-white rounded-lg py-2 text-sm font-semibold disabled:opacity-50 hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5"
+                className="flex-1 bg-indigo-600 text-white rounded-xl py-2.5 text-sm font-semibold disabled:opacity-50 hover:bg-indigo-700 transition-colors flex items-center justify-center gap-1.5"
               >
                 <Check size={14} />
                 {isEditing ? 'Salvar' : 'Criar'}
@@ -287,13 +298,13 @@ export default function ExerciciosPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 bg-red-500 text-white rounded-lg py-2 text-sm font-semibold hover:bg-red-600 transition-colors"
+                className="flex-1 bg-red-500 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-red-600 transition-colors"
               >
                 Excluir
               </button>

@@ -28,7 +28,7 @@ export default function DietasPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-5 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Dietas</h1>
         <button
@@ -41,9 +41,10 @@ export default function DietasPage() {
       </div>
 
       {myDiets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
-          <Salad size={40} className="mb-3 opacity-30" />
-          <p className="text-sm">Nenhuma dieta criada ainda.</p>
+        <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500 text-center">
+          <Salad size={36} className="mb-3 opacity-30" />
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhuma dieta criada ainda.</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Clique em "Nova dieta" para criar a primeira.</p>
         </div>
       ) : (
         <div className="grid gap-3">
@@ -56,7 +57,7 @@ export default function DietasPage() {
             return (
               <div
                 key={diet.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4 flex items-center justify-between"
+                className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-4 flex items-center justify-between"
               >
                 <button
                   onClick={() => navigate(`/personal/dietas/${diet.id}`)}
@@ -111,7 +112,7 @@ export default function DietasPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="ex: Dieta de Hipertrofia"
-                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                 />
               </div>
               <div>
@@ -123,20 +124,20 @@ export default function DietasPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="Objetivo da dieta..."
-                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none transition"
                 />
               </div>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setShowCreate(false)}
-                  className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-emerald-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-emerald-700 transition-colors"
+                  className="flex-1 bg-emerald-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-emerald-700 transition-colors"
                 >
                   Criar
                 </button>

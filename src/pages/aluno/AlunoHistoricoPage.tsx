@@ -45,11 +45,11 @@ export default function AlunoHistoricoPage() {
             return (
               <div
                 key={session.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm"
+                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm"
               >
                 <div className="flex items-center gap-3 px-4 py-3">
-                  <div className="w-9 h-9 shrink-0 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
-                    <Dumbbell size={16} className="text-indigo-600 dark:text-indigo-400" />
+                  <div className="w-9 h-9 shrink-0 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                    <Dumbbell size={16} className="text-emerald-600 dark:text-emerald-400" />
                   </div>
 
                   <div className="flex-1 min-w-0">

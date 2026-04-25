@@ -37,6 +37,9 @@ export interface Workout {
   personalId: string;
   exercises: WorkoutExercise[];
   createdAt: string;
+  status?: 'ativo' | 'rascunho';
+  level?: 'iniciante' | 'intermediario' | 'avancado';
+  durationMinutes?: number;
 }
 
 export interface WorkoutAssignment {
@@ -95,6 +98,8 @@ export interface Diet {
   id: string;
   name: string;
   description?: string;
+  goal?: string;
+  status?: 'ativa' | 'pausada';
   personalId: string;
   meals: Meal[];
   createdAt: string;

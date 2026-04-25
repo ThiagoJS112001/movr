@@ -4,12 +4,14 @@ import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, MessageSquare, ShieldOff, ShieldCheck, MoreVertical,
-  LayoutGrid, Dumbbell, Salad, History,
-  Eye, Pencil, Copy, Trash2, Plus, CalendarDays, CheckCircle2,
+  ArrowLeft, MessageSquare, ShieldOff, ShieldCheck,
+  Dumbbell, Salad, History,
+  Eye, Pencil, Copy, Trash2, Plus, CalendarDays,
   ChevronDown, ChevronUp, Archive,
 } from 'lucide-react';
 import type { Workout, Diet } from '../../types';
+import WorkoutViewModal from '../../components/WorkoutViewModal';
+import WorkoutEditModal from '../../components/WorkoutEditModal';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -54,7 +56,7 @@ function muscleBadge(g: string) {
   return MUSCLE_BADGE[g] ?? 'bg-slate-500/20 text-slate-300';
 }
 
-type Tab = 'overview' | 'treinos' | 'dieta' | 'historico';
+type Tab = 'treinos' | 'dieta' | 'historico';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function AlunoDetalhe() {
@@ -71,6 +73,12 @@ export default function AlunoDetalhe() {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<Tab>('treinos');
+
+  // View workout modal
+  const [viewingWorkout, setViewingWorkout] = useState<Workout | null>(null);
+
+  // Edit workout modal
+  const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
 
   // Assign workout modal
   const [assignWorkoutOpen, setAssignWorkoutOpen] = useState(false);
@@ -220,10 +228,9 @@ export default function AlunoDetalhe() {
 
   // ── Tabs config ───────────────────────────────────────────────────────────
   const TABS: { key: Tab; label: string; Icon: typeof Dumbbell }[] = [
-    { key: 'overview',  label: 'Visão geral', Icon: LayoutGrid },
     { key: 'treinos',   label: 'Treinos',     Icon: Dumbbell },
     { key: 'dieta',     label: 'Dieta',       Icon: Salad },
-    { key: 'historico', label: 'Histórico',   Icon: History },
+    { key: 'historico', label: 'Histórico de Treinos', Icon: History },
   ];
 
   return (
@@ -285,14 +292,11 @@ export default function AlunoDetalhe() {
           >
             {blocked ? <ShieldCheck size={16} /> : <ShieldOff size={16} />}
           </button>
-          <button className="p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-            <MoreVertical size={16} />
-          </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700/60 mb-5 overflow-x-auto">
+      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700/60 mb-5">
         {TABS.map(({ key, label, Icon }) => (
           <button
             key={key}
@@ -308,56 +312,6 @@ export default function AlunoDetalhe() {
           </button>
         ))}
       </div>
-
-      {/* ── Tab: Visão Geral ───────────────────────────────────────────────── */}
-      {activeTab === 'overview' && (
-        <div className="flex flex-col gap-4">
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { label: 'Treinos atribuídos', value: assignedWorkouts.length, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-              { label: 'Sessões realizadas', value: studentSessions.length + studentLogs.length, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-              { label: 'Dietas atribuídas', value: assignedDiets.length, color: 'text-teal-500', bg: 'bg-teal-500/10' },
-              { label: 'Logs de treino', value: studentLogs.length, color: 'text-violet-500', bg: 'bg-violet-500/10' },
-            ].map(({ label, value, color, bg }) => (
-              <div key={label} className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-4">
-                <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center mb-3`}>
-                  <CheckCircle2 size={16} className={color} />
-                </div>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white">{value}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{label}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Recent logs */}
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-5">
-            <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-4 flex items-center gap-2">
-              <History size={14} className="text-indigo-500" /> Atividade recente
-            </h2>
-            {studentLogs.length === 0 ? (
-              <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center">Nenhuma atividade registrada.</p>
-            ) : (
-              <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/50">
-                {studentLogs.slice(0, 6).map((log) => (
-                  <li key={log.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
-                      <Dumbbell size={14} className="text-indigo-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{log.workoutName}</p>
-                      <p className="text-xs text-slate-400">{log.durationMinutes} min · {log.completedExercises.length} exercícios</p>
-                    </div>
-                    <span className="text-xs text-slate-400 shrink-0">
-                      {new Date(log.completedAt).toLocaleDateString('pt-BR')}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ── Tab: Treinos ──────────────────────────────────────────────────── */}
       {activeTab === 'treinos' && (
@@ -377,14 +331,10 @@ export default function AlunoDetalhe() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => { setSelectedWorkoutId(''); setAssignWorkoutOpen(true); }}
-                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium pl-4 pr-3 py-2 rounded-xl transition-colors"
+                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
                 >
                   <Plus size={14} />
                   Novo treino
-                  <ChevronDown size={13} className="ml-0.5 opacity-80" />
-                </button>
-                <button className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  <MoreVertical size={16} />
                 </button>
               </div>
             </div>
@@ -440,7 +390,9 @@ export default function AlunoDetalhe() {
                                 ))}
                               </div>
                             </td>
-                            <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">{duration}</td>
+                            <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
+                              {workout.durationMinutes ? `${workout.durationMinutes} min` : duration}
+                            </td>
                             <td className="px-4 py-3.5">
                               <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                                 <CalendarDays size={13} />
@@ -448,22 +400,29 @@ export default function AlunoDetalhe() {
                               </span>
                             </td>
                             <td className="px-4 py-3.5">
-                              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                Ativo
-                              </span>
+                              {workout.status === 'rascunho' ? (
+                                <span className="flex items-center gap-1.5 text-xs font-medium text-amber-500">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                  Rascunho
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                  Ativo
+                                </span>
+                              )}
                             </td>
                             <td className="px-4 py-3.5">
                               <div className="flex items-center gap-1">
                                 <button
-                                  onClick={() => navigate(`/personal/treinos/${workout.id}`)}
+                                  onClick={() => setViewingWorkout(workout)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
                                   title="Ver"
                                 >
                                   <Eye size={14} />
                                 </button>
                                 <button
-                                  onClick={() => navigate(`/personal/treinos/${workout.id}`)}
+                                  onClick={() => setEditingWorkout(workout)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
                                   title="Editar"
                                 >
@@ -498,133 +457,6 @@ export default function AlunoDetalhe() {
               </>
             )}
           </div>
-
-          {/* Dietas section */}
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                  <Salad size={15} className="text-emerald-400" />
-                </div>
-                <div>
-                  <p className="font-semibold text-slate-800 dark:text-white">Dietas</p>
-                  <p className="text-xs text-slate-400">Crie, edite e gerencie as dietas do aluno.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => { setSelectedDietId(''); setAssignDietOpen(true); }}
-                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium pl-4 pr-3 py-2 rounded-xl transition-colors"
-                >
-                  <Plus size={14} />
-                  Nova dieta
-                  <ChevronDown size={13} className="ml-0.5 opacity-80" />
-                </button>
-                <button className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  <MoreVertical size={16} />
-                </button>
-              </div>
-            </div>
-
-            {assignedDiets.length === 0 ? (
-              <div className="py-16 text-center text-slate-400 dark:text-slate-500">
-                <Salad size={32} className="mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Nenhuma dieta atribuída.</p>
-                <button
-                  onClick={() => setAssignDietOpen(true)}
-                  className="mt-3 text-xs text-emerald-500 hover:underline"
-                >
-                  Atribuir uma dieta
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-100 dark:border-slate-700/50">
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome da dieta</th>
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Objetivo</th>
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Calorias</th>
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Última atualização</th>
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Status</th>
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
-                      {assignedDiets.map((diet) => {
-                        const totalCals = getDietTotalCals(diet);
-                        return (
-                          <tr key={diet.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                            <td className="px-6 py-3.5">
-                              <p className="font-medium text-slate-800 dark:text-slate-100">{diet.name}</p>
-                              <p className="text-xs text-slate-400">{diet.meals.length} refeições</p>
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-teal-500/20 text-teal-300">
-                                {diet.description?.split(' ')[0] ?? 'Geral'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
-                              {totalCals > 0 ? `${totalCals} kcal` : '—'}
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                                <CalendarDays size={13} />
-                                {new Date(diet.createdAt).toLocaleDateString('pt-BR')}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                Ativa
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5">
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => navigate(`/personal/dietas/${diet.id}`)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
-                                  title="Ver"
-                                >
-                                  <Eye size={14} />
-                                </button>
-                                <button
-                                  onClick={() => navigate(`/personal/dietas/${diet.id}`)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
-                                  title="Editar"
-                                >
-                                  <Pencil size={14} />
-                                </button>
-                                <button
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                  title="Duplicar"
-                                >
-                                  <Copy size={14} />
-                                </button>
-                                <button
-                                  onClick={() => handleRemoveDiet(diet.id)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                  title="Remover"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
-                  <p className="text-xs text-slate-400">
-                    Mostrando 1 a {assignedDiets.length} de {assignedDiets.length} dieta{assignedDiets.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
         </div>
       )}
 
@@ -642,16 +474,12 @@ export default function AlunoDetalhe() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button
+                <button
                 onClick={() => { setSelectedDietId(''); setAssignDietOpen(true); }}
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium pl-4 pr-3 py-2 rounded-xl transition-colors"
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
               >
                 <Plus size={14} />
                 Nova dieta
-                <ChevronDown size={13} className="ml-0.5 opacity-80" />
-              </button>
-              <button className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                <MoreVertical size={16} />
               </button>
             </div>
           </div>
@@ -692,7 +520,7 @@ export default function AlunoDetalhe() {
                           </td>
                           <td className="px-4 py-3.5">
                             <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-teal-500/20 text-teal-300">
-                              {diet.description?.split(' ')[0] ?? 'Geral'}
+                              {diet.goal ?? diet.description?.split(' ')[0] ?? 'Geral'}
                             </span>
                           </td>
                           <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
@@ -705,10 +533,17 @@ export default function AlunoDetalhe() {
                             </span>
                           </td>
                           <td className="px-4 py-3.5">
-                            <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                              Ativa
-                            </span>
+                            {diet.status === 'pausada' ? (
+                              <span className="flex items-center gap-1.5 text-xs font-medium text-amber-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                Pausada
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                Ativa
+                              </span>
+                            )}
                           </td>
                           <td className="px-4 py-3.5">
                             <div className="flex items-center gap-1">
@@ -1014,6 +849,24 @@ export default function AlunoDetalhe() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Workout view modal */}
+      {viewingWorkout && (
+        <WorkoutViewModal
+          workout={viewingWorkout}
+          exercises={exercises}
+          onClose={() => setViewingWorkout(null)}
+        />
+      )}
+
+      {/* Workout edit modal */}
+      {editingWorkout && (
+        <WorkoutEditModal
+          workout={editingWorkout}
+          exercises={exercises}
+          onClose={() => setEditingWorkout(null)}
+        />
       )}
 
     </div>

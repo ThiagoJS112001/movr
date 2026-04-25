@@ -173,7 +173,7 @@ export default function AlunoProgressoPage() {
         ].map(({ Icon, label, value, color }) => (
           <div
             key={label}
-            className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3"
+            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 p-4 shadow-sm flex items-center gap-3"
           >
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}
@@ -189,7 +189,7 @@ export default function AlunoProgressoPage() {
       </div>
 
       {/* Bar chart — treinos por semana */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5 mb-5">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5 mb-5">
         <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-4">
           Treinos por semana
         </h2>
@@ -219,7 +219,7 @@ export default function AlunoProgressoPage() {
       </div>
 
       {/* Area chart — duração dos treinos */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5 mb-5">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5 mb-5">
         <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-4">
           Duração dos treinos (min)
         </h2>
@@ -263,7 +263,7 @@ export default function AlunoProgressoPage() {
       </div>
 
       {/* Line chart — evolução de carga */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-5">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5">
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
           <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm flex items-center gap-1.5">
             <Weight size={14} className="text-emerald-500" />

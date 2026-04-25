@@ -66,17 +66,17 @@ export default function AlunoDashboard() {
 
       {/* Stats strip */}
       <div className="flex gap-3 mb-6">
-        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 shadow-sm text-center">
-          <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{sessionsThisWeek.length}</div>
+        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/60 shadow-sm text-center">
+          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{sessionsThisWeek.length}</div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Treinos esta semana</div>
         </div>
-        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 shadow-sm text-center">
+        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/60 shadow-sm text-center">
           <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
             {plan ? plan.days.filter((d) => d.exerciseIds.length > 0 || d.label.trim()).length : 0}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Dias com treino</div>
         </div>
-        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/50 shadow-sm text-center">
+        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/60 shadow-sm text-center">
           <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
             {sessionsThisWeek.reduce((sum, s) => sum + s.durationMinutes, 0)}
           </div>
@@ -86,7 +86,7 @@ export default function AlunoDashboard() {
 
       {/* Weekly plan grid */}
       {!plan ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/50 shadow-sm p-8 text-center">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-8 text-center">
           <p className="text-slate-400 dark:text-slate-500 text-sm">
             Nenhum plano semanal configurado ainda. Seu personal trainer irá criar um para você em breve.
           </p>
@@ -105,19 +105,19 @@ export default function AlunoDashboard() {
                 key={day}
                 className={`flex items-center gap-3 rounded-2xl px-4 py-3 border transition-colors ${
                   isToday
-                    ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700/50'
-                    : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/50'
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700/50'
+                    : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/60'
                 }`}
               >
                 {/* Day label */}
                 <div className="w-20 shrink-0">
                   <p className={`text-sm font-semibold ${
-                    isToday ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'
+                    isToday ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'
                   }`}>
                     {DAYS_LABEL[day]}
                   </p>
                   {isToday && (
-                    <span className="text-xs text-indigo-500 dark:text-indigo-400">Hoje</span>
+                    <span className="text-xs text-emerald-500 dark:text-emerald-400">Hoje</span>
                   )}
                 </div>
 
@@ -126,7 +126,7 @@ export default function AlunoDashboard() {
                   {hasWorkout ? (
                     <div>
                       <p className={`text-sm font-medium truncate ${
-                        isToday ? 'text-indigo-800 dark:text-indigo-200' : 'text-slate-700 dark:text-slate-200'
+                        isToday ? 'text-emerald-800 dark:text-emerald-200' : 'text-slate-700 dark:text-slate-200'
                       }`}>
                         {dayData?.label || 'Treino'}
                       </p>
@@ -154,7 +154,7 @@ export default function AlunoDashboard() {
                   ) : isToday ? (
                     <button
                       onClick={() => navigate('/aluno/treino')}
-                      className="shrink-0 flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
+                      className="shrink-0 flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
                     >
                       <Play size={11} fill="currentColor" />
                       Iniciar
@@ -162,7 +162,7 @@ export default function AlunoDashboard() {
                   ) : (
                     <button
                       onClick={() => navigate('/aluno/treino')}
-                      className="shrink-0 text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                      className="shrink-0 text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
                     >
                       Ver
                     </button>
@@ -178,7 +178,7 @@ export default function AlunoDashboard() {
       {plan && (
         <button
           onClick={() => navigate('/aluno/treino')}
-          className="w-full mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-2xl transition-colors flex items-center justify-center gap-2"
+          className="w-full mt-5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-2xl transition-colors flex items-center justify-center gap-2"
         >
           <Play size={16} fill="currentColor" />
           Iniciar treino

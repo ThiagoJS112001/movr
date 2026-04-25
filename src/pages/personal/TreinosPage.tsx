@@ -28,7 +28,7 @@ export default function TreinosPage() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-5 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Treinos</h1>
         <button
@@ -41,16 +41,17 @@ export default function TreinosPage() {
       </div>
 
       {myWorkouts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
-          <Dumbbell size={40} className="mb-3 opacity-30" />
-          <p className="text-sm">Nenhum treino criado ainda.</p>
+        <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500 text-center">
+          <Dumbbell size={36} className="mb-3 opacity-30" />
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhum treino criado ainda.</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Clique em "Novo treino" para criar o primeiro.</p>
         </div>
       ) : (
         <div className="grid gap-3">
           {myWorkouts.map((workout) => (
             <div
               key={workout.id}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4 flex items-center justify-between"
+              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-4 flex items-center justify-between"
             >
               <button
                 onClick={() => navigate(`/personal/treinos/${workout.id}`)}
@@ -104,7 +105,7 @@ export default function TreinosPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="ex: Treino A – Peito"
-                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>
               <div>
@@ -116,20 +117,20 @@ export default function TreinosPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
                   placeholder="Descreva o objetivo do treino..."
-                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition"
                 />
               </div>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setShowCreate(false)}
-                  className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700"
+                  className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-indigo-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-indigo-700 transition-colors"
+                  className="flex-1 bg-indigo-600 text-white rounded-xl py-2.5 text-sm font-semibold hover:bg-indigo-700 transition-colors"
                 >
                   Criar
                 </button>

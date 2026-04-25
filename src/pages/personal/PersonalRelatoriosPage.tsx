@@ -101,7 +101,7 @@ export default function PersonalRelatoriosPage() {
   const cursorStyle = { fill: theme === 'dark' ? '#334155' : '#f1f5f9' };
 
   return (
-    <div className="p-5 max-w-4xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Relatórios</h1>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
         Visão geral da atividade dos seus alunos.

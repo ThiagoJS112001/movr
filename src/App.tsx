@@ -13,6 +13,7 @@ import AlunoLayout from './components/layout/AlunoLayout';
 // Personal pages
 import PersonalDashboard from './pages/personal/PersonalDashboard';
 import AlunosPage from './pages/personal/AlunosPage';
+import AlunoDetalhe from './pages/personal/AlunoDetalhe';
 import ExerciciosPage from './pages/personal/ExerciciosPage';
 import TreinosPage from './pages/personal/TreinosPage';
 import TreinoDetalhe from './pages/personal/TreinoDetalhe';
@@ -54,6 +55,7 @@ export default function App() {
           <Route element={<PersonalLayout />}>
             <Route path="/personal/dashboard" element={<PersonalDashboard />} />
             <Route path="/personal/alunos" element={<AlunosPage />} />
+            <Route path="/personal/alunos/:id" element={<AlunoDetalhe />} />
             <Route path="/personal/exercicios" element={<ExerciciosPage />} />
             <Route path="/personal/treinos" element={<TreinosPage />} />
             <Route path="/personal/treinos/:id" element={<TreinoDetalhe />} />

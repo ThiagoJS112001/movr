@@ -1,0 +1,1021 @@
+import { useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useApp } from '../../contexts/AppContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { toast } from 'sonner';
+import {
+  ArrowLeft, MessageSquare, ShieldOff, ShieldCheck, MoreVertical,
+  LayoutGrid, Dumbbell, Salad, History,
+  Eye, Pencil, Copy, Trash2, Plus, CalendarDays, CheckCircle2,
+  ChevronDown, ChevronUp, Archive,
+} from 'lucide-react';
+import type { Workout, Diet } from '../../types';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const AVATAR_COLORS = [
+  'bg-violet-600', 'bg-blue-600', 'bg-rose-500',
+  'bg-amber-500',  'bg-teal-500', 'bg-indigo-600',
+  'bg-pink-500',   'bg-emerald-600',
+];
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+const WORKOUT_LETTER_COLORS = [
+  'bg-blue-500', 'bg-indigo-500', 'bg-teal-500', 'bg-amber-500',
+  'bg-rose-500',  'bg-violet-500', 'bg-emerald-500', 'bg-pink-500',
+];
+
+const DAYS_ORDER = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
+const DAYS_SHORT: Record<string, string> = {
+  segunda: 'Seg', terca: 'Ter', quarta: 'Qua',
+  quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb', domingo: 'Dom',
+};
+function formatArchiveDate(iso: string) {
+  return new Date(iso).toLocaleDateString('pt-BR', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+}
+
+const MUSCLE_BADGE: Record<string, string> = {
+  'Peito':       'bg-purple-500/20 text-purple-300',
+  'Costas':      'bg-teal-500/20 text-teal-300',
+  'Pernas':      'bg-emerald-500/20 text-emerald-300',
+  'Glúteos':     'bg-emerald-500/20 text-emerald-300',
+  'Ombros':      'bg-orange-500/20 text-orange-300',
+  'Bíceps':      'bg-indigo-500/20 text-indigo-300',
+  'Tríceps':     'bg-pink-500/20 text-pink-300',
+  'Abdômen':     'bg-amber-500/20 text-amber-300',
+  'Panturrilha': 'bg-cyan-500/20 text-cyan-300',
+};
+function muscleBadge(g: string) {
+  return MUSCLE_BADGE[g] ?? 'bg-slate-500/20 text-slate-300';
+}
+
+type Tab = 'overview' | 'treinos' | 'dieta' | 'historico';
+
+// ── Component ─────────────────────────────────────────────────────────────────
+export default function AlunoDetalhe() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const {
+    students, workouts, assignments, logs, exercises,
+    diets, dietAssignments,
+    assignWorkout, removeAssignment,
+    assignDiet, removeDietAssignment,
+    isStudentBlocked, blockStudent, unblockStudent,
+    workoutSessions, weeklyPlanArchives,
+  } = useApp();
+
+  const [activeTab, setActiveTab] = useState<Tab>('treinos');
+
+  // Assign workout modal
+  const [assignWorkoutOpen, setAssignWorkoutOpen] = useState(false);
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState('');
+
+  // Assign diet modal
+  const [assignDietOpen, setAssignDietOpen] = useState(false);
+  const [selectedDietId, setSelectedDietId] = useState('');
+
+  // Plan archives
+  const [expandedArchiveIds, setExpandedArchiveIds] = useState<Set<string>>(new Set());
+  function toggleArchiveExpanded(archiveId: string) {
+    setExpandedArchiveIds((prev) => {
+      const next = new Set(prev);
+      next.has(archiveId) ? next.delete(archiveId) : next.add(archiveId);
+      return next;
+    });
+  }
+
+  // ── Student data ──────────────────────────────────────────────────────────
+  const student = students.find((s) => s.id === id);
+  if (!student) {
+    return (
+      <div className="p-6 text-center text-slate-400 dark:text-slate-500 py-20">
+        <p>Aluno não encontrado.</p>
+        <button onClick={() => navigate('/personal/alunos')} className="mt-3 text-sm text-indigo-500 hover:underline">
+          Voltar para Alunos
+        </button>
+      </div>
+    );
+  }
+
+  const blocked = isStudentBlocked(student.id);
+  const avatarColor = blocked ? 'bg-red-500' : getAvatarColor(student.name);
+
+  // Since date: earliest assignment
+  const studentAssignments = useMemo(
+    () => assignments.filter((a) => a.studentId === id),
+    [assignments, id],
+  );
+  const sinceDate = useMemo(() => {
+    if (studentAssignments.length === 0) return null;
+    const earliest = [...studentAssignments].sort((a, b) => a.assignedAt.localeCompare(b.assignedAt))[0];
+    return new Date(earliest.assignedAt);
+  }, [studentAssignments]);
+
+  // Assigned workouts
+  const assignedWorkoutIds = useMemo(
+    () => [...new Set(studentAssignments.map((a) => a.workoutId))],
+    [studentAssignments],
+  );
+  const assignedWorkouts = useMemo(
+    () => workouts.filter((w) => assignedWorkoutIds.includes(w.id)),
+    [workouts, assignedWorkoutIds],
+  );
+
+  // Assigned diets
+  const studentDietAssignments = useMemo(
+    () => dietAssignments.filter((a) => a.studentId === id && a.personalId === user?.id),
+    [dietAssignments, id, user?.id],
+  );
+  const assignedDiets = useMemo(
+    () => diets.filter((d) => studentDietAssignments.some((a) => a.dietId === d.id)),
+    [diets, studentDietAssignments],
+  );
+
+  // Logs
+  const studentLogs = useMemo(
+    () => [...logs.filter((l) => l.studentId === id)].sort((a, b) => b.completedAt.localeCompare(a.completedAt)),
+    [logs, id],
+  );
+
+  // Sessions
+  const studentSessions = useMemo(
+    () => [...workoutSessions.filter((s) => s.studentId === id)].sort((a, b) => b.completedAt.localeCompare(a.completedAt)),
+    [workoutSessions, id],
+  );
+
+  // Plan archives for this student
+  const studentArchives = useMemo(
+    () => [...weeklyPlanArchives.filter((a) => a.studentId === id && a.personalId === user?.id)]
+      .sort((a, b) => b.archivedAt.localeCompare(a.archivedAt)),
+    [weeklyPlanArchives, id, user?.id],
+  );
+
+  // Unassigned workouts (available to assign)
+  const myWorkouts = workouts.filter((w) => w.personalId === user?.id);
+  const unassignedWorkouts = myWorkouts.filter((w) => !assignedWorkoutIds.includes(w.id));
+
+  // Unassigned diets
+  const myDiets = diets.filter((d) => d.personalId === user?.id);
+  const assignedDietIds = studentDietAssignments.map((a) => a.dietId);
+  const unassignedDiets = myDiets.filter((d) => !assignedDietIds.includes(d.id));
+
+  // Helpers
+  function getWorkoutMuscleGroups(workout: Workout): string[] {
+    const groups = new Set<string>();
+    for (const we of workout.exercises) {
+      const ex = exercises.find((e) => e.id === we.exerciseId);
+      if (ex) groups.add(ex.muscleGroup);
+    }
+    return [...groups];
+  }
+
+  function getLastLogDuration(workoutId: string): string {
+    const wLogs = studentLogs.filter((l) => l.workoutId === workoutId);
+    if (wLogs.length === 0) return '—';
+    return `${wLogs[0].durationMinutes ?? '—'} min`;
+  }
+
+  function getDietTotalCals(diet: Diet): number {
+    return diet.meals.reduce(
+      (sum, m) => sum + m.foods.reduce((s, f) => s + (f.calories ?? 0), 0),
+      0,
+    );
+  }
+
+  function handleAssignWorkout() {
+    if (!selectedWorkoutId || !user) return;
+    const w = myWorkouts.find((wk) => wk.id === selectedWorkoutId);
+    if (!w) return;
+    assignWorkout({ workoutId: w.id, workoutName: w.name, studentId: student.id, personalId: user.id });
+    setAssignWorkoutOpen(false);
+    setSelectedWorkoutId('');
+    toast.success(`"${w.name}" atribuído!`);
+  }
+
+  function handleAssignDiet() {
+    if (!selectedDietId || !user) return;
+    const d = myDiets.find((dt) => dt.id === selectedDietId);
+    if (!d) return;
+    assignDiet({ dietId: d.id, dietName: d.name, studentId: student.id, personalId: user.id });
+    setAssignDietOpen(false);
+    setSelectedDietId('');
+    toast.success(`"${d.name}" atribuída!`);
+  }
+
+  function handleRemoveWorkout(workoutId: string) {
+    const a = studentAssignments.find((sa) => sa.workoutId === workoutId);
+    if (a) { removeAssignment(a.id); toast.success('Treino removido.'); }
+  }
+
+  function handleRemoveDiet(dietId: string) {
+    const a = studentDietAssignments.find((da) => da.dietId === dietId);
+    if (a) { removeDietAssignment(a.id); toast.success('Dieta removida.'); }
+  }
+
+  // ── Tabs config ───────────────────────────────────────────────────────────
+  const TABS: { key: Tab; label: string; Icon: typeof Dumbbell }[] = [
+    { key: 'overview',  label: 'Visão geral', Icon: LayoutGrid },
+    { key: 'treinos',   label: 'Treinos',     Icon: Dumbbell },
+    { key: 'dieta',     label: 'Dieta',       Icon: Salad },
+    { key: 'historico', label: 'Histórico',   Icon: History },
+  ];
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+
+      {/* Back button */}
+      <button
+        onClick={() => navigate('/personal/alunos')}
+        className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 mb-5 transition-colors"
+      >
+        <ArrowLeft size={15} />
+        Voltar para alunos
+      </button>
+
+      {/* Student header card */}
+      <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-5 mb-4 flex items-center gap-4">
+        <div className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center font-bold text-xl text-white ${avatarColor}`}>
+          {student.name.charAt(0).toUpperCase()}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-lg font-bold text-slate-800 dark:text-white">{student.name}</h1>
+            <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full ${
+              blocked
+                ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${blocked ? 'bg-red-500' : 'bg-emerald-500'}`} />
+              {blocked ? 'Bloqueado' : 'Ativo'}
+            </span>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {student.email}
+            {sinceDate && (
+              <span className="ml-2 before:content-['•'] before:mr-2 before:opacity-50">
+                Desde {sinceDate.toLocaleDateString('pt-BR')}
+              </span>
+            )}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            onClick={() => navigate('/personal/chat')}
+            className="p-2.5 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+            title="Chat"
+          >
+            <MessageSquare size={16} />
+          </button>
+          <button
+            onClick={() => blocked ? unblockStudent(student.id) : blockStudent(student.id)}
+            className={`p-2.5 rounded-xl transition-colors ${
+              blocked
+                ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                : 'text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30'
+            }`}
+            title={blocked ? 'Desbloquear' : 'Bloquear'}
+          >
+            {blocked ? <ShieldCheck size={16} /> : <ShieldOff size={16} />}
+          </button>
+          <button className="p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+            <MoreVertical size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700/60 mb-5 overflow-x-auto">
+        {TABS.map(({ key, label, Icon }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap -mb-px ${
+              activeTab === key
+                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+            }`}
+          >
+            <Icon size={14} />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Tab: Visão Geral ───────────────────────────────────────────────── */}
+      {activeTab === 'overview' && (
+        <div className="flex flex-col gap-4">
+          {/* Stat cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: 'Treinos atribuídos', value: assignedWorkouts.length, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+              { label: 'Sessões realizadas', value: studentSessions.length + studentLogs.length, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+              { label: 'Dietas atribuídas', value: assignedDiets.length, color: 'text-teal-500', bg: 'bg-teal-500/10' },
+              { label: 'Logs de treino', value: studentLogs.length, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+            ].map(({ label, value, color, bg }) => (
+              <div key={label} className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-4">
+                <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center mb-3`}>
+                  <CheckCircle2 size={16} className={color} />
+                </div>
+                <p className="text-2xl font-bold text-slate-800 dark:text-white">{value}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Recent logs */}
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-5">
+            <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-4 flex items-center gap-2">
+              <History size={14} className="text-indigo-500" /> Atividade recente
+            </h2>
+            {studentLogs.length === 0 ? (
+              <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center">Nenhuma atividade registrada.</p>
+            ) : (
+              <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/50">
+                {studentLogs.slice(0, 6).map((log) => (
+                  <li key={log.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
+                      <Dumbbell size={14} className="text-indigo-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{log.workoutName}</p>
+                      <p className="text-xs text-slate-400">{log.durationMinutes} min · {log.completedExercises.length} exercícios</p>
+                    </div>
+                    <span className="text-xs text-slate-400 shrink-0">
+                      {new Date(log.completedAt).toLocaleDateString('pt-BR')}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab: Treinos ──────────────────────────────────────────────────── */}
+      {activeTab === 'treinos' && (
+        <div className="flex flex-col gap-4">
+          {/* Treinos section */}
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                  <Dumbbell size={15} className="text-indigo-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-white">Treinos</p>
+                  <p className="text-xs text-slate-400">Crie, edite e gerencie os treinos do aluno.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { setSelectedWorkoutId(''); setAssignWorkoutOpen(true); }}
+                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium pl-4 pr-3 py-2 rounded-xl transition-colors"
+                >
+                  <Plus size={14} />
+                  Novo treino
+                  <ChevronDown size={13} className="ml-0.5 opacity-80" />
+                </button>
+                <button className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <MoreVertical size={16} />
+                </button>
+              </div>
+            </div>
+
+            {assignedWorkouts.length === 0 ? (
+              <div className="py-16 text-center text-slate-400 dark:text-slate-500">
+                <Dumbbell size={32} className="mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Nenhum treino atribuído.</p>
+                <button
+                  onClick={() => setAssignWorkoutOpen(true)}
+                  className="mt-3 text-xs text-indigo-500 hover:underline"
+                >
+                  Atribuir um treino
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 dark:border-slate-700/50">
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome do treino</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Grupos musculares</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Duração</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Última atualização</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Status</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
+                      {assignedWorkouts.map((workout, i) => {
+                        const letterColor = WORKOUT_LETTER_COLORS[i % WORKOUT_LETTER_COLORS.length];
+                        const letter = String.fromCharCode(65 + (i % 26));
+                        const muscleGroups = getWorkoutMuscleGroups(workout);
+                        const duration = getLastLogDuration(workout.id);
+                        return (
+                          <tr key={workout.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                            <td className="px-6 py-3.5">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-lg ${letterColor} flex items-center justify-center text-white font-bold text-xs shrink-0`}>
+                                  {letter}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-slate-800 dark:text-slate-100">{workout.name}</p>
+                                  <p className="text-xs text-slate-400">{workout.exercises.length} exercícios</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <div className="flex flex-wrap gap-1">
+                                {muscleGroups.slice(0, 3).map((g) => (
+                                  <span key={g} className={`text-xs px-2 py-0.5 rounded-full font-medium ${muscleBadge(g)}`}>{g}</span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">{duration}</td>
+                            <td className="px-4 py-3.5">
+                              <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                <CalendarDays size={13} />
+                                {new Date(workout.createdAt).toLocaleDateString('pt-BR')}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                Ativo
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => navigate(`/personal/treinos/${workout.id}`)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                                  title="Ver"
+                                >
+                                  <Eye size={14} />
+                                </button>
+                                <button
+                                  onClick={() => navigate(`/personal/treinos/${workout.id}`)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
+                                  title="Editar"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                                <button
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                  title="Duplicar"
+                                >
+                                  <Copy size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveWorkout(workout.id)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                  title="Remover"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs text-slate-400">
+                    Mostrando 1 a {assignedWorkouts.length} de {assignedWorkouts.length} treino{assignedWorkouts.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Dietas section */}
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <Salad size={15} className="text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-white">Dietas</p>
+                  <p className="text-xs text-slate-400">Crie, edite e gerencie as dietas do aluno.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { setSelectedDietId(''); setAssignDietOpen(true); }}
+                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium pl-4 pr-3 py-2 rounded-xl transition-colors"
+                >
+                  <Plus size={14} />
+                  Nova dieta
+                  <ChevronDown size={13} className="ml-0.5 opacity-80" />
+                </button>
+                <button className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <MoreVertical size={16} />
+                </button>
+              </div>
+            </div>
+
+            {assignedDiets.length === 0 ? (
+              <div className="py-16 text-center text-slate-400 dark:text-slate-500">
+                <Salad size={32} className="mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Nenhuma dieta atribuída.</p>
+                <button
+                  onClick={() => setAssignDietOpen(true)}
+                  className="mt-3 text-xs text-emerald-500 hover:underline"
+                >
+                  Atribuir uma dieta
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-100 dark:border-slate-700/50">
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome da dieta</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Objetivo</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Calorias</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Última atualização</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Status</th>
+                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
+                      {assignedDiets.map((diet) => {
+                        const totalCals = getDietTotalCals(diet);
+                        return (
+                          <tr key={diet.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                            <td className="px-6 py-3.5">
+                              <p className="font-medium text-slate-800 dark:text-slate-100">{diet.name}</p>
+                              <p className="text-xs text-slate-400">{diet.meals.length} refeições</p>
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-teal-500/20 text-teal-300">
+                                {diet.description?.split(' ')[0] ?? 'Geral'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
+                              {totalCals > 0 ? `${totalCals} kcal` : '—'}
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                                <CalendarDays size={13} />
+                                {new Date(diet.createdAt).toLocaleDateString('pt-BR')}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                Ativa
+                              </span>
+                            </td>
+                            <td className="px-4 py-3.5">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => navigate(`/personal/dietas/${diet.id}`)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                                  title="Ver"
+                                >
+                                  <Eye size={14} />
+                                </button>
+                                <button
+                                  onClick={() => navigate(`/personal/dietas/${diet.id}`)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
+                                  title="Editar"
+                                >
+                                  <Pencil size={14} />
+                                </button>
+                                <button
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                  title="Duplicar"
+                                >
+                                  <Copy size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveDiet(diet.id)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                  title="Remover"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs text-slate-400">
+                    Mostrando 1 a {assignedDiets.length} de {assignedDiets.length} dieta{assignedDiets.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Tab: Dieta ────────────────────────────────────────────────────── */}
+      {activeTab === 'dieta' && (
+        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <Salad size={15} className="text-emerald-400" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 dark:text-white">Dietas</p>
+                <p className="text-xs text-slate-400">Crie, edite e gerencie as dietas do aluno.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setSelectedDietId(''); setAssignDietOpen(true); }}
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium pl-4 pr-3 py-2 rounded-xl transition-colors"
+              >
+                <Plus size={14} />
+                Nova dieta
+                <ChevronDown size={13} className="ml-0.5 opacity-80" />
+              </button>
+              <button className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                <MoreVertical size={16} />
+              </button>
+            </div>
+          </div>
+
+          {assignedDiets.length === 0 ? (
+            <div className="py-16 text-center text-slate-400 dark:text-slate-500">
+              <Salad size={32} className="mx-auto mb-3 opacity-30" />
+              <p className="text-sm">Nenhuma dieta atribuída.</p>
+              <button
+                onClick={() => setAssignDietOpen(true)}
+                className="mt-3 text-xs text-emerald-500 hover:underline"
+              >
+                Atribuir uma dieta
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 dark:border-slate-700/50">
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome da dieta</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Objetivo</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Calorias</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Última atualização</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Status</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
+                    {assignedDiets.map((diet) => {
+                      const totalCals = getDietTotalCals(diet);
+                      return (
+                        <tr key={diet.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                          <td className="px-6 py-3.5">
+                            <p className="font-medium text-slate-800 dark:text-slate-100">{diet.name}</p>
+                            <p className="text-xs text-slate-400">{diet.meals.length} refeições</p>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-teal-500/20 text-teal-300">
+                              {diet.description?.split(' ')[0] ?? 'Geral'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
+                            {totalCals > 0 ? `${totalCals} kcal` : '—'}
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                              <CalendarDays size={13} />
+                              {new Date(diet.createdAt).toLocaleDateString('pt-BR')}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              Ativa
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => navigate(`/personal/dietas/${diet.id}`)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                                title="Ver"
+                              >
+                                <Eye size={14} />
+                              </button>
+                              <button
+                                onClick={() => navigate(`/personal/dietas/${diet.id}`)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
+                                title="Editar"
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              <button
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                title="Duplicar"
+                              >
+                                <Copy size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleRemoveDiet(diet.id)}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                                title="Remover"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
+                <p className="text-xs text-slate-400">
+                  Mostrando 1 a {assignedDiets.length} de {assignedDiets.length} dieta{assignedDiets.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── Tab: Histórico ────────────────────────────────────────────────── */}
+      {activeTab === 'historico' && (
+        <div className="flex flex-col gap-4">
+          {/* Plan Archives section */}
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <Archive size={15} className="text-amber-500" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 dark:text-white">Histórico de Planos</p>
+                <p className="text-xs text-slate-400">
+                  {studentArchives.length} plano{studentArchives.length !== 1 ? 's' : ''} arquivado{studentArchives.length !== 1 ? 's' : ''}
+                </p>
+              </div>
+            </div>
+
+            {studentArchives.length === 0 ? (
+              <div className="py-16 text-center text-slate-400 dark:text-slate-500">
+                <Archive size={32} className="mx-auto mb-3 opacity-30" />
+                <p className="text-sm font-medium">Nenhum plano arquivado ainda.</p>
+                <p className="text-xs mt-1">Abra o plano do aluno e clique em "Novo plano" para arquivar o atual.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/50">
+                {studentArchives.map((archive) => {
+                  const expanded = expandedArchiveIds.has(archive.id);
+                  const activeDays = archive.days.filter((d) => d.label.trim() || d.exerciseIds.length > 0);
+                  const totalExs = archive.days.reduce((acc, d) => acc + d.exerciseIds.length, 0);
+                  return (
+                    <div key={archive.id}>
+                      <div className="flex items-start gap-3 px-6 py-4">
+                        <div className="w-9 h-9 shrink-0 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                          <Archive size={15} className="text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm text-slate-800 dark:text-slate-100">
+                            Plano arquivado
+                          </p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500">
+                            {formatArchiveDate(archive.archivedAt)}
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {DAYS_ORDER.map((day) => {
+                              const dayData = archive.days.find((d) => d.dayOfWeek === day);
+                              const hasContent = dayData && (dayData.label.trim() || dayData.exerciseIds.length > 0);
+                              if (!hasContent) return null;
+                              return (
+                                <span
+                                  key={day}
+                                  className="inline-flex items-center gap-1 text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2.5 py-1 rounded-full"
+                                >
+                                  <span className="font-semibold">{DAYS_SHORT[day]}:</span>
+                                  {dayData.label.trim() || `${dayData.exerciseIds.length}ex`}
+                                </span>
+                              );
+                            })}
+                            {activeDays.length === 0 && (
+                              <span className="text-xs text-slate-400 dark:text-slate-500 italic">Plano vazio</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-xs text-slate-400 dark:text-slate-500">{totalExs} ex.</span>
+                          <button
+                            onClick={() => toggleArchiveExpanded(archive.id)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          >
+                            {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {expanded && (
+                        <div className="border-t border-slate-100 dark:border-slate-700 px-6 py-4 bg-slate-50/50 dark:bg-slate-800/40">
+                          {DAYS_ORDER.map((day) => {
+                            const dayData = archive.days.find((d) => d.dayOfWeek === day);
+                            const hasContent = dayData && (dayData.label.trim() || dayData.exerciseIds.length > 0);
+                            if (!hasContent) return null;
+                            return (
+                              <div key={day} className="mb-4 last:mb-0">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full">
+                                    {DAYS_SHORT[day]}
+                                  </span>
+                                  {dayData.label && (
+                                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                      {dayData.label}
+                                    </span>
+                                  )}
+                                </div>
+                                {dayData.exerciseIds.length > 0 ? (
+                                  <div className="flex flex-col gap-1 pl-2">
+                                    {dayData.exerciseIds.map((exId) => {
+                                      const ex = exercises.find((e) => e.id === exId);
+                                      return (
+                                        <div key={exId} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-white dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                                          <span className="text-sm text-slate-700 dark:text-slate-200">
+                                            {ex?.name ?? exId}
+                                          </span>
+                                          {ex?.muscleGroup && (
+                                            <span className="text-xs text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                                              {ex.muscleGroup}
+                                            </span>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ) : (
+                                  <p className="text-xs text-slate-400 dark:text-slate-500 pl-2 italic">
+                                    Sem exercícios — apenas rótulo
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Workout logs section */}
+          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                <History size={15} className="text-violet-400" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800 dark:text-white">Histórico de treinos</p>
+                <p className="text-xs text-slate-400">Sessões registradas pelo aluno.</p>
+              </div>
+            </div>
+
+            {studentLogs.length === 0 ? (
+              <div className="py-12 text-center text-slate-400 dark:text-slate-500">
+                <History size={32} className="mx-auto mb-3 opacity-30" />
+                <p className="text-sm">Nenhum treino registrado ainda.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 dark:border-slate-700/50">
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Treino</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Exercícios</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Duração</th>
+                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
+                    {studentLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                        <td className="px-6 py-3.5">
+                          <p className="font-medium text-slate-800 dark:text-slate-100">{log.workoutName}</p>
+                        </td>
+                        <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
+                          {log.completedExercises.length} completados
+                        </td>
+                        <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
+                          {log.durationMinutes ? `${log.durationMinutes} min` : '—'}
+                        </td>
+                        <td className="px-4 py-3.5">
+                          <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                            <CalendarDays size={13} />
+                            {new Date(log.completedAt).toLocaleDateString('pt-BR')}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
+                  <p className="text-xs text-slate-400">
+                    {studentLogs.length} sessão{studentLogs.length !== 1 ? 'ões' : ''} no total
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Assign Workout ─────────────────────────────────────────── */}
+      {assignWorkoutOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h2 className="font-bold text-slate-800 dark:text-white mb-1">Atribuir treino</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Para: <strong className="text-slate-700 dark:text-slate-200">{student.name}</strong></p>
+            {unassignedWorkouts.length === 0 ? (
+              <p className="text-sm text-slate-400 py-4 text-center">Todos os treinos já foram atribuídos.</p>
+            ) : (
+              <select
+                value={selectedWorkoutId}
+                onChange={(e) => setSelectedWorkoutId(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Selecione um treino</option>
+                {unassignedWorkouts.map((w) => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </select>
+            )}
+            <div className="flex gap-3">
+              <button onClick={() => setAssignWorkoutOpen(false)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                Cancelar
+              </button>
+              <button
+                onClick={handleAssignWorkout}
+                disabled={!selectedWorkoutId}
+                className="flex-1 bg-indigo-600 text-white rounded-xl py-2.5 text-sm font-semibold disabled:opacity-40 hover:bg-indigo-700 transition-colors"
+              >
+                Atribuir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Assign Diet ────────────────────────────────────────────── */}
+      {assignDietOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <h2 className="font-bold text-slate-800 dark:text-white mb-1">Atribuir dieta</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Para: <strong className="text-slate-700 dark:text-slate-200">{student.name}</strong></p>
+            {unassignedDiets.length === 0 ? (
+              <p className="text-sm text-slate-400 py-4 text-center">Todas as dietas já foram atribuídas.</p>
+            ) : (
+              <select
+                value={selectedDietId}
+                onChange={(e) => setSelectedDietId(e.target.value)}
+                className="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="">Selecione uma dieta</option>
+                {unassignedDiets.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            )}
+            <div className="flex gap-3">
+              <button onClick={() => setAssignDietOpen(false)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                Cancelar
+              </button>
+              <button
+                onClick={handleAssignDiet}
+                disabled={!selectedDietId}
+                className="flex-1 bg-emerald-600 text-white rounded-xl py-2.5 text-sm font-semibold disabled:opacity-40 hover:bg-emerald-700 transition-colors"
+              >
+                Atribuir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

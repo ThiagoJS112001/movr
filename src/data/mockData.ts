@@ -248,6 +248,7 @@ export const MOCK_LOGS: WorkoutLog[] = [
 
 // ── Mensagens ─────────────────────────────────────────────────────────────────
 export const MOCK_MESSAGES: Message[] = [
+  // ── Ana (aluno-1) ──────────────────────────────────────────────────────────
   {
     id: 'msg-1',
     fromId: 'personal-1',
@@ -264,7 +265,72 @@ export const MOCK_MESSAGES: Message[] = [
     toId: 'personal-1',
     content: 'Oi Carlos! Treinei ontem, ficou ótimo!',
     sentAt: '2026-04-18T18:00:00Z',
+    read: true,
+  },
+  {
+    id: 'msg-3',
+    fromId: 'aluno-1',
+    fromName: 'Ana Souza',
+    toId: 'personal-1',
+    content: 'Oi! Tudo bem? Posso mudar o treino de hoje? Estou com a academia fechada aqui perto',
+    sentAt: '2026-04-26T10:38:00Z',
+    read: true,
+  },
+  {
+    id: 'msg-4',
+    fromId: 'personal-1',
+    fromName: 'Carlos Silva',
+    toId: 'aluno-1',
+    content: 'Oi Ana! Claro, sem problema. Posso adaptar para treino em casa, sem equipamentos',
+    sentAt: '2026-04-26T10:40:00Z',
+    read: true,
+  },
+  {
+    id: 'msg-5',
+    fromId: 'aluno-1',
+    fromName: 'Ana Souza',
+    toId: 'personal-1',
+    content: 'Que ótimo! Me manda o treino adaptado quando puder 🙏',
+    sentAt: '2026-04-26T10:42:00Z',
     read: false,
+  },
+  // ── Bruno (aluno-2) ────────────────────────────────────────────────────────
+  {
+    id: 'msg-6',
+    fromId: 'personal-1',
+    fromName: 'Carlos Silva',
+    toId: 'aluno-2',
+    content: 'Bruno, seu desempenho nesta semana está excelente! Continue assim 💪',
+    sentAt: '2026-04-25T11:00:00Z',
+    read: true,
+  },
+  {
+    id: 'msg-7',
+    fromId: 'aluno-2',
+    fromName: 'Bruno Ramos',
+    toId: 'personal-1',
+    content: 'Ok, obrigado!',
+    sentAt: '2026-04-25T14:30:00Z',
+    read: true,
+  },
+  // ── Fernanda (aluno-3) ─────────────────────────────────────────────────────
+  {
+    id: 'msg-8',
+    fromId: 'personal-1',
+    fromName: 'Carlos Silva',
+    toId: 'aluno-3',
+    content: 'Fernanda, não esqueça do treino de pernas hoje!',
+    sentAt: '2026-04-21T08:00:00Z',
+    read: true,
+  },
+  {
+    id: 'msg-9',
+    fromId: 'aluno-3',
+    fromName: 'Fernanda Lima',
+    toId: 'personal-1',
+    content: 'Fiz o treino completo 💪',
+    sentAt: '2026-04-21T11:00:00Z',
+    read: true,
   },
 ];
 

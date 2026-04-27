@@ -2,50 +2,47 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApp } from '../../contexts/AppContext';
-import { ArrowLeft, Play, CheckSquare, Square, Video, Trophy, Moon, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Play, CheckSquare, Square, Video, Trophy, ChevronRight, Clock, Dumbbell } from 'lucide-react';
 
-const DAYS = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'] as const;
-type DayKey = typeof DAYS[number];
-
-const DAYS_LABEL: Record<DayKey, string> = {
-  segunda: 'Segunda-feira',
-  terca:   'Terça-feira',
-  quarta:  'Quarta-feira',
-  quinta:  'Quinta-feira',
-  sexta:   'Sexta-feira',
-  sabado:  'Sábado',
-  domingo: 'Domingo',
+const DAY_LABEL: Record<string, string> = {
+  segunda: 'Seg',
+  terca:   'Ter',
+  quarta:  'Qua',
+  quinta:  'Qui',
+  sexta:   'Sex',
+  sabado:  'Sáb',
+  domingo: 'Dom',
 };
 
-const TODAY_MAP: DayKey[] = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+const TODAY_MAP = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
 
-type Step = 'select-day' | 'workout' | 'done';
+type Step = 'select-workout' | 'workout' | 'done';
 
 export default function AlunoTreinoPage() {
   const { user } = useAuth();
-  const { getWeeklyPlan, exercises, addWorkoutSession } = useApp();
+  const { assignments, workouts, addLog } = useApp();
   const navigate = useNavigate();
 
-  const plan    = user ? getWeeklyPlan(user.id) : undefined;
   const todayKey = TODAY_MAP[new Date().getDay()];
 
-  const [step,        setStep]        = useState<Step>('select-day');
-  const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
-  const [checked,     setChecked]     = useState<Set<string>>(new Set());
+  const studentAssignments = user
+    ? assignments.filter((a) => a.studentId === user.id)
+    : [];
+
+  const [step,               setStep]               = useState<Step>('select-workout');
+  const [selectedAssignId,   setSelectedAssignId]   = useState<string | null>(null);
+  const [checked,            setChecked]            = useState<Set<string>>(new Set());
 
   const startTimeRef = useRef<Date>(new Date());
 
-  const selectedDayData = plan?.days.find((d) => d.dayOfWeek === selectedDay);
-  const dayExercises = selectedDayData
-    ? selectedDayData.exerciseIds
-        .map((id) => exercises.find((e) => e.id === id))
-        .filter(Boolean) as typeof exercises
-    : [];
+  const selectedAssign  = studentAssignments.find((a) => a.id === selectedAssignId);
+  const selectedWorkout = selectedAssign
+    ? workouts.find((w) => w.id === selectedAssign.workoutId)
+    : undefined;
+  const workoutExercises = selectedWorkout?.exercises ?? [];
 
-  function handleSelectDay(day: DayKey) {
-    const dayData = plan?.days.find((d) => d.dayOfWeek === day);
-    if (!dayData || (dayData.exerciseIds.length === 0 && !dayData.label.trim())) return;
-    setSelectedDay(day);
+  function handleSelectAssignment(assignId: string) {
+    setSelectedAssignId(assignId);
     setChecked(new Set());
     startTimeRef.current = new Date();
     setStep('workout');
@@ -60,23 +57,24 @@ export default function AlunoTreinoPage() {
   }
 
   function handleFinish() {
-    if (!user || !selectedDay || !selectedDayData) return;
+    if (!user || !selectedAssign || !selectedWorkout) return;
     const elapsed = Math.round((Date.now() - startTimeRef.current.getTime()) / 60000);
-    addWorkoutSession({
+    addLog({
+      assignmentId: selectedAssign.id,
+      workoutId: selectedWorkout.id,
+      workoutName: selectedWorkout.name,
       studentId: user.id,
-      dayOfWeek: selectedDay,
-      label: selectedDayData.label || 'Treino',
-      completedExerciseIds: Array.from(checked),
-      durationMinutes: Math.max(1, elapsed),
       completedAt: new Date().toISOString(),
+      completedExercises: Array.from(checked),
+      durationMinutes: Math.max(1, elapsed),
     });
     setStep('done');
   }
 
-  const progress = dayExercises.length > 0 ? (checked.size / dayExercises.length) * 100 : 0;
+  const progress = workoutExercises.length > 0 ? (checked.size / workoutExercises.length) * 100 : 0;
 
-  // ── STEP: select-day ──────────────────────────────────────────────────────────
-  if (step === 'select-day') {
+  // ── STEP: select-workout ───────────────────────────────────────────────────────
+  if (step === 'select-workout') {
     return (
       <div className="p-5 max-w-lg mx-auto">
         <div className="flex items-center gap-3 mb-6">
@@ -88,63 +86,64 @@ export default function AlunoTreinoPage() {
           </button>
           <div>
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Iniciar treino</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Escolha o dia</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Escolha o treino</p>
           </div>
         </div>
 
-        {!plan ? (
+        {studentAssignments.length === 0 ? (
           <div className="text-center py-16 text-slate-400 dark:text-slate-500">
-            <p className="text-sm">Nenhum plano semanal disponível.</p>
+            <Dumbbell size={40} className="mx-auto mb-3 opacity-40" />
+            <p className="text-sm">Nenhum treino atribuído.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {DAYS.map((day) => {
-              const dayData    = plan.days.find((d) => d.dayOfWeek === day);
-              const hasWorkout = !!(dayData && (dayData.exerciseIds.length > 0 || dayData.label.trim()));
-              const isToday    = day === todayKey;
+            {studentAssignments.map((assign) => {
+              const workout  = workouts.find((w) => w.id === assign.workoutId);
+              const isToday  = !!(assign.scheduledDays?.includes(todayKey));
+              const exCount  = workout?.exercises.length ?? 0;
+              const duration = workout?.durationMinutes;
 
               return (
                 <button
-                  key={day}
-                  onClick={() => hasWorkout && handleSelectDay(day)}
-                  disabled={!hasWorkout}
+                  key={assign.id}
+                  onClick={() => handleSelectAssignment(assign.id)}
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl border text-left transition-colors ${
-                    isToday && hasWorkout
+                    isToday
                       ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/30'
-                      : hasWorkout
-                      ? 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                      : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700/30 opacity-50 cursor-default'
+                      : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                   }`}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className={`text-sm font-semibold ${
-                        isToday && hasWorkout
-                          ? 'text-indigo-700 dark:text-indigo-300'
-                          : 'text-slate-700 dark:text-slate-200'
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className={`text-sm font-semibold truncate ${
+                        isToday ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-200'
                       }`}>
-                        {DAYS_LABEL[day]}
+                        {assign.workoutName}
                       </p>
                       {isToday && (
-                        <span className="text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="text-xs bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-medium shrink-0">
                           Hoje
                         </span>
                       )}
                     </div>
-                    {hasWorkout ? (
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        {dayData?.label || 'Treino'}{dayData && dayData.exerciseIds.length > 0 ? ` · ${dayData.exerciseIds.length} exercícios` : ''}
-                      </p>
-                    ) : (
-                      <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                        <Moon size={11} />
-                        <span>Descanso</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        {exCount} exercício{exCount !== 1 ? 's' : ''}
+                      </span>
+                      {duration && (
+                        <span className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                          <Clock size={10} />
+                          {duration} min
+                        </span>
+                      )}
+                      {assign.scheduledDays && assign.scheduledDays.length > 0 && (
+                        <span className="text-xs text-slate-400 dark:text-slate-500">
+                          {assign.scheduledDays.map((d) => DAY_LABEL[d] ?? d).join(' · ')}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {hasWorkout && (
-                    <ChevronRight size={16} className={isToday ? 'text-indigo-500' : 'text-slate-400'} />
-                  )}
+                  <ChevronRight size={16} className={isToday ? 'text-indigo-500' : 'text-slate-400'} />
                 </button>
               );
             })}
@@ -155,30 +154,32 @@ export default function AlunoTreinoPage() {
   }
 
   // ── STEP: workout ──────────────────────────────────────────────────────────────
-  if (step === 'workout' && selectedDay && selectedDayData) {
+  if (step === 'workout' && selectedAssign && selectedWorkout) {
     return (
       <div className="p-5 max-w-lg mx-auto flex flex-col min-h-[70vh]">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <button
-            onClick={() => setStep('select-day')}
+            onClick={() => setStep('select-workout')}
             className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           >
             <ArrowLeft size={18} />
           </button>
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">
-              {selectedDayData.label || 'Treino'}
+              {selectedWorkout.name}
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{DAYS_LABEL[selectedDay]}</p>
+            {selectedWorkout.description && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{selectedWorkout.description}</p>
+            )}
           </div>
         </div>
 
         {/* Progress bar */}
-        {dayExercises.length > 0 && (
+        {workoutExercises.length > 0 && (
           <div className="mb-4">
             <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
-              <span>{checked.size} / {dayExercises.length} feitos</span>
+              <span>{checked.size} / {workoutExercises.length} feitos</span>
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -192,12 +193,12 @@ export default function AlunoTreinoPage() {
 
         {/* Exercise list */}
         <div className="flex-1 flex flex-col gap-2 mb-6">
-          {dayExercises.length === 0 ? (
+          {workoutExercises.length === 0 ? (
             <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-8">
-              Nenhum exercício neste dia.
+              Nenhum exercício neste treino.
             </p>
           ) : (
-            dayExercises.map((ex) => {
+            workoutExercises.map((ex) => {
               const done = checked.has(ex.id);
               return (
                 <div
@@ -217,9 +218,16 @@ export default function AlunoTreinoPage() {
                     <p className={`text-sm font-medium truncate ${
                       done ? 'text-emerald-700 dark:text-emerald-300 line-through' : 'text-slate-700 dark:text-slate-200'
                     }`}>
-                      {ex.name}
+                      {ex.exerciseName}
                     </p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">{ex.muscleGroup}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                      {ex.sets}x{ex.reps}
+                      {ex.weight ? ` · ${ex.weight}` : ''}
+                      {ex.restSeconds ? ` · descanso ${ex.restSeconds}s` : ''}
+                    </p>
+                    {ex.notes && (
+                      <p className="text-xs text-slate-400 dark:text-slate-500 italic mt-0.5">{ex.notes}</p>
+                    )}
                   </div>
                   {ex.videoUrl && (
                     <a
@@ -259,10 +267,10 @@ export default function AlunoTreinoPage() {
       </div>
       <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Treino finalizado!</h1>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">
-        {selectedDayData?.label || 'Treino'} · {DAYS_LABEL[selectedDay ?? 'segunda']}
+        {selectedWorkout?.name ?? 'Treino'}
       </p>
       <p className="text-slate-400 dark:text-slate-500 text-sm mb-8">
-        {checked.size} de {dayExercises.length} exercícios concluídos
+        {checked.size} de {workoutExercises.length} exercícios concluídos
       </p>
       <div className="flex flex-col gap-3 w-full max-w-xs">
         <button
@@ -272,7 +280,7 @@ export default function AlunoTreinoPage() {
           Ir para o dashboard
         </button>
         <button
-          onClick={() => { setStep('select-day'); setSelectedDay(null); }}
+          onClick={() => { setStep('select-workout'); setSelectedAssignId(null); }}
           className="w-full border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium py-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
         >
           Fazer outro treino

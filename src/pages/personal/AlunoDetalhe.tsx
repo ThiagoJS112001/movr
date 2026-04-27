@@ -7,11 +7,13 @@ import {
   ArrowLeft, MessageSquare, ShieldOff, ShieldCheck,
   Dumbbell, Salad, History,
   Eye, Pencil, Copy, Trash2, Plus, CalendarDays,
-  ChevronDown, ChevronUp, Archive,
+  ChevronDown, ChevronUp, Archive, MoreHorizontal,
+  TrendingUp, Target, Clock, Zap, MoreVertical,
 } from 'lucide-react';
 import type { Workout, Diet } from '../../types';
 import WorkoutViewModal from '../../components/WorkoutViewModal';
 import WorkoutEditModal from '../../components/WorkoutEditModal';
+import WeeklyPlanModal from '../../components/WeeklyPlanModal';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -73,12 +75,18 @@ export default function AlunoDetalhe() {
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<Tab>('treinos');
+  const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
+  const [workoutMenuOpenId, setWorkoutMenuOpenId] = useState<string | null>(null);
+  const [dietMenuOpenId, setDietMenuOpenId] = useState<string | null>(null);
 
   // View workout modal
   const [viewingWorkout, setViewingWorkout] = useState<Workout | null>(null);
 
   // Edit workout modal
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+
+  // Create workout modal
+  const [weeklyPlanOpen, setWeeklyPlanOpen] = useState(false);
 
   // Assign workout modal
   const [assignWorkoutOpen, setAssignWorkoutOpen] = useState(false);
@@ -173,6 +181,49 @@ export default function AlunoDetalhe() {
   const assignedDietIds = studentDietAssignments.map((a) => a.dietId);
   const unassignedDiets = myDiets.filter((d) => !assignedDietIds.includes(d.id));
 
+  // ── Header metrics ────────────────────────────────────────────────────────
+  const lastLog = studentLogs[0] ?? null;
+  const lastLogRelative = lastLog ? (() => {
+    const days = Math.floor((Date.now() - new Date(lastLog.completedAt).getTime()) / 86_400_000);
+    if (days === 0) return 'hoje';
+    if (days === 1) return 'ontem';
+    if (days < 7) return `há ${days} dias`;
+    return `há ${Math.floor(days / 7)} sem.`;
+  })() : null;
+
+  const logsThisMonth = studentLogs.filter((l) => {
+    const d = new Date(l.completedAt);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+
+  const logsLast4Weeks = studentLogs.filter((l) =>
+    Date.now() - new Date(l.completedAt).getTime() < 28 * 86_400_000,
+  );
+  const freqPct = Math.min(100, Math.round((logsLast4Weeks.length / 12) * 100));
+
+  const nextAssignmentLabel = (() => {
+    const dowMap: Record<string, number> = { domingo: 0, segunda: 1, terca: 2, quarta: 3, quinta: 4, sexta: 5, sabado: 6 };
+    const todayDow = new Date().getDay();
+    for (const a of studentAssignments) {
+      for (const day of a.scheduledDays ?? []) {
+        if ((dowMap[day] ?? -1) > todayDow) return a.workoutName.replace(/^(Treino [A-Z])\s*[-–]\s*.+/, '$1');
+      }
+    }
+    return studentAssignments[0]?.workoutName.replace(/^(Treino [A-Z])\s*[-–]\s*.+/, '$1') ?? null;
+  })();
+
+  const now2 = Date.now();
+  const week2 = 14 * 86_400_000;
+  const recentLogs = studentLogs.filter((l) => now2 - new Date(l.completedAt).getTime() < week2);
+  const prevLogs   = studentLogs.filter((l) => {
+    const age = now2 - new Date(l.completedAt).getTime();
+    return age >= week2 && age < week2 * 2;
+  });
+  const progressTrend: 'up' | 'down' | 'stable' =
+    recentLogs.length > prevLogs.length ? 'up' :
+    recentLogs.length < prevLogs.length ? 'down' : 'stable';
+
   // Helpers
   function getWorkoutMuscleGroups(workout: Workout): string[] {
     const groups = new Set<string>();
@@ -245,54 +296,165 @@ export default function AlunoDetalhe() {
         Voltar para alunos
       </button>
 
+      {/* Close header menu on outside click */}
+      {headerMenuOpen && (
+        <div className="fixed inset-0 z-10" onClick={() => setHeaderMenuOpen(false)} />
+      )}
+      {(workoutMenuOpenId || dietMenuOpenId) && (
+        <div className="fixed inset-0 z-10" onClick={() => { setWorkoutMenuOpenId(null); setDietMenuOpenId(null); }} />
+      )}
+
       {/* Student header card */}
-      <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl p-5 mb-4 flex items-center gap-4">
-        <div className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center font-bold text-xl text-white ${avatarColor}`}>
-          {student.name.charAt(0).toUpperCase()}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-lg font-bold text-slate-800 dark:text-white">{student.name}</h1>
-            <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full ${
-              blocked
-                ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${blocked ? 'bg-red-500' : 'bg-emerald-500'}`} />
-              {blocked ? 'Bloqueado' : 'Ativo'}
-            </span>
+      <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl mb-4 overflow-hidden">
+        {/* Top row */}
+        <div className="flex items-center gap-4 px-5 pt-5 pb-4">
+          <div className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center font-bold text-xl text-white ${avatarColor}`}>
+            {student.name.charAt(0).toUpperCase()}
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            {student.email}
-            {sinceDate && (
-              <span className="ml-2 before:content-['•'] before:mr-2 before:opacity-50">
-                Desde {sinceDate.toLocaleDateString('pt-BR')}
+
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-lg font-bold text-slate-800 dark:text-white">{student.name}</h1>
+              <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-0.5 rounded-full ${
+                blocked
+                  ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+              }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${blocked ? 'bg-red-500' : 'bg-emerald-500'}`} />
+                {blocked ? 'Bloqueado' : 'Ativo'}
               </span>
-            )}
-          </p>
+            </div>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
+              {student.email}
+              {sinceDate && (
+                <span className="ml-2 before:content-['·'] before:mr-2 before:opacity-50">
+                  desde {sinceDate.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}
+                </span>
+              )}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => navigate('/personal/chat')}
+              className="p-2.5 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+              title="Chat"
+            >
+              <MessageSquare size={16} />
+            </button>
+            {/* ⋯ secondary menu */}
+            <div className="relative">
+              <button
+                onClick={() => setHeaderMenuOpen((o) => !o)}
+                className="p-2.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                title="Mais opções"
+              >
+                <MoreVertical size={16} />
+              </button>
+              {headerMenuOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1.5">
+                  <button
+                    onClick={() => { blocked ? unblockStudent(student.id) : blockStudent(student.id); setHeaderMenuOpen(false); }}
+                    className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
+                      blocked
+                        ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
+                        : 'text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+                    }`}
+                  >
+                    {blocked ? <ShieldCheck size={14} /> : <ShieldOff size={14} />}
+                    {blocked ? 'Desbloquear acesso' : 'Bloquear acesso'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={() => navigate('/personal/chat')}
-            className="p-2.5 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
-            title="Chat"
-          >
-            <MessageSquare size={16} />
-          </button>
-          <button
-            onClick={() => blocked ? unblockStudent(student.id) : blockStudent(student.id)}
-            className={`p-2.5 rounded-xl transition-colors ${
-              blocked
-                ? 'text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
-                : 'text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30'
-            }`}
-            title={blocked ? 'Desbloquear' : 'Bloquear'}
-          >
-            {blocked ? <ShieldCheck size={16} /> : <ShieldOff size={16} />}
-          </button>
+        {/* Metrics strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-slate-100 dark:divide-slate-700/50 border-t border-slate-100 dark:border-slate-700/50">
+          {/* Last session */}
+          <div className="flex items-center gap-3 px-5 py-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
+              <Clock size={14} className="text-indigo-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-medium">Última sessão</p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{lastLogRelative ?? '—'}</p>
+            </div>
+          </div>
+
+          {/* This month */}
+          <div className="flex items-center gap-3 px-5 py-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
+              <TrendingUp size={14} className="text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-medium">Este mês</p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                {logsThisMonth.length} treino{logsThisMonth.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+          </div>
+
+          {/* Frequency */}
+          <div className="flex items-center gap-3 px-5 py-3">
+            <div className="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+              <Zap size={14} className="text-violet-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-medium">Frequência</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{freqPct}%</p>
+                <div className="flex-1 h-1 bg-slate-100 dark:bg-slate-700 rounded-full min-w-[40px]">
+                  <div
+                    className={`h-1 rounded-full ${
+                      freqPct >= 80 ? 'bg-emerald-500' : freqPct >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                    }`}
+                    style={{ width: `${freqPct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Next workout */}
+          <div className="flex items-center gap-3 px-5 py-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center shrink-0">
+              <Target size={14} className="text-amber-500" />
+            </div>
+            <div>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-medium">Próximo treino</p>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{nextAssignmentLabel ?? '—'}</p>
+            </div>
+          </div>
         </div>
+
+        {/* Progress trend banner (only if data exists) */}
+        {studentLogs.length > 0 && (
+          <div className={`flex items-center gap-2 px-5 py-2.5 border-t border-slate-100 dark:border-slate-700/50 ${
+            progressTrend === 'up'
+              ? 'bg-emerald-50/60 dark:bg-emerald-900/10'
+              : progressTrend === 'down'
+              ? 'bg-amber-50/60 dark:bg-amber-900/10'
+              : 'bg-slate-50/60 dark:bg-slate-800/20'
+          }`}>
+            <TrendingUp
+              size={13}
+              className={progressTrend === 'up' ? 'text-emerald-500' : progressTrend === 'down' ? 'text-amber-500' : 'text-slate-400'}
+            />
+            <p className={`text-xs font-medium ${
+              progressTrend === 'up' ? 'text-emerald-600 dark:text-emerald-400' :
+              progressTrend === 'down' ? 'text-amber-600 dark:text-amber-400' :
+              'text-slate-500 dark:text-slate-400'
+            }`}>
+              {progressTrend === 'up'
+                ? `Evolução positiva — ${recentLogs.length} treinos nas últimas 2 semanas (vs ${prevLogs.length} anteriores)`
+                : progressTrend === 'down'
+                ? `Frequência caindo — ${recentLogs.length} treinos nas últimas 2 semanas (vs ${prevLogs.length} anteriores)`
+                : `Frequência estável — ${recentLogs.length} treinos nas últimas 2 semanas`}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
@@ -331,6 +493,13 @@ export default function AlunoDetalhe() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => { setSelectedWorkoutId(''); setAssignWorkoutOpen(true); }}
+                  className="flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium px-3 py-2 rounded-xl transition-colors"
+                  title="Atribuir treino existente"
+                >
+                  Atribuir existente
+                </button>
+                <button
+                  onClick={() => setWeeklyPlanOpen(true)}
                   className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
                 >
                   <Plus size={14} />
@@ -359,9 +528,8 @@ export default function AlunoDetalhe() {
                         <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome do treino</th>
                         <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Grupos musculares</th>
                         <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Duração</th>
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Última atualização</th>
                         <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Status</th>
-                        <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
+                        <th className="text-right text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
@@ -394,12 +562,6 @@ export default function AlunoDetalhe() {
                               {workout.durationMinutes ? `${workout.durationMinutes} min` : duration}
                             </td>
                             <td className="px-4 py-3.5">
-                              <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                                <CalendarDays size={13} />
-                                {new Date(workout.createdAt).toLocaleDateString('pt-BR')}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3.5">
                               {workout.status === 'rascunho' ? (
                                 <span className="flex items-center gap-1.5 text-xs font-medium text-amber-500">
                                   <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
@@ -412,15 +574,8 @@ export default function AlunoDetalhe() {
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-3.5">
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => setViewingWorkout(workout)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
-                                  title="Ver"
-                                >
-                                  <Eye size={14} />
-                                </button>
+                            <td className="px-4 py-3.5 text-right">
+                              <div className="flex items-center justify-end gap-1">
                                 <button
                                   onClick={() => setEditingWorkout(workout)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
@@ -428,19 +583,37 @@ export default function AlunoDetalhe() {
                                 >
                                   <Pencil size={14} />
                                 </button>
-                                <button
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                  title="Duplicar"
-                                >
-                                  <Copy size={14} />
-                                </button>
-                                <button
-                                  onClick={() => handleRemoveWorkout(workout.id)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                  title="Remover"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
+                                {/* ⋯ row menu */}
+                                <div className="relative">
+                                  <button
+                                    onClick={() => setWorkoutMenuOpenId(workoutMenuOpenId === workout.id ? null : workout.id)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                  >
+                                    <MoreHorizontal size={14} />
+                                  </button>
+                                  {workoutMenuOpenId === workout.id && (
+                                    <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1.5">
+                                      <button
+                                        onClick={() => { setViewingWorkout(workout); setWorkoutMenuOpenId(null); }}
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+                                      >
+                                        <Eye size={13} className="text-indigo-400" /> Visualizar
+                                      </button>
+                                      <button
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+                                      >
+                                        <Copy size={13} className="text-slate-400" /> Duplicar
+                                      </button>
+                                      <div className="my-1 border-t border-slate-100 dark:border-slate-700/60" />
+                                      <button
+                                        onClick={() => { handleRemoveWorkout(workout.id); setWorkoutMenuOpenId(null); }}
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                      >
+                                        <Trash2 size={13} /> Remover
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </td>
                           </tr>
@@ -504,9 +677,8 @@ export default function AlunoDetalhe() {
                       <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome da dieta</th>
                       <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Objetivo</th>
                       <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Calorias</th>
-                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Última atualização</th>
                       <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Status</th>
-                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
+                      <th className="text-right text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
@@ -527,12 +699,6 @@ export default function AlunoDetalhe() {
                             {totalCals > 0 ? `${totalCals} kcal` : '—'}
                           </td>
                           <td className="px-4 py-3.5">
-                            <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                              <CalendarDays size={13} />
-                              {new Date(diet.createdAt).toLocaleDateString('pt-BR')}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3.5">
                             {diet.status === 'pausada' ? (
                               <span className="flex items-center gap-1.5 text-xs font-medium text-amber-500">
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
@@ -545,15 +711,8 @@ export default function AlunoDetalhe() {
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3.5">
-                            <div className="flex items-center gap-1">
-                              <button
-                                onClick={() => navigate(`/personal/dietas/${diet.id}`)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
-                                title="Ver"
-                              >
-                                <Eye size={14} />
-                              </button>
+                          <td className="px-4 py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => navigate(`/personal/dietas/${diet.id}`)}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
@@ -561,19 +720,36 @@ export default function AlunoDetalhe() {
                               >
                                 <Pencil size={14} />
                               </button>
-                              <button
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                title="Duplicar"
-                              >
-                                <Copy size={14} />
-                              </button>
-                              <button
-                                onClick={() => handleRemoveDiet(diet.id)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                title="Remover"
-                              >
-                                <Trash2 size={14} />
-                              </button>
+                              <div className="relative">
+                                <button
+                                  onClick={() => setDietMenuOpenId(dietMenuOpenId === diet.id ? null : diet.id)}
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                  <MoreHorizontal size={14} />
+                                </button>
+                                {dietMenuOpenId === diet.id && (
+                                  <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1.5">
+                                    <button
+                                      onClick={() => { navigate(`/personal/dietas/${diet.id}`); setDietMenuOpenId(null); }}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+                                    >
+                                      <Eye size={13} className="text-indigo-400" /> Visualizar
+                                    </button>
+                                    <button
+                                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+                                    >
+                                      <Copy size={13} className="text-slate-400" /> Duplicar
+                                    </button>
+                                    <div className="my-1 border-t border-slate-100 dark:border-slate-700/60" />
+                                    <button
+                                      onClick={() => { handleRemoveDiet(diet.id); setDietMenuOpenId(null); }}
+                                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    >
+                                      <Trash2 size={13} /> Remover
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </td>
                         </tr>
@@ -777,6 +953,15 @@ export default function AlunoDetalhe() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ── Modal: Weekly Plan ────────────────────────────────────────────── */}
+      {weeklyPlanOpen && (
+        <WeeklyPlanModal
+          studentId={student.id}
+          studentName={student.name}
+          onClose={() => setWeeklyPlanOpen(false)}
+        />
       )}
 
       {/* ── Modal: Assign Workout ─────────────────────────────────────────── */}

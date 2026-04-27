@@ -9,6 +9,9 @@ export const LS_DYNAMIC_USERS_KEY = 'fitcoach_dynamic_users' as const;
 /** localStorage key for dynamically created student passwords. */
 export const LS_DYNAMIC_PASSWORDS_KEY = 'fitcoach_dynamic_passwords' as const;
 
+/** localStorage key for dynamically registered gym profiles. */
+export const LS_GYMS_KEY = 'fitcoach_dynamic_gyms' as const;
+
 // ── UI tokens ─────────────────────────────────────────────────────────────────
 /** Standard card shell — white/dark-800, rounded-2xl, shadow, border */
 export const CARD = 'bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm' as const;

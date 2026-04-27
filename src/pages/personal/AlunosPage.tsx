@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import {
   Salad, ShieldOff, ShieldCheck,
   Search, Check, MessageSquare, MoreHorizontal,
-  UserPlus, CalendarDays, X,
+  UserPlus, CalendarDays, X, History, Dumbbell,
   ChevronLeft, ChevronRight, TrendingUp,
 } from 'lucide-react';
 import type { DietAssignment } from '../../types';

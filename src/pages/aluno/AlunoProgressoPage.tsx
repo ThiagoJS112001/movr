@@ -141,8 +141,8 @@ export default function AlunoProgressoPage() {
   const cursorStyle = { fill: theme === 'dark' ? '#334155' : '#f1f5f9' };
 
   return (
-    <div className="p-5 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-1">
         Meu Progresso
       </h1>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">

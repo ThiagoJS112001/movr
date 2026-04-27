@@ -14,7 +14,12 @@ export default function ProtectedRoute({ requiredRole, redirectTo = '/login' }: 
 
   if (!user) return <Navigate to={redirectTo} replace />;
   if (user.role !== requiredRole) {
-    return <Navigate to={user.role === 'personal' ? '/personal/dashboard' : '/aluno/dashboard'} replace />;
+    const roleMap: Record<string, string> = {
+      personal: '/personal/dashboard',
+      aluno: '/aluno/dashboard',
+      academia: '/academia/dashboard',
+    };
+    return <Navigate to={roleMap[user.role] ?? '/login'} replace />;
   }
   if (user.role === 'aluno' && isStudentBlocked(user.id)) {
     return <Navigate to="/aluno/bloqueado" replace />;

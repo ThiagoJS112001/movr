@@ -11,8 +11,8 @@ export default function AlunoDietaPage() {
 
   if (!myAssignment || !diet) {
     return (
-      <div className="p-5 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-6">Minha Dieta</h1>
+      <div className="p-6 max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-6">Minha Dieta</h1>
         <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
           <Salad size={40} className="mb-3 opacity-30" />
           <p className="text-sm">Nenhuma dieta atribuída ainda.</p>
@@ -39,8 +39,8 @@ export default function AlunoDietaPage() {
   );
 
   return (
-    <div className="p-5 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Minha Dieta</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-1">Minha Dieta</h1>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">{diet.name}</p>
       {diet.description && (
         <p className="text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 rounded-xl px-4 py-3 shadow-sm mb-5 border-l-4 border-emerald-400">

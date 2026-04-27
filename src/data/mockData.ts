@@ -8,6 +8,11 @@ import type {
   Exercise,
   Diet,
   DietAssignment,
+  Gym,
+  GymRating,
+  FriendRequest,
+  StudentGroup,
+  GroupMessage,
 } from '../types';
 
 // ── Usuários ──────────────────────────────────────────────────────────────────
@@ -36,6 +41,10 @@ export const MOCK_USERS: User[] = [
     email: 'fernanda@aluno.com',
     role: 'aluno',
   },
+  // Academia accounts
+  { id: 'gym-1', name: 'Academia Força Total', email: 'forca@academia.com', role: 'academia' },
+  { id: 'gym-2', name: 'FitLife Club', email: 'fitlife@academia.com', role: 'academia' },
+  { id: 'gym-3', name: 'Power House', email: 'power@academia.com', role: 'academia' },
 ];
 
 // Senha padrão para todos (apenas mock): 123456
@@ -44,6 +53,9 @@ export const MOCK_PASSWORDS: Record<string, string> = {
   'ana@aluno.com': '123456',
   'bruno@aluno.com': '123456',
   'fernanda@aluno.com': '123456',
+  'forca@academia.com': '123456',
+  'fitlife@academia.com': '123456',
+  'power@academia.com': '123456',
 };
 
 // ── Exercícios ────────────────────────────────────────────────────────────────
@@ -499,4 +511,92 @@ export const MOCK_DIET_ASSIGNMENTS: DietAssignment[] = [
     personalId: 'personal-1',
     assignedAt: '2024-03-12T08:00:00Z',
   },
+];
+
+// ── Academias (Gyms) ──────────────────────────────────────────────────────────
+export const MOCK_GYMS: Gym[] = [
+  {
+    id: 'gym-1',
+    name: 'Academia Força Total',
+    email: 'forca@academia.com',
+    bio: 'Mais de 10 anos formando campeões! Estrutura completa e equipe especializada.',
+    address: 'Rua das Flores, 123',
+    city: 'São Paulo',
+    state: 'SP',
+    phone: '(11) 99999-1111',
+    openingHours: {
+      segunda: '06:00–22:00', terca: '06:00–22:00', quarta: '06:00–22:00',
+      quinta: '06:00–22:00', sexta: '06:00–21:00', sabado: '08:00–18:00', domingo: 'Fechado',
+    },
+    hasPersonal: true,
+    hasNutrition: true,
+    amenities: ['Estacionamento', 'Vestiário', 'Sauna', 'Wi-Fi'],
+    photos: [],
+  },
+  {
+    id: 'gym-2',
+    name: 'FitLife Club',
+    email: 'fitlife@academia.com',
+    bio: 'Sua evolução começa aqui. Ambiente moderno e acolhedor.',
+    address: 'Av. Paulista, 456',
+    city: 'São Paulo',
+    state: 'SP',
+    phone: '(11) 99999-2222',
+    openingHours: {
+      segunda: '05:00–23:00', terca: '05:00–23:00', quarta: '05:00–23:00',
+      quinta: '05:00–23:00', sexta: '05:00–22:00', sabado: '07:00–20:00', domingo: '08:00–14:00',
+    },
+    hasPersonal: true,
+    hasNutrition: false,
+    amenities: ['Estacionamento', 'Vestiário', 'Wi-Fi', 'Área Kids'],
+    photos: [],
+  },
+  {
+    id: 'gym-3',
+    name: 'Power House',
+    email: 'power@academia.com',
+    bio: 'Ambiente premium para resultados máximos.',
+    address: 'Rua do Treino, 789',
+    city: 'Campinas',
+    state: 'SP',
+    phone: '(19) 99999-3333',
+    openingHours: {
+      segunda: '06:00–22:00', terca: '06:00–22:00', quarta: '06:00–22:00',
+      quinta: '06:00–22:00', sexta: '06:00–22:00', sabado: '08:00–18:00', domingo: 'Fechado',
+    },
+    hasPersonal: false,
+    hasNutrition: true,
+    amenities: ['Estacionamento', 'Sauna', 'Piscina'],
+    photos: [],
+  },
+];
+
+export const MOCK_GYM_RATINGS: GymRating[] = [
+  { id: 'gr-1', gymId: 'gym-1', userId: 'aluno-1', userName: 'Ana Souza', rating: 5, comment: 'Excelente academia, estrutura top!', createdAt: '2026-01-15T10:00:00Z' },
+  { id: 'gr-2', gymId: 'gym-1', userId: 'aluno-2', userName: 'Bruno Ramos', rating: 4, comment: 'Muito boa estrutura, recomendo.', createdAt: '2026-01-20T10:00:00Z' },
+  { id: 'gr-3', gymId: 'gym-2', userId: 'aluno-1', userName: 'Ana Souza', rating: 4, comment: 'Ótima localização e atendimento.', createdAt: '2026-02-01T10:00:00Z' },
+  { id: 'gr-4', gymId: 'gym-2', userId: 'aluno-3', userName: 'Fernanda Lima', rating: 5, comment: 'Adoro o ambiente!', createdAt: '2026-02-05T10:00:00Z' },
+  { id: 'gr-5', gymId: 'gym-3', userId: 'aluno-3', userName: 'Fernanda Lima', rating: 3, comment: 'Boa, mas poderia ter mais equipamentos.', createdAt: '2026-02-10T10:00:00Z' },
+];
+
+// ── Social ────────────────────────────────────────────────────────────────────
+export const MOCK_FRIEND_REQUESTS: FriendRequest[] = [
+  { id: 'fr-1', fromId: 'aluno-1', fromName: 'Ana Souza', toId: 'aluno-2', toName: 'Bruno Ramos', status: 'accepted', createdAt: '2026-01-10T10:00:00Z' },
+  { id: 'fr-2', fromId: 'aluno-1', fromName: 'Ana Souza', toId: 'aluno-3', toName: 'Fernanda Lima', status: 'accepted', createdAt: '2026-01-12T10:00:00Z' },
+];
+
+export const MOCK_STUDENT_GROUPS: StudentGroup[] = [
+  {
+    id: 'grp-1',
+    name: 'Turma do Sacrifício 💪',
+    memberIds: ['aluno-1', 'aluno-2', 'aluno-3'],
+    createdBy: 'aluno-1',
+    createdAt: '2026-01-15T10:00:00Z',
+  },
+];
+
+export const MOCK_GROUP_MESSAGES: GroupMessage[] = [
+  { id: 'gm-1', groupId: 'grp-1', fromId: 'aluno-1', fromName: 'Ana Souza', content: 'Oi galera! Vamos treinar hoje? 🏋️', type: 'text', createdAt: '2026-04-27T08:00:00Z' },
+  { id: 'gm-2', groupId: 'grp-1', fromId: 'aluno-2', fromName: 'Bruno Ramos', content: 'Claro! Às 18h eu estou lá 🔥', type: 'text', createdAt: '2026-04-27T08:05:00Z' },
+  { id: 'gm-3', groupId: 'grp-1', fromId: 'aluno-3', fromName: 'Fernanda Lima', content: 'Eu vou também! Modo destroyer ativado 💪', type: 'text', createdAt: '2026-04-27T08:10:00Z' },
 ];

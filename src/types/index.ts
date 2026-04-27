@@ -1,4 +1,4 @@
-export type UserRole = 'personal' | 'aluno';
+export type UserRole = 'personal' | 'aluno' | 'academia';
 
 export interface User {
   id: string;
@@ -147,4 +147,73 @@ export interface WorkoutSession {
   completedExerciseIds: string[];
   durationMinutes: number;
   completedAt: string;
+}
+
+// ── Academia / Gym ─────────────────────────────────────────────────────────────
+export interface GymHours {
+  segunda?: string;
+  terca?: string;
+  quarta?: string;
+  quinta?: string;
+  sexta?: string;
+  sabado?: string;
+  domingo?: string;
+}
+
+export interface Gym {
+  id: string; // same as the User.id for this academia account
+  name: string;
+  email: string;
+  bio?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  phone?: string;
+  openingHours?: GymHours;
+  hasPersonal: boolean;
+  hasNutrition: boolean;
+  amenities: string[];
+  photos: string[]; // base64 data-URLs or empty
+}
+
+export interface GymRating {
+  id: string;
+  gymId: string;
+  userId: string;
+  userName: string;
+  rating: number; // 1–5
+  comment?: string;
+  createdAt: string;
+}
+
+// ── Social ────────────────────────────────────────────────────────────────────
+export interface FriendRequest {
+  id: string;
+  fromId: string;
+  fromName: string;
+  toId: string;
+  toName: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}
+
+export interface StudentGroup {
+  id: string;
+  name: string;
+  memberIds: string[];
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface GroupMessage {
+  id: string;
+  groupId: string;
+  fromId: string;
+  fromName: string;
+  content: string;
+  type: 'text' | 'image' | 'offer';
+  imageUrl?: string;
+  offerGymId?: string;
+  offerGymName?: string;
+  createdAt: string;
 }

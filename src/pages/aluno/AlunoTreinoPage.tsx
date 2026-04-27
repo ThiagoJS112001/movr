@@ -76,7 +76,7 @@ export default function AlunoTreinoPage() {
   // ── STEP: select-workout ───────────────────────────────────────────────────────
   if (step === 'select-workout') {
     return (
-      <div className="p-5 max-w-lg mx-auto">
+      <div className="p-6 max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => navigate('/aluno/dashboard')}
@@ -156,7 +156,7 @@ export default function AlunoTreinoPage() {
   // ── STEP: workout ──────────────────────────────────────────────────────────────
   if (step === 'workout' && selectedAssign && selectedWorkout) {
     return (
-      <div className="p-5 max-w-lg mx-auto flex flex-col min-h-[70vh]">
+      <div className="p-6 max-w-2xl mx-auto flex flex-col min-h-[70vh]">
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <button
@@ -261,7 +261,7 @@ export default function AlunoTreinoPage() {
 
   // ── STEP: done ─────────────────────────────────────────────────────────────────
   return (
-    <div className="p-5 max-w-lg mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center">
+    <div className="p-6 max-w-2xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center">
       <div className="w-20 h-20 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mb-5">
         <Trophy size={36} className="text-indigo-600 dark:text-indigo-400" />
       </div>

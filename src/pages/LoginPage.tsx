@@ -10,8 +10,11 @@ import {
   ClipboardList,
   MessageSquare,
   BarChart2,
+  Building2,
+  MapPin,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useApp } from '../contexts/AppContext';
 import { APP_NAME, LS_USER_KEY } from '../lib/constants';
 
 const FEATURES = [
@@ -34,7 +37,9 @@ const FEATURES = [
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { registerAcademia } = useApp();
   const navigate = useNavigate();
+  // Login state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -42,6 +47,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showDemo, setShowDemo] = useState(false);
+  // Right-panel tab: 'signup' or 'academia'
+  const [rightTab, setRightTab] = useState<'signup' | 'academia'>('signup');
+  // Academia registration state
+  const [gymName, setGymName] = useState('');
+  const [gymEmail, setGymEmail] = useState('');
+  const [gymPassword, setGymPassword] = useState('');
+  const [gymPasswordConfirm, setGymPasswordConfirm] = useState('');
+  const [gymCity, setGymCity] = useState('');
+  const [gymState, setGymState] = useState('');
+  const [gymRegError, setGymRegError] = useState('');
+  const [gymRegLoading, setGymRegLoading] = useState(false);
+  const [showGymPassword, setShowGymPassword] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,8 +73,39 @@ export default function LoginPage() {
     const stored = localStorage.getItem(LS_USER_KEY);
     if (stored) {
       const u = JSON.parse(stored) as { role: string };
-      navigate(u.role === 'personal' ? '/personal/dashboard' : '/aluno/dashboard');
+      const roleMap: Record<string, string> = {
+        personal: '/personal/dashboard',
+        academia: '/academia/dashboard',
+        aluno: '/aluno/dashboard',
+      };
+      navigate(roleMap[u.role] ?? '/aluno/dashboard');
     }
+  }
+
+  async function handleGymRegister(e: React.FormEvent) {
+    e.preventDefault();
+    setGymRegError('');
+    if (!gymName.trim() || !gymEmail.trim() || !gymPassword) {
+      setGymRegError('Preencha todos os campos obrigatórios.');
+      return;
+    }
+    if (gymPassword !== gymPasswordConfirm) {
+      setGymRegError('As senhas não coincidem.');
+      return;
+    }
+    if (gymPassword.length < 6) {
+      setGymRegError('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    setGymRegLoading(true);
+    registerAcademia(gymName, gymEmail, gymPassword, gymCity || undefined, gymState || undefined);
+    const result = await login(gymEmail, gymPassword);
+    setGymRegLoading(false);
+    if (!result.success) {
+      setGymRegError(result.error ?? 'Erro ao fazer login após cadastro.');
+      return;
+    }
+    navigate('/academia/dashboard');
   }
 
   return (
@@ -179,40 +227,184 @@ export default function LoginPage() {
           </form>
         </div>
 
-        {/* ── Right: Sign-up promo ── */}
-        <div className="bg-slate-900/50 border-l border-slate-700/50 p-8 flex flex-col items-center justify-center gap-6">
-          {/* Icon */}
-          <div className="bg-indigo-600/20 border border-indigo-500/30 p-5 rounded-2xl">
-            <Dumbbell size={36} className="text-indigo-400" />
+        {/* ── Right: Sign-up promo / Academia registration ── */}
+        <div className="bg-slate-900/50 border-l border-slate-700/50 p-8 flex flex-col gap-4">
+          {/* Tab switcher */}
+          <div className="flex gap-1 bg-slate-800 rounded-xl p-1">
+            <button
+              type="button"
+              onClick={() => setRightTab('signup')}
+              className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                rightTab === 'signup'
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              Personal / Aluno
+            </button>
+            <button
+              type="button"
+              onClick={() => setRightTab('academia')}
+              className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 ${
+                rightTab === 'academia'
+                  ? 'bg-violet-600 text-white'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Building2 size={12} />
+              Academia
+            </button>
           </div>
 
-          <div className="text-center">
-            <h3 className="text-lg font-bold text-white">Ainda não tem uma conta?</h3>
-            <p className="text-slate-400 text-sm mt-1">Crie sua conta e comece agora mesmo.</p>
-          </div>
+          {/* Personal/Aluno promo */}
+          {rightTab === 'signup' && (
+            <div className="flex flex-col items-center justify-center gap-6 flex-1">
+              <div className="bg-indigo-600/20 border border-indigo-500/30 p-5 rounded-2xl">
+                <Dumbbell size={36} className="text-indigo-400" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-white">Ainda não tem uma conta?</h3>
+                <p className="text-slate-400 text-sm mt-1">Crie sua conta e comece agora mesmo.</p>
+              </div>
+              <button
+                type="button"
+                className="w-full flex items-center justify-center gap-2 border border-indigo-500 hover:bg-indigo-500/10 text-indigo-300 hover:text-indigo-200 rounded-xl py-2.5 text-sm font-semibold transition"
+              >
+                <UserPlus size={15} />
+                Criar conta
+              </button>
+              <ul className="w-full space-y-3">
+                {FEATURES.map(({ icon: Icon, title, description }) => (
+                  <li key={title} className="flex items-start gap-3">
+                    <div className="mt-0.5 flex-shrink-0 bg-indigo-600/20 border border-indigo-500/30 rounded-lg p-1.5">
+                      <Icon size={14} className="text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">{title}</p>
+                      <p className="text-xs text-slate-400">{description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-          <button
-            type="button"
-            className="w-full flex items-center justify-center gap-2 border border-indigo-500 hover:bg-indigo-500/10 text-indigo-300 hover:text-indigo-200 rounded-xl py-2.5 text-sm font-semibold transition"
-          >
-            <UserPlus size={15} />
-            Criar conta
-          </button>
-
-          {/* Feature list */}
-          <ul className="w-full space-y-3 mt-2">
-            {FEATURES.map(({ icon: Icon, title, description }) => (
-              <li key={title} className="flex items-start gap-3">
-                <div className="mt-0.5 flex-shrink-0 bg-indigo-600/20 border border-indigo-500/30 rounded-lg p-1.5">
-                  <Icon size={14} className="text-indigo-400" />
+          {/* Academia registration */}
+          {rightTab === 'academia' && (
+            <div className="flex flex-col flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="bg-violet-600/20 border border-violet-500/30 p-2 rounded-xl">
+                  <Building2 size={18} className="text-violet-400" />
                 </div>
+                <h3 className="text-base font-bold text-white">Cadastrar academia</h3>
+              </div>
+              <p className="text-slate-400 text-xs mb-4">Registre sua academia e alcance novos alunos.</p>
+
+              <form onSubmit={handleGymRegister} className="flex flex-col gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-white">{title}</p>
-                  <p className="text-xs text-slate-400">{description}</p>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Nome da academia *</label>
+                  <div className="relative">
+                    <Building2 size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      required
+                      value={gymName}
+                      onChange={(e) => setGymName(e.target.value)}
+                      placeholder="Academia Força Total"
+                      className="w-full bg-slate-900/60 border border-slate-600 text-white placeholder:text-slate-500 rounded-xl pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    />
+                  </div>
                 </div>
-              </li>
-            ))}
-          </ul>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">E-mail *</label>
+                  <div className="relative">
+                    <Mail size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      type="email"
+                      required
+                      value={gymEmail}
+                      onChange={(e) => setGymEmail(e.target.value)}
+                      placeholder="contato@academia.com"
+                      className="w-full bg-slate-900/60 border border-slate-600 text-white placeholder:text-slate-500 rounded-xl pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">Senha *</label>
+                    <div className="relative">
+                      <Lock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type={showGymPassword ? 'text' : 'password'}
+                        required
+                        value={gymPassword}
+                        onChange={(e) => setGymPassword(e.target.value)}
+                        placeholder="••••••"
+                        className="w-full bg-slate-900/60 border border-slate-600 text-white placeholder:text-slate-500 rounded-xl pl-8 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      />
+                      <button type="button" onClick={() => setShowGymPassword((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200">
+                        {showGymPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">Confirmar *</label>
+                    <div className="relative">
+                      <Lock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type={showGymPassword ? 'text' : 'password'}
+                        required
+                        value={gymPasswordConfirm}
+                        onChange={(e) => setGymPasswordConfirm(e.target.value)}
+                        placeholder="••••••"
+                        className="w-full bg-slate-900/60 border border-slate-600 text-white placeholder:text-slate-500 rounded-xl pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">Cidade</label>
+                    <div className="relative">
+                      <MapPin size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        value={gymCity}
+                        onChange={(e) => setGymCity(e.target.value)}
+                        placeholder="São Paulo"
+                        className="w-full bg-slate-900/60 border border-slate-600 text-white placeholder:text-slate-500 rounded-xl pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-300 mb-1">Estado</label>
+                    <input
+                      value={gymState}
+                      onChange={(e) => setGymState(e.target.value)}
+                      placeholder="SP"
+                      maxLength={2}
+                      className="w-full bg-slate-900/60 border border-slate-600 text-white placeholder:text-slate-500 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                    />
+                  </div>
+                </div>
+
+                {gymRegError && (
+                  <p className="text-red-400 text-xs bg-red-900/30 border border-red-700/50 rounded-xl px-3 py-2">
+                    {gymRegError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={gymRegLoading}
+                  className="bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-semibold rounded-xl py-2.5 text-sm transition-colors mt-1"
+                >
+                  {gymRegLoading ? 'Cadastrando…' : 'Cadastrar academia'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
 
@@ -230,6 +422,10 @@ export default function LoginPage() {
             <p>Personal → carlos@personal.com</p>
             <p>Aluno → ana@aluno.com</p>
             <p>Aluno → bruno@aluno.com</p>
+            <p className="mt-2 font-semibold text-violet-400">Academias:</p>
+            <p>Academia Força Total → forca@academia.com</p>
+            <p>FitLife Club → fitlife@academia.com</p>
+            <p>Power House → power@academia.com</p>
           </div>
         )}
       </div>

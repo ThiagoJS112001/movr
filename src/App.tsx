@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Layouts
 import PersonalLayout from './components/layout/PersonalLayout';
 import AlunoLayout from './components/layout/AlunoLayout';
+import AcademiaLayout from './components/layout/AcademiaLayout';
 
 // Personal pages
 import PersonalDashboard from './pages/personal/PersonalDashboard';
@@ -31,16 +32,24 @@ import AlunoChatPage from './pages/aluno/AlunoChatPage';
 import AlunoDietaPage from './pages/aluno/AlunoDietaPage';
 import AlunoProgressoPage from './pages/aluno/AlunoProgressoPage';
 import AcessoBloqueadoPage from './pages/aluno/AcessoBloqueadoPage';
+import AlunoGruposPage from './pages/aluno/AlunoGruposPage';
+import AlunoGrupoChatPage from './pages/aluno/AlunoGrupoChatPage';
+import AlunoAcademiasPage from './pages/aluno/AlunoAcademiasPage';
+
+// Academia pages
+import AcademiaDashboard from './pages/academia/AcademiaDashboard';
+import AcademiaPerfilPage from './pages/academia/AcademiaPerfilPage';
+import AcademiaGruposPage from './pages/academia/AcademiaGruposPage';
 
 function RootRedirect() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  return (
-    <Navigate
-      to={user.role === 'personal' ? '/personal/dashboard' : '/aluno/dashboard'}
-      replace
-    />
-  );
+  const roleMap: Record<string, string> = {
+    personal: '/personal/dashboard',
+    academia: '/academia/dashboard',
+    aluno: '/aluno/dashboard',
+  };
+  return <Navigate to={roleMap[user.role] ?? '/aluno/dashboard'} replace />;
 }
 
 export default function App() {
@@ -76,6 +85,18 @@ export default function App() {
             <Route path="/aluno/dieta" element={<AlunoDietaPage />} />
             <Route path="/aluno/progresso" element={<AlunoProgressoPage />} />
             <Route path="/aluno/chat" element={<AlunoChatPage />} />
+            <Route path="/aluno/grupos" element={<AlunoGruposPage />} />
+            <Route path="/aluno/grupos/:id" element={<AlunoGrupoChatPage />} />
+            <Route path="/aluno/academias" element={<AlunoAcademiasPage />} />
+          </Route>
+        </Route>
+
+        {/* Academia routes */}
+        <Route element={<ProtectedRoute requiredRole="academia" />}>
+          <Route element={<AcademiaLayout />}>
+            <Route path="/academia/dashboard" element={<AcademiaDashboard />} />
+            <Route path="/academia/perfil" element={<AcademiaPerfilPage />} />
+            <Route path="/academia/grupos" element={<AcademiaGruposPage />} />
           </Route>
         </Route>
 

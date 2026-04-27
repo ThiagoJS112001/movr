@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { Workout, WorkoutAssignment, WorkoutLog, Message, User, WorkoutExercise, Diet, DietAssignment, Meal, FoodItem, Exercise, WeeklyDay, WeeklyPlan, WeeklyPlanArchive, WorkoutSession } from '../types';
+import type { Workout, WorkoutAssignment, WorkoutLog, Message, User, WorkoutExercise, Diet, DietAssignment, Meal, FoodItem, Exercise, WeeklyDay, WeeklyPlan, WeeklyPlanArchive, WorkoutSession, Gym, GymRating, FriendRequest, StudentGroup, GroupMessage } from '../types';
 import {
   MOCK_WORKOUTS,
   MOCK_ASSIGNMENTS,
@@ -10,8 +10,13 @@ import {
   MOCK_DIETS,
   MOCK_DIET_ASSIGNMENTS,
   MOCK_EXERCISES,
+  MOCK_GYMS,
+  MOCK_GYM_RATINGS,
+  MOCK_FRIEND_REQUESTS,
+  MOCK_STUDENT_GROUPS,
+  MOCK_GROUP_MESSAGES,
 } from '../data/mockData';
-import { LS_DYNAMIC_USERS_KEY, LS_DYNAMIC_PASSWORDS_KEY } from '../lib/constants';
+import { LS_DYNAMIC_USERS_KEY, LS_DYNAMIC_PASSWORDS_KEY, LS_GYMS_KEY } from '../lib/constants';
 
 interface AppContextType {
   // Data
@@ -87,6 +92,33 @@ interface AppContextType {
   updateFoodInMeal: (dietId: string, mealId: string, foodId: string, data: Partial<FoodItem>) => void;
   assignDiet: (a: Omit<DietAssignment, 'id' | 'assignedAt'>) => void;
   removeDietAssignment: (id: string) => void;
+
+  // Gyms
+  gyms: Gym[];
+  registerAcademia: (name: string, email: string, password: string, city?: string, state?: string) => User;
+  updateGym: (id: string, data: Partial<Gym>) => void;
+  getGymById: (id: string) => Gym | undefined;
+
+  // Gym Ratings
+  gymRatings: GymRating[];
+  addGymRating: (r: Omit<GymRating, 'id' | 'createdAt'>) => void;
+  getGymAvgRating: (gymId: string) => number;
+
+  // Friend Requests
+  friendRequests: FriendRequest[];
+  sendFriendRequest: (fromId: string, fromName: string, toId: string, toName: string) => void;
+  respondFriendRequest: (id: string, status: 'accepted' | 'rejected') => void;
+  getFriends: (userId: string) => string[];
+
+  // Student Groups
+  studentGroups: StudentGroup[];
+  createGroup: (name: string, createdBy: string, memberIds: string[]) => StudentGroup;
+  getUserGroups: (userId: string) => StudentGroup[];
+
+  // Group Messages
+  groupMessages: GroupMessage[];
+  sendGroupMessage: (msg: Omit<GroupMessage, 'id' | 'createdAt'>) => void;
+  getGroupMessages: (groupId: string) => GroupMessage[];
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -105,8 +137,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [workoutSessions, setWorkoutSessions] = useState<WorkoutSession[]>([]);
   const [dynamicStudents, setDynamicStudents] = useState<User[]>(() => {
     const stored = localStorage.getItem(LS_DYNAMIC_USERS_KEY);
-    return stored ? (JSON.parse(stored) as User[]) : [];
+    return stored ? (JSON.parse(stored) as User[]).filter((u) => u.role === 'aluno') : [];
   });
+
+  // ── Gym / Social state ────────────────────────────────────────────────────────
+  const [gyms, setGyms] = useState<Gym[]>(() => {
+    const dynamic: Gym[] = JSON.parse(localStorage.getItem(LS_GYMS_KEY) ?? '[]');
+    return [...MOCK_GYMS, ...dynamic];
+  });
+  const [gymRatings, setGymRatings] = useState<GymRating[]>(MOCK_GYM_RATINGS);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>(MOCK_FRIEND_REQUESTS);
+  const [studentGroups, setStudentGroups] = useState<StudentGroup[]>(MOCK_STUDENT_GROUPS);
+  const [groupMessages, setGroupMessages] = useState<GroupMessage[]>(MOCK_GROUP_MESSAGES);
 
   const students = [
     ...MOCK_USERS.filter((u) => u.role === 'aluno'),
@@ -396,6 +438,99 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setDietAssignments((prev) => prev.filter((a) => a.id !== id));
   }
 
+  // ── Academia Registration ─────────────────────────────────────────────────────
+  function registerAcademia(name: string, email: string, password: string, city?: string, state?: string): User {
+    const id = uuidv4();
+    const normalizedEmail = email.toLowerCase().trim();
+    const newUser: User = { id, name: name.trim(), email: normalizedEmail, role: 'academia' };
+
+    const allUsers: User[] = JSON.parse(localStorage.getItem(LS_DYNAMIC_USERS_KEY) ?? '[]');
+    localStorage.setItem(LS_DYNAMIC_USERS_KEY, JSON.stringify([...allUsers, newUser]));
+
+    const passwords: Record<string, string> = JSON.parse(localStorage.getItem(LS_DYNAMIC_PASSWORDS_KEY) ?? '{}');
+    passwords[normalizedEmail] = password;
+    localStorage.setItem(LS_DYNAMIC_PASSWORDS_KEY, JSON.stringify(passwords));
+
+    const newGym: Gym = {
+      id, name: name.trim(), email: normalizedEmail,
+      city, state, hasPersonal: false, hasNutrition: false, amenities: [], photos: [],
+    };
+    const storedGyms: Gym[] = JSON.parse(localStorage.getItem(LS_GYMS_KEY) ?? '[]');
+    localStorage.setItem(LS_GYMS_KEY, JSON.stringify([...storedGyms, newGym]));
+    setGyms((prev) => [...prev, newGym]);
+
+    return newUser;
+  }
+
+  function updateGym(id: string, data: Partial<Gym>) {
+    setGyms((prev) => prev.map((g) => (g.id === id ? { ...g, ...data } : g)));
+    const stored: Gym[] = JSON.parse(localStorage.getItem(LS_GYMS_KEY) ?? '[]');
+    const idx = stored.findIndex((g) => g.id === id);
+    if (idx >= 0) {
+      stored[idx] = { ...stored[idx], ...data };
+      localStorage.setItem(LS_GYMS_KEY, JSON.stringify(stored));
+    }
+  }
+
+  function getGymById(id: string): Gym | undefined {
+    return gyms.find((g) => g.id === id);
+  }
+
+  // ── Gym Ratings ───────────────────────────────────────────────────────────────
+  function addGymRating(r: Omit<GymRating, 'id' | 'createdAt'>) {
+    const existing = gymRatings.find((x) => x.gymId === r.gymId && x.userId === r.userId);
+    if (existing) {
+      setGymRatings((prev) => prev.map((x) => (x.id === existing.id ? { ...x, ...r, createdAt: new Date().toISOString() } : x)));
+    } else {
+      setGymRatings((prev) => [...prev, { ...r, id: uuidv4(), createdAt: new Date().toISOString() }]);
+    }
+  }
+
+  function getGymAvgRating(gymId: string): number {
+    const ratings = gymRatings.filter((r) => r.gymId === gymId);
+    if (ratings.length === 0) return 0;
+    return ratings.reduce((s, r) => s + r.rating, 0) / ratings.length;
+  }
+
+  // ── Friend Requests ───────────────────────────────────────────────────────────
+  function sendFriendRequest(fromId: string, fromName: string, toId: string, toName: string) {
+    const alreadyExists = friendRequests.find(
+      (r) => ((r.fromId === fromId && r.toId === toId) || (r.fromId === toId && r.toId === fromId)) && r.status === 'pending'
+    );
+    if (alreadyExists) return;
+    setFriendRequests((prev) => [...prev, { id: uuidv4(), fromId, fromName, toId, toName, status: 'pending', createdAt: new Date().toISOString() }]);
+  }
+
+  function respondFriendRequest(id: string, status: 'accepted' | 'rejected') {
+    setFriendRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+  }
+
+  function getFriends(userId: string): string[] {
+    return friendRequests
+      .filter((r) => r.status === 'accepted' && (r.fromId === userId || r.toId === userId))
+      .map((r) => (r.fromId === userId ? r.toId : r.fromId));
+  }
+
+  // ── Student Groups ─────────────────────────────────────────────────────────────
+  function createGroup(name: string, createdBy: string, memberIds: string[]): StudentGroup {
+    const group: StudentGroup = { id: uuidv4(), name, memberIds, createdBy, createdAt: new Date().toISOString() };
+    setStudentGroups((prev) => [...prev, group]);
+    return group;
+  }
+
+  function getUserGroups(userId: string): StudentGroup[] {
+    return studentGroups.filter((g) => g.memberIds.includes(userId));
+  }
+
+  // ── Group Messages ─────────────────────────────────────────────────────────────
+  function sendGroupMessage(msg: Omit<GroupMessage, 'id' | 'createdAt'>) {
+    setGroupMessages((prev) => [...prev, { ...msg, id: uuidv4(), createdAt: new Date().toISOString() }]);
+  }
+
+  function getGroupMessages(groupId: string): GroupMessage[] {
+    return groupMessages.filter((m) => m.groupId === groupId).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  }
+
   return (
     <AppContext.Provider
       value={{
@@ -447,6 +582,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         blockStudent,
         unblockStudent,
         isStudentBlocked,
+        // Gyms
+        gyms,
+        registerAcademia,
+        updateGym,
+        getGymById,
+        // Gym Ratings
+        gymRatings,
+        addGymRating,
+        getGymAvgRating,
+        // Friend Requests
+        friendRequests,
+        sendFriendRequest,
+        respondFriendRequest,
+        getFriends,
+        // Student Groups
+        studentGroups,
+        createGroup,
+        getUserGroups,
+        // Group Messages
+        groupMessages,
+        sendGroupMessage,
+        getGroupMessages,
       }}
     >
       {children}

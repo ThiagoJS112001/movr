@@ -10,6 +10,8 @@ import {
   Salad,
   TrendingUp,
   Settings,
+  Users,
+  Building2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,6 +25,8 @@ const ALL_NAV_ITEMS = [
   { to: '/aluno/dieta', label: 'Minha Dieta', icon: Salad },
   { to: '/aluno/historico', label: 'Histórico', icon: ClipboardList },
   { to: '/aluno/progresso', label: 'Progresso', icon: TrendingUp },
+  { to: '/aluno/grupos', label: 'Grupos', icon: Users },
+  { to: '/aluno/academias', label: 'Academias', icon: Building2 },
   { to: '/aluno/chat', label: 'Chat', icon: MessageCircle },
 ];
 

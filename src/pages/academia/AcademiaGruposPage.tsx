@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Users, Search, Send, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
 
 export default function AcademiaGruposPage() {
   const { user } = useAuth();
-  const { studentGroups, students, sendGroupMessage } = useApp();
+  const studentGroups: never[] = [];
+  const students: never[] = [];
+  function sendGroupMessage(_data: unknown) { return; }
 
   const [search, setSearch] = useState('');
   const [offerModal, setOfferModal] = useState<{ groupId: string; groupName: string } | null>(null);

@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../contexts/AppContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useExercises } from '../hooks/useExercises';
+import { useWeeklyPlan, useSetWeeklyPlan, useArchiveWeeklyPlan } from '../hooks/useWeeklyPlans';
 import { toast } from 'sonner';
 import {
   CalendarDays, X, Check, Plus, Archive, History,
@@ -54,10 +55,13 @@ interface Props {
 
 export default function WeeklyPlanModal({ studentId, studentName, onClose }: Props) {
   const { user } = useAuth();
-  const { exercises, getWeeklyPlan, setWeeklyPlan, archiveWeeklyPlan } = useApp();
+  const { data: exercises = [] } = useExercises();
+  const { data: existingPlan } = useWeeklyPlan(studentId);
+  const setWeeklyPlanMutation = useSetWeeklyPlan();
+  const archiveMutation = useArchiveWeeklyPlan();
   const navigate = useNavigate();
 
-  const existing = getWeeklyPlan(studentId);
+  const existing = existingPlan;
   const [planDays,             setPlanDays]             = useState<WeeklyDay[]>(
     existing ? existing.days.map((d) => ({ ...d })) : makeEmptyDays(),
   );
@@ -122,7 +126,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
 
   function handleSavePlan() {
     if (!user) return;
-    setWeeklyPlan(studentId, user.id, planDays);
+    setWeeklyPlanMutation.mutate({ studentId, days: planDays });
     onClose();
     toast.success('Plano semanal salvo!');
   }
@@ -146,7 +150,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
             <div className="flex flex-col gap-2 w-full">
               <button
                 onClick={() => {
-                  if (user) archiveWeeklyPlan(studentId, user.id, studentName);
+                  archiveMutation.mutate({ studentId, studentName, days: planDays });
                   resetPlanDays();
                   toast.success('Plano arquivado no histórico!');
                 }}

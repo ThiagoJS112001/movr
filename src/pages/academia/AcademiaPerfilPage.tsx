@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Building2, Save, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
 import type { GymHours } from '../../types';
 
 const DAYS: { key: keyof GymHours; label: string }[] = [
@@ -22,7 +21,8 @@ const AMENITY_OPTIONS = [
 
 export default function AcademiaPerfilPage() {
   const { user } = useAuth();
-  const { getGymById, updateGym } = useApp();
+  function getGymById(_id: string) { return undefined; }
+  function updateGym(_id: string, _data: unknown) { toast.error('Perfil da academia ainda não disponível.'); }
 
   const gym = user ? getGymById(user.id) : undefined;
 

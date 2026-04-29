@@ -1,57 +1,82 @@
 import { useState, useMemo, useRef } from 'react';
 import {
-  X, Plus, Trash2, GripVertical, Pencil, Dumbbell, Check,
+  X, Search, SlidersHorizontal, Plus, Trash2, GripVertical,
+  Dumbbell, Pencil, Check, Sparkles,
 } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
-import { useApp } from '../contexts/AppContext';
+import { useUpdateWorkout, useUpdateAssignment } from '../hooks/useWorkouts';
 import { toast } from 'sonner';
-import type { Workout, Exercise, WorkoutExercise } from '../types';
+import type { Workout, Exercise, WorkoutExercise, WorkoutAssignment } from '../types';
 
-const MUSCLE_TAG: Record<string, string> = {
-  'Peito':       'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  'Costas':      'bg-teal-500/20 text-teal-300 border-teal-500/30',
-  'Pernas':      'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  'Glúteos':     'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  'Ombros':      'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  'Bíceps':      'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-  'Tríceps':     'bg-pink-500/20 text-pink-300 border-pink-500/30',
-  'Abdômen':     'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  'Panturrilha': 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+const DAYS = [
+  { key: 'segunda', label: 'Seg' },
+  { key: 'terca',   label: 'Ter' },
+  { key: 'quarta',  label: 'Qua' },
+  { key: 'quinta',  label: 'Qui' },
+  { key: 'sexta',   label: 'Sex' },
+  { key: 'sabado',  label: 'Sáb' },
+  { key: 'domingo', label: 'Dom' },
+] as const;
+
+const MUSCLE_FILTERS = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Abdômen'] as const;
+
+const MUSCLE_MAP: Record<string, string[]> = {
+  Peito:   ['Peito'],
+  Costas:  ['Costas'],
+  Pernas:  ['Pernas', 'Glúteos', 'Panturrilha'],
+  Ombros:  ['Ombros'],
+  'Braços':  ['Bíceps', 'Tríceps'],
+  'Abdômen': ['Abdômen'],
 };
 
-const INPUT = 'w-full bg-slate-700 border border-slate-600 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
-const LABEL = 'block text-sm font-medium text-slate-300 mb-1.5';
+function estimateDuration(count: number): number {
+  return Math.max(15, count * 10);
+}
+
+function getSummaryFocus(exList: WorkoutExercise[], exercises: Exercise[]): string {
+  const groups: Record<string, number> = {};
+  for (const we of exList) {
+    const ex = exercises.find((e) => e.id === we.exerciseId);
+    if (ex?.muscleGroup) groups[ex.muscleGroup] = (groups[ex.muscleGroup] ?? 0) + 1;
+  }
+  const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
+  if (sorted.length === 0) return 'Sem foco definido.';
+  return `Treino com foco em ${sorted[0][0].toLowerCase()}.`;
+}
 
 interface Props {
   workout: Workout;
   exercises: Exercise[];
+  assignment?: WorkoutAssignment;
   onClose: () => void;
 }
 
-export default function WorkoutEditModal({ workout, exercises, onClose }: Props) {
-  const { updateWorkout } = useApp();
+export default function WorkoutEditModal({ workout, exercises, assignment, onClose }: Props) {
+  const updateWorkoutMutation = useUpdateWorkout(workout.id);
+  const updateAssignmentMutation = useUpdateAssignment();
 
-  // ── Form state ──────────────────────────────────────────────────────────────
   const [name, setName] = useState(workout.name);
-  const [description, setDescription] = useState(workout.description ?? '');
-  const [duration, setDuration] = useState(String(workout.durationMinutes ?? ''));
-  const [level, setLevel] = useState<string>(workout.level ?? 'intermediario');
-  const [status, setStatus] = useState<'ativo' | 'rascunho'>(workout.status ?? 'ativo');
+  const [selectedDay, setSelectedDay] = useState<string>(assignment?.scheduledDays?.[0] ?? '');
+  const [search, setSearch] = useState('');
+  const [muscleFilter, setMuscleFilter] = useState('Todos');
   const [localExercises, setLocalExercises] = useState<WorkoutExercise[]>([...workout.exercises]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editSets, setEditSets] = useState('');
+  const [editReps, setEditReps] = useState('');
+  const [editWeight, setEditWeight] = useState('');
+  const [editRest, setEditRest] = useState('');
 
-  // ── Drag-and-drop
   const dragIndexRef = useRef<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  function handleDragStart(index: number) {
-    dragIndexRef.current = index;
+  function toggleDay(key: string) {
+    setSelectedDay((prev) => (prev === key ? '' : key));
   }
 
+  function handleDragStart(index: number) { dragIndexRef.current = index; }
   function handleDragOver(e: React.DragEvent, index: number) {
     e.preventDefault();
     setDragOverIndex(index);
   }
-
   function handleDrop(index: number) {
     const from = dragIndexRef.current;
     if (from === null || from === index) { setDragOverIndex(null); return; }
@@ -62,89 +87,61 @@ export default function WorkoutEditModal({ workout, exercises, onClose }: Props)
     dragIndexRef.current = null;
     setDragOverIndex(null);
   }
+  function handleDragEnd() { dragIndexRef.current = null; setDragOverIndex(null); }
 
-  function handleDragEnd() {
-    dragIndexRef.current = null;
-    setDragOverIndex(null);
-  }
-
-  // ── Add exercise sub-form ───────────────────────────────────────────────────
-  const [showAdd, setShowAdd] = useState(false);
-  const [addExId, setAddExId] = useState('');
-  const [addSets, setAddSets] = useState('3');
-  const [addReps, setAddReps] = useState('12');
-  const [addWeight, setAddWeight] = useState('');
-  const [addRest, setAddRest] = useState('60');
-
-  // ── Inline edit ─────────────────────────────────────────────────────────────
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [eSets, setESets] = useState('');
-  const [eReps, setEReps] = useState('');
-  const [eWeight, setEWeight] = useState('');
-  const [eRest, setERest] = useState('');
-
-  // ── Derived ─────────────────────────────────────────────────────────────────
-  const usedExerciseIds = useMemo(
-    () => new Set(localExercises.map((we) => we.exerciseId)),
+  const selectedIds = useMemo(
+    () => new Set(localExercises.map((e) => e.exerciseId)),
     [localExercises],
   );
 
-  const availableExercises = useMemo(
-    () => exercises.filter((ex) => !usedExerciseIds.has(ex.id)),
-    [exercises, usedExerciseIds],
-  );
+  const filteredExercises = useMemo(() => {
+    const q = search.toLowerCase();
+    return exercises.filter((ex) => {
+      const matchesSearch = ex.name.toLowerCase().includes(q) || ex.muscleGroup.toLowerCase().includes(q);
+      const matchesMuscle =
+        muscleFilter === 'Todos' ||
+        (MUSCLE_MAP[muscleFilter]?.includes(ex.muscleGroup) ?? ex.muscleGroup === muscleFilter);
+      return matchesSearch && matchesMuscle;
+    });
+  }, [exercises, search, muscleFilter]);
 
-  const muscleGroups = useMemo(
-    () =>
-      [...new Set(
-        localExercises
-          .map((we) => exercises.find((e) => e.id === we.exerciseId)?.muscleGroup)
-          .filter(Boolean) as string[],
-      )],
-    [localExercises, exercises],
-  );
-
-  // ── Handlers ────────────────────────────────────────────────────────────────
-  function handleAddExercise() {
-    if (!addExId) return;
-    const exData = exercises.find((e) => e.id === addExId);
-    const newWE: WorkoutExercise = {
-      id: uuidv4(),
-      exerciseId: addExId,
-      exerciseName: exData?.name ?? '',
-      sets: Number(addSets) || 3,
-      reps: addReps || '12',
-      weight: addWeight || undefined,
-      restSeconds: Number(addRest) || 60,
-      imageUrl: exData?.imageUrl,
-    };
-    setLocalExercises((prev) => [...prev, newWE]);
-    setAddExId(''); setAddSets('3'); setAddReps('12'); setAddWeight(''); setAddRest('60');
-    setShowAdd(false);
+  function addExercise(ex: Exercise) {
+    setLocalExercises((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        exerciseId: ex.id,
+        exerciseName: ex.name,
+        sets: 3,
+        reps: '12',
+        restSeconds: 60,
+        imageUrl: ex.imageUrl,
+      },
+    ]);
   }
 
-  function handleDeleteExercise(id: string) {
+  function removeExercise(id: string) {
     setLocalExercises((prev) => prev.filter((e) => e.id !== id));
   }
 
-  function startEdit(we: WorkoutExercise) {
+  function startInlineEdit(we: WorkoutExercise) {
     setEditingId(we.id);
-    setESets(String(we.sets));
-    setEReps(we.reps);
-    setEWeight(we.weight ?? '');
-    setERest(String(we.restSeconds));
+    setEditSets(String(we.sets));
+    setEditReps(we.reps);
+    setEditWeight(we.weight ?? '');
+    setEditRest(String(we.restSeconds));
   }
 
-  function saveEdit(id: string) {
+  function saveInlineEdit(id: string) {
     setLocalExercises((prev) =>
       prev.map((e) =>
         e.id === id
           ? {
               ...e,
-              sets: Number(eSets) || e.sets,
-              reps: eReps || e.reps,
-              weight: eWeight || undefined,
-              restSeconds: Number(eRest) || e.restSeconds,
+              sets: Number(editSets) || e.sets,
+              reps: editReps || e.reps,
+              weight: editWeight || undefined,
+              restSeconds: Number(editRest) || e.restSeconds,
             }
           : e,
       ),
@@ -152,347 +149,252 @@ export default function WorkoutEditModal({ workout, exercises, onClose }: Props)
     setEditingId(null);
   }
 
+  function clearAll() { setLocalExercises([]); }
+
   function handleSave() {
     if (!name.trim()) {
       toast.error('Nome do treino é obrigatório.');
       return;
     }
-    updateWorkout(workout.id, {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      durationMinutes: duration ? Number(duration) : undefined,
-      level: level as Workout['level'],
-      status,
-      exercises: localExercises,
+    updateWorkoutMutation.mutate({
+        name: name.trim(),
+        exercises: localExercises,
+        durationMinutes: estimateDuration(localExercises.length),
     });
+    if (assignment) {
+      updateAssignmentMutation.mutate({ id: assignment.id, data: { scheduledDays: selectedDay ? [selectedDay] : [] } });
+    }
     toast.success('Treino atualizado com sucesso!');
     onClose();
   }
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  const duration = estimateDuration(localExercises.length);
+  const summaryFocus = getSummaryFocus(localExercises, exercises);
+
   return (
     <div
       className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-slate-800 border border-slate-700/60 rounded-2xl w-full max-w-2xl flex flex-col max-h-[92vh]">
-
+      <div className="bg-slate-900 border border-slate-700/60 rounded-2xl w-full max-w-4xl flex flex-col max-h-[92vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-slate-700/60 shrink-0">
-          <div>
-            <h2 className="text-lg font-bold text-white">Editar treino</h2>
-            <p className="text-sm text-slate-400 mt-0.5">Altere as informações do treino.</p>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/60 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              <Dumbbell size={18} className="text-amber-400" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-white">Edição de treino</h2>
+              <p className="text-xs text-slate-400">Edite as informações e exercícios do treino.</p>
+            </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-          >
+          <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700 transition-colors">
             <X size={18} />
           </button>
         </div>
 
-        {/* Scrollable body */}
-        <div className="overflow-y-auto flex-1 px-7 py-6 space-y-5">
+        {/* Body */}
+        <div className="flex flex-1 min-h-0 overflow-hidden">
 
-          {/* Nome */}
-          <div>
-            <label className={LABEL}>Nome do treino</label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={100}
-              className={INPUT}
-              placeholder="Ex: Treino A – Peito e Tríceps"
-            />
-            <p className="text-xs text-slate-500 text-right mt-1">{name.length}/100</p>
-          </div>
+          {/* Left panel */}
+          <div className="flex-1 flex flex-col border-r border-slate-700/60 overflow-hidden">
+            <div className="px-5 pt-5 pb-4 space-y-4 shrink-0">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1.5">Nome do treino</label>
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={80}
+                    placeholder="Ex: Peito e Tríceps"
+                    className="w-full bg-slate-800 border border-slate-600 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1.5">Dia da semana</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DAYS.map(({ key, label }) => {
+                      const active = selectedDay === key;
+                      return (
+                        <button key={key} type="button" onClick={() => toggleDay(key)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-colors ${active ? 'bg-indigo-600 text-white' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}>
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
 
-          {/* Grupo muscular (derived) */}
-          <div>
-            <label className={LABEL}>Grupos musculares trabalhados</label>
-            <div className="flex flex-wrap gap-2 min-h-[42px] bg-slate-700 border border-slate-600 rounded-xl px-3 py-2.5 items-center">
-              {muscleGroups.length === 0 ? (
-                <span className="text-xs text-slate-500">Derivado automaticamente dos exercícios</span>
+              <div>
+                <p className="text-xs font-semibold text-slate-300 mb-2">Exercícios disponíveis</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                    <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar exercício..."
+                      className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
+                  </div>
+                  <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 text-xs font-medium transition-colors">
+                    <SlidersHorizontal size={13} /> Filtros
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {MUSCLE_FILTERS.map((f) => (
+                  <button key={f} type="button" onClick={() => setMuscleFilter(f)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${muscleFilter === f ? 'bg-indigo-600 text-white' : 'bg-slate-700/60 text-slate-400 hover:bg-slate-700 hover:text-slate-200'}`}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 pb-5">
+              {filteredExercises.length === 0 ? (
+                <div className="py-12 text-center text-slate-500">
+                  <Dumbbell size={24} className="mx-auto mb-2 opacity-40" />
+                  <p className="text-sm">Nenhum exercício encontrado.</p>
+                </div>
               ) : (
-                muscleGroups.map((g) => (
-                  <span
-                    key={g}
-                    className={`text-xs px-2.5 py-1 rounded-full border font-medium ${MUSCLE_TAG[g] ?? 'bg-slate-600/50 text-slate-300 border-slate-500/30'}`}
-                  >
-                    {g}
-                  </span>
-                ))
+                <div className="flex flex-col divide-y divide-slate-700/40">
+                  {filteredExercises.map((ex) => {
+                    const already = selectedIds.has(ex.id);
+                    return (
+                      <div key={ex.id} className="flex items-center gap-3 py-3 hover:bg-slate-800/40 rounded-xl px-2 -mx-2 transition-colors">
+                        {ex.imageUrl ? (
+                          <img src={ex.imageUrl} alt={ex.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-slate-700/60 flex items-center justify-center shrink-0">
+                            <Dumbbell size={16} className="text-slate-500" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white truncate">{ex.name}</p>
+                          <p className="text-xs text-slate-400 truncate">{ex.muscleGroup}</p>
+                        </div>
+                        <button onClick={() => !already && addExercise(ex)} disabled={already}
+                          className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${already ? 'bg-indigo-500/20 text-indigo-400 cursor-default' : 'bg-slate-700 text-slate-400 hover:bg-indigo-600 hover:text-white border border-slate-600'}`}
+                          title={already ? 'Já adicionado' : 'Adicionar'}>
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
 
-          {/* Duração + Nível + Status */}
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className={LABEL}>Duração média</label>
-              <div className="relative flex items-center">
-                <input
-                  type="number"
-                  min="1"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className={`${INPUT} pr-12`}
-                  placeholder="60"
-                />
-                <span className="absolute right-3 text-xs text-slate-400 pointer-events-none">min</span>
-              </div>
-            </div>
-            <div>
-              <label className={LABEL}>Nível</label>
-              <select value={level} onChange={(e) => setLevel(e.target.value)} className={INPUT}>
-                <option value="iniciante">Iniciante</option>
-                <option value="intermediario">Intermediário</option>
-                <option value="avancado">Avançado</option>
-              </select>
-            </div>
-            <div>
-              <label className={LABEL}>Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value as 'ativo' | 'rascunho')}
-                className={INPUT}
-              >
-                <option value="ativo">Ativo</option>
-                <option value="rascunho">Rascunho</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Observações */}
-          <div>
-            <label className={LABEL}>
-              Observações{' '}
-              <span className="text-slate-500 font-normal">(opcional)</span>
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              maxLength={300}
-              rows={3}
-              className={`${INPUT} resize-none`}
-              placeholder="Instruções ou observações sobre este treino..."
-            />
-            <p className="text-xs text-slate-500 text-right mt-1">{description.length}/300</p>
-          </div>
-
-          {/* ── Exercícios ─────────────────────────────────────────────────── */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white">Exercícios</span>
-                <span className="text-xs text-slate-500 bg-slate-700/60 px-2 py-0.5 rounded-full">
-                  {localExercises.length}
-                </span>
-                {localExercises.length > 1 && (
-                  <span className="text-xs text-slate-500">· arraste para reordenar</span>
-                )}
-              </div>
-              <button
-                onClick={() => { setShowAdd((v) => !v); setAddExId(''); }}
-                className="flex items-center gap-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition-colors"
-              >
-                <Plus size={13} />
-                Adicionar exercício
-              </button>
+          {/* Right panel */}
+          <div className="w-[340px] shrink-0 flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/60 shrink-0">
+              <p className="text-sm font-semibold text-white">
+                Exercícios <span className="text-slate-400 font-normal">({localExercises.length})</span>
+              </p>
+              {localExercises.length > 0 && (
+                <button onClick={clearAll} className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">
+                  Limpar tudo
+                </button>
+              )}
             </div>
 
-            {/* Add exercise form */}
-            {showAdd && (
-              <div className="bg-slate-700/40 border border-slate-600/50 rounded-xl p-4 mb-3 space-y-3">
-                <div>
-                  <label className="text-xs text-slate-400 mb-1.5 block">Exercício</label>
-                  <select
-                    value={addExId}
-                    onChange={(e) => setAddExId(e.target.value)}
-                    className={INPUT}
-                  >
-                    <option value="">Selecione o exercício</option>
-                    {availableExercises.length === 0 ? (
-                      <option disabled>Todos os exercícios já foram adicionados</option>
-                    ) : (
-                      availableExercises.map((ex) => (
-                        <option key={ex.id} value={ex.id}>
-                          {ex.name} – {ex.muscleGroup}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                  {availableExercises.length === 0 && (
-                    <p className="text-xs text-amber-400 mt-1.5">
-                      Todos os exercícios do catálogo já estão neste treino.
-                    </p>
-                  )}
+            <div className="flex-1 overflow-y-auto px-4 py-3">
+              {localExercises.length === 0 ? (
+                <div className="py-12 text-center text-slate-500">
+                  <Dumbbell size={24} className="mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">Nenhum exercício.</p>
+                  <p className="text-xs mt-1 text-slate-600">Clique no + para adicionar.</p>
                 </div>
-                <div className="grid grid-cols-4 gap-3">
-                  {[
-                    { label: 'Séries',       value: addSets,   setter: setAddSets,   type: 'number', placeholder: '3' },
-                    { label: 'Reps',          value: addReps,   setter: setAddReps,   type: 'text',   placeholder: '12' },
-                    { label: 'Carga',         value: addWeight, setter: setAddWeight, type: 'text',   placeholder: '—' },
-                    { label: 'Descanso (s)',  value: addRest,   setter: setAddRest,   type: 'number', placeholder: '60' },
-                  ].map(({ label, value, setter, type, placeholder }) => (
-                    <div key={label}>
-                      <label className="text-xs text-slate-400 mb-1 block">{label}</label>
-                      <input
-                        type={type}
-                        value={value}
-                        onChange={(e) => setter(e.target.value)}
-                        placeholder={placeholder}
-                        className="w-full bg-slate-700 border border-slate-600 rounded-lg px-2.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowAdd(false)}
-                    className="flex-1 text-sm text-slate-400 border border-slate-600 rounded-xl py-2 hover:bg-slate-700 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleAddExercise}
-                    disabled={!addExId}
-                    className="flex-1 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-2 disabled:opacity-40 transition-colors"
-                  >
-                    Adicionar
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Exercise list */}
-            {localExercises.length === 0 ? (
-              <div className="py-10 text-center border border-dashed border-slate-600 rounded-xl">
-                <Dumbbell size={24} className="mx-auto mb-2 text-slate-600" />
-                <p className="text-sm text-slate-500">Nenhum exercício adicionado.</p>
-              </div>
-            ) : (
-              <div className="border border-slate-700/60 rounded-xl overflow-hidden divide-y divide-slate-700/50">
-                {localExercises.map((we, i) => {
-                  const exData = exercises.find((e) => e.id === we.exerciseId);
-                  const isDragOver = dragOverIndex === i;
-                  return (
-                    <div
-                      key={we.id}
-                      draggable={editingId !== we.id}
-                      onDragStart={() => handleDragStart(i)}
-                      onDragOver={(e) => handleDragOver(e, i)}
-                      onDrop={() => handleDrop(i)}
-                      onDragEnd={handleDragEnd}
-                      className={`transition-colors ${isDragOver ? 'bg-indigo-500/10 border-l-2 border-indigo-500' : ''}`}
-                    >
-                      {editingId === we.id ? (
-                        /* Inline edit row */
-                        <div className="p-4 bg-slate-700/30">
-                          <p className="text-xs font-semibold text-slate-200 mb-3">{we.exerciseName}</p>
-                          <div className="grid grid-cols-4 gap-2 mb-3">
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {localExercises.map((we, i) => {
+                    const isDragOver = dragOverIndex === i;
+                    if (editingId === we.id) {
+                      return (
+                        <div key={we.id} className="p-3 bg-slate-700/40 rounded-xl space-y-2 border border-slate-600/50">
+                          <p className="text-xs font-semibold text-white">{we.exerciseName}</p>
+                          <div className="grid grid-cols-4 gap-2">
                             {[
-                              { label: 'Séries', value: eSets, setter: setESets, type: 'number' },
-                              { label: 'Reps', value: eReps, setter: setEReps, type: 'text' },
-                              { label: 'Carga', value: eWeight, setter: setEWeight, type: 'text' },
-                              { label: 'Descanso (s)', value: eRest, setter: setERest, type: 'number' },
+                              { label: 'Séries', value: editSets, setter: setEditSets, type: 'number' },
+                              { label: 'Reps', value: editReps, setter: setEditReps, type: 'text' },
+                              { label: 'Carga', value: editWeight, setter: setEditWeight, type: 'text' },
+                              { label: 'Desc. (s)', value: editRest, setter: setEditRest, type: 'number' },
                             ].map(({ label, value, setter, type }) => (
                               <div key={label}>
-                                <label className="text-xs text-slate-400 mb-1 block">{label}</label>
-                                <input
-                                  type={type}
-                                  value={value}
-                                  onChange={(e) => setter(e.target.value)}
-                                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-2.5 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                />
+                                <label className="text-[10px] text-slate-400 mb-0.5 block">{label}</label>
+                                <input type={type} value={value} onChange={(e) => setter(e.target.value)}
+                                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500" />
                               </div>
                             ))}
                           </div>
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="flex-1 text-xs text-slate-400 border border-slate-600 rounded-lg py-1.5 hover:bg-slate-700 transition-colors"
-                            >
+                            <button onClick={() => setEditingId(null)}
+                              className="flex-1 text-xs text-slate-400 border border-slate-600 rounded-lg py-1.5 hover:bg-slate-700 transition-colors">
                               Cancelar
                             </button>
-                            <button
-                              onClick={() => saveEdit(we.id)}
-                              className="flex-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-1.5 transition-colors flex items-center justify-center gap-1"
-                            >
-                              <Check size={12} />
-                              Salvar
+                            <button onClick={() => saveInlineEdit(we.id)}
+                              className="flex-1 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-1.5 flex items-center justify-center gap-1 transition-colors">
+                              <Check size={11} /> Salvar
                             </button>
                           </div>
                         </div>
-                      ) : (
-                        /* Normal row */
-                        <div className="flex items-center gap-3 px-4 py-3 hover:bg-slate-700/20 transition-colors">
-                          <GripVertical
-                            size={14}
-                            className="text-slate-600 hover:text-slate-400 shrink-0 cursor-grab active:cursor-grabbing"
-                          />
-                          <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-bold flex items-center justify-center shrink-0">
-                            {i + 1}
-                          </div>
-                          {we.imageUrl ? (
-                            <img
-                              src={we.imageUrl}
-                              alt={we.exerciseName}
-                              className="w-9 h-9 rounded-lg object-cover shrink-0"
-                            />
-                          ) : (
-                            <div className="w-9 h-9 rounded-lg bg-slate-700/80 flex items-center justify-center shrink-0">
-                              <Dumbbell size={14} className="text-slate-500" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-white font-medium truncate">{we.exerciseName}</p>
-                            <p className="text-xs text-slate-400">{exData?.muscleGroup ?? '—'}</p>
-                          </div>
-                          <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-                            {[`${we.sets}×${we.reps}`, we.weight ?? '—', `${we.restSeconds}s`].map((label) => (
-                              <span key={label} className="text-xs text-slate-400 bg-slate-700/60 px-2 py-0.5 rounded-md">
-                                {label}
-                              </span>
-                            ))}
-                          </div>
-                          <button
-                            onClick={() => startEdit(we)}
-                            className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors shrink-0"
-                            title="Editar"
-                          >
-                            <Pencil size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteExercise(we.id)}
-                            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
-                            title="Remover"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+                      );
+                    }
+                    return (
+                      <div key={we.id} draggable
+                        onDragStart={() => handleDragStart(i)} onDragOver={(e) => handleDragOver(e, i)}
+                        onDrop={() => handleDrop(i)} onDragEnd={handleDragEnd}
+                        className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-colors ${isDragOver ? 'bg-indigo-500/10 border border-indigo-500/40' : 'bg-slate-800 border border-slate-700/60'}`}>
+                        <GripVertical size={14} className="text-slate-600 hover:text-slate-400 shrink-0 cursor-grab active:cursor-grabbing" />
+                        <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-bold flex items-center justify-center shrink-0">
+                          {i + 1}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-white truncate">{we.exerciseName}</p>
+                          <p className="text-[10px] text-slate-500">{we.sets} séries · {we.reps} reps</p>
+                        </div>
+                        <button onClick={() => startInlineEdit(we)}
+                          className="p-1 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors shrink-0">
+                          <Pencil size={11} />
+                        </button>
+                        <button onClick={() => removeExercise(we.id)}
+                          className="p-1 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors shrink-0">
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {localExercises.length > 0 && (
+              <div className="mx-4 mb-3 shrink-0">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Sparkles size={13} className="text-amber-400" />
+                    <p className="text-xs font-semibold text-amber-300">Resumo</p>
+                  </div>
+                  <p className="text-xs text-slate-300">
+                    {localExercises.length} exercício{localExercises.length !== 1 ? 's' : ''} · ~{duration} min
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">{summaryFocus}</p>
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 px-7 py-5 border-t border-slate-700/60 shrink-0">
-          <button
-            onClick={onClose}
-            className="flex-1 border border-slate-600 text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-700 transition-colors"
-          >
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-700/60 shrink-0">
+          <button onClick={onClose}
+            className="px-5 py-2.5 rounded-xl border border-slate-600 text-slate-300 text-sm hover:bg-slate-700 transition-colors">
             Cancelar
           </button>
-          <button
-            onClick={handleSave}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
-          >
-            Salvar alterações
+          <button onClick={handleSave} disabled={!name.trim() || localExercises.length === 0}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold disabled:opacity-40 transition-colors">
+            <Check size={15} /> Salvar alterações
           </button>
         </div>
       </div>

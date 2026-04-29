@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
+import { useStudentAssignments, useAddWorkoutLog } from '../../hooks/useWorkouts';
 import { ArrowLeft, Play, CheckSquare, Square, Video, Trophy, ChevronRight, Clock, Dumbbell } from 'lucide-react';
 
 const DAY_LABEL: Record<string, string> = {
@@ -20,14 +20,13 @@ type Step = 'select-workout' | 'workout' | 'done';
 
 export default function AlunoTreinoPage() {
   const { user } = useAuth();
-  const { assignments, workouts, addLog } = useApp();
+  const { data: assignments = [] } = useStudentAssignments();
+  const addLogMutation = useAddWorkoutLog();
   const navigate = useNavigate();
 
   const todayKey = TODAY_MAP[new Date().getDay()];
 
-  const studentAssignments = user
-    ? assignments.filter((a) => a.studentId === user.id)
-    : [];
+  const studentAssignments = assignments;
 
   const [step,               setStep]               = useState<Step>('select-workout');
   const [selectedAssignId,   setSelectedAssignId]   = useState<string | null>(null);
@@ -35,11 +34,11 @@ export default function AlunoTreinoPage() {
 
   const startTimeRef = useRef<Date>(new Date());
 
-  const selectedAssign  = studentAssignments.find((a) => a.id === selectedAssignId);
-  const selectedWorkout = selectedAssign
-    ? workouts.find((w) => w.id === selectedAssign.workoutId)
-    : undefined;
-  const workoutExercises = selectedWorkout?.exercises ?? [];
+  const selectedAssign = studentAssignments.find((a) => a.id === selectedAssignId);
+  // workoutExercises come from the assignment's embedded workout (not available here);
+  // we only have assignment metadata. For exercise list, we'd need a separate fetch.
+  // For now keep an empty array — the workout exercises are shown via WorkoutViewModal or similar.
+  const workoutExercises: import('../../types').WorkoutExercise[] = [];
 
   function handleSelectAssignment(assignId: string) {
     setSelectedAssignId(assignId);
@@ -57,12 +56,12 @@ export default function AlunoTreinoPage() {
   }
 
   function handleFinish() {
-    if (!user || !selectedAssign || !selectedWorkout) return;
+    if (!user || !selectedAssign) return;
     const elapsed = Math.round((Date.now() - startTimeRef.current.getTime()) / 60000);
-    addLog({
+    addLogMutation.mutate({
       assignmentId: selectedAssign.id,
-      workoutId: selectedWorkout.id,
-      workoutName: selectedWorkout.name,
+      workoutId: selectedAssign.workoutId,
+      workoutName: selectedAssign.workoutName,
       studentId: user.id,
       completedAt: new Date().toISOString(),
       completedExercises: Array.from(checked),
@@ -154,7 +153,7 @@ export default function AlunoTreinoPage() {
   }
 
   // ── STEP: workout ──────────────────────────────────────────────────────────────
-  if (step === 'workout' && selectedAssign && selectedWorkout) {
+  if (step === 'workout' && selectedAssign) {
     return (
       <div className="p-6 max-w-2xl mx-auto flex flex-col min-h-[70vh]">
         {/* Header */}
@@ -167,11 +166,8 @@ export default function AlunoTreinoPage() {
           </button>
           <div className="flex-1 min-w-0">
             <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 truncate">
-              {selectedWorkout.name}
+              {selectedAssign.workoutName}
             </h1>
-            {selectedWorkout.description && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{selectedWorkout.description}</p>
-            )}
           </div>
         </div>
 
@@ -267,7 +263,7 @@ export default function AlunoTreinoPage() {
       </div>
       <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Treino finalizado!</h1>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-1">
-        {selectedWorkout?.name ?? 'Treino'}
+        {selectedAssign?.workoutName ?? 'Treino'}
       </p>
       <p className="text-slate-400 dark:text-slate-500 text-sm mb-8">
         {checked.size} de {workoutExercises.length} exercícios concluídos

@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useStudents } from '../../hooks/useStudents';
+import { useExercises } from '../../hooks/useExercises';
+import { usePlanArchives, useDeletePlanArchive } from '../../hooks/useWeeklyPlans';
 import { Archive, ChevronDown, ChevronUp, ArrowLeft, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { WeeklyPlanArchive } from '../../types';
@@ -20,7 +22,10 @@ function formatDate(iso: string) {
 
 export default function HistoricoPlanoPage() {
   const { user } = useAuth();
-  const { weeklyPlanArchives, exercises, students } = useApp();
+  const { data: weeklyPlanArchives = [] } = usePlanArchives();
+  const { data: exercises = [] } = useExercises();
+  const { data: students = [] } = useStudents();
+  const deleteArchiveMutation = useDeletePlanArchive();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 

@@ -1,7 +1,9 @@
 ﻿import { useState, useMemo } from 'react';
 import emailjs from '@emailjs/browser';
-import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useStudents, useCreateStudent, useBlockStudent } from '../../hooks/useStudents';
+import { useDiets, useDietAssignments, useAssignDiet, useRemoveDietAssignment } from '../../hooks/useDiets';
+import { usePersonalWorkoutLogs, useAssignments } from '../../hooks/useWorkouts';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
@@ -73,13 +75,15 @@ function getPaginationRange(current: number, total: number): (number | '...')[] 
 
 export default function AlunosPage() {
   const { user } = useAuth();
-  const {
-    students, addStudent,
-    getWeeklyPlan,
-    diets, dietAssignments, assignDiet, removeDietAssignment,
-    isStudentBlocked, blockStudent, unblockStudent,
-    logs, assignments,
-  } = useApp();
+  const { data: diets = [] } = useDiets();
+  const { data: dietAssignments = [] } = useDietAssignments();
+  const assignDietMutation = useAssignDiet();
+  const removeDietAssignmentMutation = useRemoveDietAssignment();
+  const { data: logs = [] } = usePersonalWorkoutLogs();
+  const { data: assignments = [] } = useAssignments();
+  const { data: students = [], isLoading: studentsLoading } = useStudents();
+  const { mutateAsync: createStudentMutation } = useCreateStudent();
+  const { mutate: toggleBlock } = useBlockStudent();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery]     = useState('');
@@ -107,21 +111,21 @@ export default function AlunosPage() {
   const myDiets = diets.filter((d) => d.personalId === user?.id);
 
   const totalStudents = students.length;
-  const blockedCount  = students.filter((s) => isStudentBlocked(s.id)).length;
+  const blockedCount  = students.filter((s) => s.isBlocked).length;
   const activeCount   = totalStudents - blockedCount;
 
   const filteredStudents = useMemo(() => {
     return students.filter((s) => {
       const q = searchQuery.toLowerCase();
       const matchesSearch = s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q);
-      const blocked = isStudentBlocked(s.id);
+      const blocked = s.isBlocked ?? false;
       const matchesStatus =
         statusFilter === 'all' ||
         (statusFilter === 'active'  && !blocked) ||
         (statusFilter === 'blocked' &&  blocked);
       return matchesSearch && matchesStatus;
     });
-  }, [students, searchQuery, statusFilter, isStudentBlocked]);
+  }, [students, searchQuery, statusFilter]);
 
   const totalPages        = Math.max(1, Math.ceil(filteredStudents.length / ITEMS_PER_PAGE));
   const safePage          = Math.min(currentPage, totalPages);
@@ -177,13 +181,15 @@ export default function AlunosPage() {
     const password = generatePassword();
     setCreatingStudent(true);
     try {
-      addStudent(newName.trim(), newEmail.trim(), password);
+      await createStudentMutation({ name: newName.trim(), email: newEmail.trim(), password });
       const emailSent = await sendWelcomeEmail(newEmail.trim(), newName.trim(), password);
       setCredentialsModal({ name: newName.trim(), email: newEmail.trim(), emailSent });
       setNewStudentModal(false);
       setNewName('');
       setNewEmail('');
       toast.success(`Aluno ${newName.trim()} cadastrado com sucesso!`);
+    } catch (err) {
+      toast.error((err as Error).message ?? 'Erro ao cadastrar aluno.');
     } finally {
       setCreatingStudent(false);
     }
@@ -193,7 +199,7 @@ export default function AlunosPage() {
     if (!selectedDietId || !dietModal || !user) return;
     const diet = myDiets.find((d) => d.id === selectedDietId);
     if (!diet) return;
-    assignDiet({ dietId: selectedDietId, dietName: diet.name, studentId: dietModal.studentId, personalId: user.id });
+    assignDietMutation.mutate({ dietId: selectedDietId, dietName: diet.name, studentId: dietModal.studentId, personalId: user.id });
     setDietModal(null);
     setSelectedDietId('');
   }
@@ -202,15 +208,8 @@ export default function AlunosPage() {
     setPlanModal({ studentId, studentName });
   }
 
-  function getPlanSummaryChips(studentId: string) {
-    const plan = getWeeklyPlan(studentId);
-    if (!plan) return null;
-    const withContent = plan.days.filter((d) => d.exerciseIds.length > 0 || d.label.trim());
-    if (withContent.length === 0) return null;
-    return withContent.map((d) => ({
-      short: DAYS_SHORT[d.dayOfWeek as DayKey] ?? d.dayOfWeek,
-      label: d.label.trim() || `${d.exerciseIds.length} ex.`,
-    }));
+  function getPlanSummaryChips(_studentId: string) {
+    return null; // TODO: migrate to useWeeklyPlan per student
   }
 
   return (
@@ -290,7 +289,7 @@ export default function AlunosPage() {
       {/* Student list */}
       <div className="flex flex-col gap-2">
         {paginatedStudents.map((student) => {
-          const blocked     = isStudentBlocked(student.id);
+          const blocked     = student.isBlocked ?? false;
           const avatarColor = blocked ? 'bg-red-500' : getAvatarColor(student.name);
           const lastLog     = getLastLog(student.id);
           const monthCount  = getMonthlyLogCount(student.id);
@@ -397,7 +396,7 @@ export default function AlunosPage() {
                         <div className="my-1 border-t border-slate-100 dark:border-slate-700/60" />
                         <button
                           onClick={() => {
-                            blocked ? unblockStudent(student.id) : setConfirmBlock({ id: student.id, name: student.name });
+                            blocked ? toggleBlock({ studentId: student.id, blocked: false }) : setConfirmBlock({ id: student.id, name: student.name });
                             setOpenMenuId(null);
                           }}
                           className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
@@ -598,7 +597,7 @@ export default function AlunosPage() {
             <p className="text-xs text-slate-400 dark:text-slate-500 mb-6">O aluno perderá o acesso ao app até ser desbloqueado.</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmBlock(null)} className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">Cancelar</button>
-              <button onClick={() => { blockStudent(confirmBlock.id); setConfirmBlock(null); }} className="flex-1 bg-red-500 text-white rounded-lg py-2 text-sm font-semibold hover:bg-red-600">Bloquear</button>
+              <button onClick={() => { toggleBlock({ studentId: confirmBlock.id, blocked: true }); setConfirmBlock(null); }} className="flex-1 bg-red-500 text-white rounded-lg py-2 text-sm font-semibold hover:bg-red-600">Bloquear</button>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useApp } from '../../contexts/AppContext';
+import { useExercises, useCreateExercise, useUpdateExercise, useDeleteExercise } from '../../hooks/useExercises';
 import { Plus, Trash2, Video, Edit2, Dumbbell, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Exercise } from '../../types';
@@ -29,7 +29,10 @@ function groupColor(group: string) {
 const EMPTY_FORM = { name: '', muscleGroup: '', videoUrl: '' };
 
 export default function ExerciciosPage() {
-  const { exercises, createExercise, updateExercise, deleteExercise } = useApp();
+  const { data: exercises = [], isLoading } = useExercises();
+  const createMutation = useCreateExercise();
+  const updateMutation = useUpdateExercise();
+  const deleteMutation = useDeleteExercise();
 
   const [modal, setModal]         = useState<'create' | { exercise: Exercise } | null>(null);
   const [form, setForm]           = useState(EMPTY_FORM);
@@ -54,14 +57,17 @@ export default function ExerciciosPage() {
   function handleSave() {
     if (!form.name.trim() || !form.muscleGroup.trim()) return;
     if (isEditing) {
-      updateExercise((modal as { exercise: Exercise }).exercise.id, {
-        name: form.name.trim(),
-        muscleGroup: form.muscleGroup.trim(),
-        videoUrl: form.videoUrl.trim() || undefined,
+      updateMutation.mutate({
+        id: (modal as { exercise: Exercise }).exercise.id,
+        data: {
+          name: form.name.trim(),
+          muscleGroup: form.muscleGroup.trim(),
+          videoUrl: form.videoUrl.trim() || undefined,
+        },
       });
       toast.success('Exercício atualizado!');
     } else {
-      createExercise({
+      createMutation.mutate({
         name: form.name.trim(),
         muscleGroup: form.muscleGroup.trim(),
         videoUrl: form.videoUrl.trim() || undefined,
@@ -72,7 +78,7 @@ export default function ExerciciosPage() {
   }
 
   function handleDelete(ex: Exercise) {
-    deleteExercise(ex.id);
+    deleteMutation.mutate(ex.id);
     setDeleteConfirm(null);
     toast.success(`"${ex.name}" removido.`);
   }
@@ -132,7 +138,7 @@ export default function ExerciciosPage() {
       </div>
 
       {/* Empty state */}
-      {filtered.length === 0 && (
+      {filtered.length === 0 && !isLoading && (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500 text-center">
           <Dumbbell size={36} className="mb-3 opacity-30" />
           <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhum exercício encontrado.</p>

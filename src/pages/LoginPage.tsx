@@ -14,8 +14,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useApp } from '../contexts/AppContext';
-import { APP_NAME, LS_USER_KEY } from '../lib/constants';
+import { APP_NAME } from '../lib/constants';
 
 const FEATURES = [
   {
@@ -36,8 +35,7 @@ const FEATURES = [
 ];
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const { registerAcademia } = useApp();
+  const { login, signUpAcademia } = useAuth();
   const navigate = useNavigate();
   // Login state
   const [email, setEmail] = useState('');
@@ -70,16 +68,12 @@ export default function LoginPage() {
       setError(result.error ?? 'Erro ao fazer login.');
       return;
     }
-    const stored = localStorage.getItem(LS_USER_KEY);
-    if (stored) {
-      const u = JSON.parse(stored) as { role: string };
-      const roleMap: Record<string, string> = {
-        personal: '/personal/dashboard',
-        academia: '/academia/dashboard',
-        aluno: '/aluno/dashboard',
-      };
-      navigate(roleMap[u.role] ?? '/aluno/dashboard');
-    }
+    const roleMap: Record<string, string> = {
+      personal: '/personal/dashboard',
+      academia: '/academia/dashboard',
+      aluno: '/aluno/dashboard',
+    };
+    navigate(roleMap[result.role ?? ''] ?? '/aluno/dashboard');
   }
 
   async function handleGymRegister(e: React.FormEvent) {
@@ -98,11 +92,16 @@ export default function LoginPage() {
       return;
     }
     setGymRegLoading(true);
-    registerAcademia(gymName, gymEmail, gymPassword, gymCity || undefined, gymState || undefined);
-    const result = await login(gymEmail, gymPassword);
+    const result = await signUpAcademia(
+      gymName,
+      gymEmail,
+      gymPassword,
+      gymCity || undefined,
+      gymState || undefined,
+    );
     setGymRegLoading(false);
     if (!result.success) {
-      setGymRegError(result.error ?? 'Erro ao fazer login após cadastro.');
+      setGymRegError(result.error ?? 'Erro ao cadastrar academia.');
       return;
     }
     navigate('/academia/dashboard');

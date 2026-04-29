@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApp } from '../../contexts/AppContext';
-import { MOCK_EXERCISES } from '../../data/mockData';
+import {
+  useWorkout,
+  useUpdateWorkout,
+  useAddExercise,
+  useRemoveExercise,
+  useUpdateExercise,
+} from '../../hooks/useWorkouts';
+import { useExercises } from '../../hooks/useExercises';
 import { ArrowLeft, Plus, Trash2, Edit2, Check, X, Image, Video } from 'lucide-react';
 import type { WorkoutExercise } from '../../types';
 import VideoModal from '../../components/VideoModal';
@@ -9,15 +15,12 @@ import VideoModal from '../../components/VideoModal';
 export default function TreinoDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const {
-    workouts,
-    updateWorkout,
-    addExerciseToWorkout,
-    removeExerciseFromWorkout,
-    updateExerciseInWorkout,
-  } = useApp();
-
-  const workout = workouts.find((w) => w.id === id);
+  const { data: workout, isLoading } = useWorkout(id ?? '');
+  const updateWorkoutMutation = useUpdateWorkout(id ?? '');
+  const addExerciseMutation = useAddExercise(id ?? '');
+  const removeExerciseMutation = useRemoveExercise(id ?? '');
+  const updateExerciseMutation = useUpdateExercise(id ?? '');
+  const { data: catalogExercises = [] } = useExercises();
   const [showAddEx, setShowAddEx] = useState(false);
   const [editingExId, setEditingExId] = useState<string | null>(null);
 
@@ -38,6 +41,7 @@ export default function TreinoDetalhe() {
   const [editingName, setEditingName] = useState(false);
   const [nameVal, setNameVal] = useState(workout?.name ?? '');
 
+  if (isLoading) return <div className="p-5 text-slate-400">Carregando...</div>;
   if (!workout) {
     return (
       <div className="p-5">
@@ -49,15 +53,10 @@ export default function TreinoDetalhe() {
     );
   }
 
-  function handleExerciseSelect(exerciseId: string) {
-    const ex = MOCK_EXERCISES.find((e) => e.id === exerciseId);
-    setNewEx((prev) => ({ ...prev, exerciseId, exerciseName: ex?.name ?? '' }));
-  }
-
   function handleAddExercise(e: React.FormEvent) {
     e.preventDefault();
-    if (!newEx.exerciseId) return;
-    addExerciseToWorkout(workout!.id, {
+    if (!newEx.exerciseId && !newEx.exerciseName) return;
+    addExerciseMutation.mutate({
       exerciseId: newEx.exerciseId,
       exerciseName: newEx.exerciseName,
       sets: Number(newEx.sets),
@@ -80,14 +79,14 @@ export default function TreinoDetalhe() {
     if (!file) return;
     const url = URL.createObjectURL(file);
     if (exerciseId) {
-      updateExerciseInWorkout(workout!.id, exerciseId, { imageUrl: url });
+      updateExerciseMutation.mutate({ exerciseId, data: { imageUrl: url } });
     } else {
       setNewEx((prev) => ({ ...prev, imageUrl: url }));
     }
   }
 
   function saveName() {
-    if (nameVal.trim()) updateWorkout(workout!.id, { name: nameVal.trim() });
+    if (nameVal.trim()) updateWorkoutMutation.mutate({ name: nameVal.trim() });
     setEditingName(false);
   }
 
@@ -146,10 +145,10 @@ export default function TreinoDetalhe() {
             onEdit={() => setEditingExId(ex.id)}
             onCancelEdit={() => setEditingExId(null)}
             onSaveEdit={(data) => {
-              updateExerciseInWorkout(workout.id, ex.id, data);
+              updateExerciseMutation.mutate({ exerciseId: ex.id, data });
               setEditingExId(null);
             }}
-            onDelete={() => removeExerciseFromWorkout(workout.id, ex.id)}
+            onDelete={() => removeExerciseMutation.mutate(ex.id)}
             onImageUpload={(e) => handleImageUpload(e, ex.id)}
           />
         ))}
@@ -171,19 +170,23 @@ export default function TreinoDetalhe() {
             <form onSubmit={handleAddExercise} className="flex flex-col gap-3">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Exercício</label>
-                <select
+                <input
                   required
-                  value={newEx.exerciseId}
-                  onChange={(e) => handleExerciseSelect(e.target.value)}
+                  list="catalog-exercises"
+                  value={newEx.exerciseName}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const match = catalogExercises.find((ex) => ex.name === val);
+                    setNewEx((prev) => ({ ...prev, exerciseName: val, exerciseId: match?.id ?? '' }));
+                  }}
+                  placeholder="Nome do exercício ou selecione do catálogo"
                   className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  <option value="">Selecione</option>
-                  {MOCK_EXERCISES.map((e) => (
-                    <option key={e.id} value={e.id}>
-                      {e.name} ({e.muscleGroup})
-                    </option>
+                />
+                <datalist id="catalog-exercises">
+                  {catalogExercises.map((ex) => (
+                    <option key={ex.id} value={ex.name} />
                   ))}
-                </select>
+                </datalist>
               </div>
 
               <div className="grid grid-cols-3 gap-3">

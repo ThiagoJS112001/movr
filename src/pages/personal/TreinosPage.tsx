@@ -1,30 +1,41 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useWorkouts, useCreateWorkout, useDeleteWorkout } from '../../hooks/useWorkouts';
 import { Plus, Trash2, ChevronRight, Dumbbell } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function TreinosPage() {
   const { user } = useAuth();
-  const { workouts, createWorkout, deleteWorkout } = useApp();
+  const { data: workouts = [], isLoading } = useWorkouts();
+  const createWorkoutMutation = useCreateWorkout();
+  const deleteWorkoutMutation = useDeleteWorkout();
   const navigate = useNavigate();
 
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
-  const myWorkouts = workouts.filter((w) => w.personalId === user?.id);
+  const myWorkouts = workouts;
 
-  function handleCreate(e: React.FormEvent) {
+  async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    const workout = createWorkout({ name, description, personalId: user.id, exercises: [] });
-    setName('');
-    setDescription('');
-    setShowCreate(false);
-    toast.success(`Treino "${workout.name}" criado!`);
-    navigate(`/personal/treinos/${workout.id}`);
+    try {
+      const workout = await createWorkoutMutation.mutateAsync({
+        name,
+        description,
+        personalId: user.id,
+        exercises: [],
+      });
+      setName('');
+      setDescription('');
+      setShowCreate(false);
+      toast.success(`Treino "${workout.name}" criado!`);
+      navigate(`/personal/treinos/${workout.id}`);
+    } catch {
+      toast.error('Erro ao criar treino.');
+    }
   }
 
   return (
@@ -40,7 +51,7 @@ export default function TreinosPage() {
         </button>
       </div>
 
-      {myWorkouts.length === 0 ? (
+      {myWorkouts.length === 0 && !isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500 text-center">
           <Dumbbell size={36} className="mb-3 opacity-30" />
           <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhum treino criado ainda.</p>
@@ -78,7 +89,7 @@ export default function TreinosPage() {
                 <button
                   onClick={() => {
                     toast(`Excluir "${workout.name}"?`, {
-                      action: { label: 'Excluir', onClick: () => deleteWorkout(workout.id) },
+                      action: { label: 'Excluir', onClick: () => deleteWorkoutMutation.mutate(workout.id) },
                       cancel: { label: 'Cancelar', onClick: () => {} },
                     });
                   }}

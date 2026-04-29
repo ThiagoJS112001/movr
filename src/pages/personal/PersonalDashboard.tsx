@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
+import { useStudents } from '../../hooks/useStudents';
+import { useExercises } from '../../hooks/useExercises';
+import { usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
+import { useTotalUnread } from '../../hooks/useMessages';
 import {
   Users, Dumbbell, ClipboardList, MessageCircle,
   CalendarDays, ChevronRight, Zap, Activity, UserPlus,
@@ -51,10 +54,12 @@ type ActivityItem = {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function PersonalDashboard() {
   const { user } = useAuth();
-  const { students, exercises, workoutSessions, unreadCount } = useApp();
+  const { data: students = [] } = useStudents();
+  const { data: exercises = [] } = useExercises();
+  const { data: allLogs = [] } = usePersonalWorkoutLogs();
   const navigate = useNavigate();
 
-  const unread = user ? unreadCount(user.id) : 0;
+  const unread = useTotalUnread();
   const today  = new Date();
   const tip    = TIPS[today.getDate() % TIPS.length];
 
@@ -80,16 +85,6 @@ export default function PersonalDashboard() {
       action: () => navigate('/personal/exercicios'),
     },
     {
-      label: 'Treinos realizados',
-      value: workoutSessions.length,
-      Icon: ClipboardList,
-      iconBg: 'bg-emerald-500/20 dark:bg-emerald-500/20',
-      iconColor: 'text-emerald-500 dark:text-emerald-400',
-      sparkColor: '#34d399',
-      sparkPoints: '0,26 10,26 20,24 30,24 40,26 50,22 60,20 70,22 80,20',
-      action: () => navigate('/personal/alunos'),
-    },
-    {
       label: 'Mensagens não lidas',
       value: unread,
       Icon: MessageCircle,
@@ -104,20 +99,20 @@ export default function PersonalDashboard() {
   const recentActivities = useMemo((): ActivityItem[] => {
     const items: ActivityItem[] = [];
 
-    // Recent workout sessions
-    const sessions = [...workoutSessions]
+    // Recent workout logs
+    const recentLogs = [...allLogs]
       .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
       .slice(0, 2);
-    for (const s of sessions) {
-      const student = students.find((st) => st.id === s.studentId);
+    for (const log of recentLogs) {
+      const student = students.find((st) => st.id === log.studentId);
       items.push({
-        id: `session-${s.id}`,
+        id: `log-${log.id}`,
         Icon: ClipboardList,
         iconBg: 'bg-emerald-500/15 dark:bg-emerald-500/15',
         iconColor: 'text-emerald-500 dark:text-emerald-400',
         title: 'Treino realizado',
-        subtitle: `${student?.name ?? 'Aluno'} · ${s.label}`,
-        time: new Date(s.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        subtitle: `${student?.name ?? 'Aluno'} · ${log.workoutName}`,
+        time: new Date(log.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
       });
     }
 
@@ -150,7 +145,7 @@ export default function PersonalDashboard() {
     }
 
     return items.slice(0, 5);
-  }, [workoutSessions, exercises, students]);
+  }, [allLogs, exercises, students]);
 
   return (
     <div className="p-5 max-w-6xl mx-auto">
@@ -172,7 +167,7 @@ export default function PersonalDashboard() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5">
         {stats.map(({ label, value, Icon, iconBg, iconColor, sparkColor, sparkPoints, action }) => (
           <button
             key={label}
@@ -200,7 +195,7 @@ export default function PersonalDashboard() {
             <CalendarDays size={15} className="text-indigo-500" />
             <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm">Treinos recentes dos alunos</h2>
           </div>
-          {workoutSessions.length === 0 ? (
+          {allLogs.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center py-8 gap-3 text-center">
               <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
                 <ClipboardList size={28} className="text-indigo-400" />
@@ -212,13 +207,13 @@ export default function PersonalDashboard() {
             </div>
           ) : (
             <ul className="flex flex-col gap-3">
-              {[...workoutSessions]
+              {[...allLogs]
                 .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
                 .slice(0, 5)
-                .map((session) => {
-                  const student = students.find((s) => s.id === session.studentId);
+                .map((log) => {
+                  const student = students.find((s) => s.id === log.studentId);
                   return (
-                    <li key={session.id} className="flex items-center gap-3">
+                    <li key={log.id} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
                         <span className="text-indigo-500 font-bold text-xs">
                           {student?.name?.charAt(0).toUpperCase() ?? '?'}
@@ -228,11 +223,11 @@ export default function PersonalDashboard() {
                         <p className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
                           {student?.name ?? 'Aluno'}
                         </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{session.label}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{log.workoutName}</p>
                       </div>
                       <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
-                        {new Date(session.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                        {` · ${session.durationMinutes}min`}
+                        {new Date(log.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                        {log.durationMinutes ? ` · ${log.durationMinutes}min` : ''}
                       </span>
                     </li>
                   );

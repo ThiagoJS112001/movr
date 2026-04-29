@@ -1,33 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
-import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useMyPersonalId, useProfile, useConversation, useSendMessage, useMarkConversationRead } from '../../hooks/useMessages';
 import { Send } from 'lucide-react';
-import { MOCK_USERS } from '../../data/mockData';
 
 export default function AlunoChatPage() {
   const { user } = useAuth();
-  const { getConversation, sendMessage, markMessagesRead } = useApp();
+  const { data: personalId } = useMyPersonalId();
+  const { data: personal } = useProfile(personalId ?? null);
+  const conversation = useConversation(personalId ?? null);
+  const sendMessageMutation = useSendMessage();
+  const markReadMutation = useMarkConversationRead(personalId ?? '');
   const [text, setText] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Aluno only chats with their personal
-  const personal = MOCK_USERS.find((u) => u.role === 'personal');
-  const conversation = personal && user ? getConversation(user.id, personal.id) : [];
-
-  // Capture the first unread message index once on mount, before mark-as-read runs
+  // Track first unread index (before mark-as-read runs)
   const firstUnreadIdxRef = useRef<number>(-2);
-  if (firstUnreadIdxRef.current === -2 && personal && user) {
+  if (firstUnreadIdxRef.current === -2 && personalId) {
     firstUnreadIdxRef.current = conversation.findIndex(
-      (m) => m.fromId === personal.id && !m.read
+      (m) => m.fromId === personalId && !m.read
     );
   }
   const firstUnreadIdx = firstUnreadIdxRef.current;
 
   useEffect(() => {
-    if (personal && user) {
-      markMessagesRead(personal.id, user.id);
-    }
-  }, [conversation.length]);
+    if (personalId) markReadMutation.mutate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personalId, conversation.length]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -35,13 +33,8 @@ export default function AlunoChatPage() {
 
   function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!text.trim() || !user || !personal) return;
-    sendMessage({
-      fromId: user.id,
-      fromName: user.name,
-      toId: personal.id,
-      content: text.trim(),
-    });
+    if (!text.trim() || !user || !personalId) return;
+    sendMessageMutation.mutate({ toId: personalId, content: text.trim() });
     setText('');
   }
 

@@ -1,30 +1,41 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDiets, useCreateDiet, useDeleteDiet } from '../../hooks/useDiets';
 import { Plus, Trash2, ChevronRight, Salad } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function DietasPage() {
   const { user } = useAuth();
-  const { diets, createDiet, deleteDiet } = useApp();
+  const { data: diets = [], isLoading } = useDiets();
+  const createDietMutation = useCreateDiet();
+  const deleteDietMutation = useDeleteDiet();
   const navigate = useNavigate();
 
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
 
-  const myDiets = diets.filter((d) => d.personalId === user?.id);
+  const myDiets = diets;
 
-  function handleCreate(e: React.FormEvent) {
+  async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    const diet = createDiet({ name, description, personalId: user.id, meals: [] });
-    setName('');
-    setDescription('');
-    setShowCreate(false);
-    toast.success(`Dieta "${diet.name}" criada!`);
-    navigate(`/personal/dietas/${diet.id}`);
+    try {
+      const diet = await createDietMutation.mutateAsync({
+        name,
+        description,
+        personalId: user.id,
+        status: 'ativa',
+      });
+      setName('');
+      setDescription('');
+      setShowCreate(false);
+      toast.success(`Dieta "${diet.name}" criada!`);
+      navigate(`/personal/dietas/${diet.id}`);
+    } catch {
+      toast.error('Erro ao criar dieta.');
+    }
   }
 
   return (
@@ -40,7 +51,7 @@ export default function DietasPage() {
         </button>
       </div>
 
-      {myDiets.length === 0 ? (
+      {myDiets.length === 0 && !isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500 text-center">
           <Salad size={36} className="mb-3 opacity-30" />
           <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhuma dieta criada ainda.</p>
@@ -84,7 +95,7 @@ export default function DietasPage() {
                   <button
                     onClick={() => {
                       toast(`Excluir "${diet.name}"?`, {
-                        action: { label: 'Excluir', onClick: () => deleteDiet(diet.id) },
+                        action: { label: 'Excluir', onClick: () => deleteDietMutation.mutate(diet.id) },
                         cancel: { label: 'Cancelar', onClick: () => {} },
                       });
                     }}

@@ -1,15 +1,15 @@
 import { Building2, Star, Users, Send, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
 
 export default function AcademiaDashboard() {
   const { user } = useAuth();
-  const { getGymById, gymRatings, getGymAvgRating, studentGroups, groupMessages } = useApp();
 
-  const gym = user ? getGymById(user.id) : undefined;
-  const avgRating = user ? getGymAvgRating(user.id) : 0;
-  const myRatings = user ? gymRatings.filter((r) => r.gymId === user.id) : [];
-  const myOffers = user ? groupMessages.filter((m) => m.offerGymId === user.id && m.type === 'offer') : [];
+  // Academia features (gym ratings, groups, messages) not yet migrated to Supabase
+  const gym = undefined as { name?: string; city?: string; state?: string } | undefined;
+  const avgRating = 0;
+  const myRatings: { id: string }[] = [];
+  const myOffers: { id: string; content: string; createdAt: string }[] = [];
+  const studentGroups: unknown[] = [];
 
   const stats = [
     { label: 'Avaliação média', value: avgRating > 0 ? avgRating.toFixed(1) : '—', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' },

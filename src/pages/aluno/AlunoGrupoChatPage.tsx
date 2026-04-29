@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Image, Users, Tag } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
 
 export default function AlunoGrupoChatPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  const { studentGroups, students, getGroupMessages, sendGroupMessage } = useApp();
+  const studentGroups: never[] = [];
+  const students: never[] = [];
+  function getGroupMessages(_groupId: string) { return []; }
+  function sendGroupMessage(_data: unknown) { return; }
   const navigate = useNavigate();
 
   const [text, setText] = useState('');

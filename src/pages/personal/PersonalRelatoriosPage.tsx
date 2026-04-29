@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { useApp } from '../../contexts/AppContext';
+import { usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
+import { useStudents } from '../../hooks/useStudents';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
   BarChart,
@@ -46,7 +47,8 @@ function getLastNWeeks(n: number): string[] {
 const CHART_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export default function PersonalRelatoriosPage() {
-  const { logs, students } = useApp();
+  const { data: logs = [] } = usePersonalWorkoutLogs();
+  const { data: students = [] } = useStudents();
   const { theme } = useTheme();
 
   const weekLabels = useMemo(() => getLastNWeeks(8), []);

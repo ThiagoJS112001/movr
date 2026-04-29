@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { Workout, WorkoutAssignment, WorkoutLog, Message, User, WorkoutExercise, Diet, DietAssignment, Meal, FoodItem, Exercise, WeeklyDay, WeeklyPlan, WeeklyPlanArchive, WorkoutSession, Gym, GymRating, FriendRequest, StudentGroup, GroupMessage } from '../types';
+import type { Workout, WorkoutAssignment, WorkoutLog, Message, User, WorkoutExercise, Diet, DietAssignment, Meal, FoodItem, Exercise, WeeklyDay, WeeklyPlan, WeeklyPlanArchive, WorkoutSession, Gym, GymRating, FriendRequest, StudentGroup, GroupMessage, StudentAssessment } from '../types';
 import {
   MOCK_WORKOUTS,
   MOCK_ASSIGNMENTS,
@@ -61,6 +61,7 @@ interface AppContextType {
 
   // Assignments
   assignWorkout: (a: Omit<WorkoutAssignment, 'id' | 'assignedAt'>) => void;
+  updateAssignment: (id: string, data: Partial<WorkoutAssignment>) => void;
   removeAssignment: (id: string) => void;
 
   // Logs
@@ -119,6 +120,12 @@ interface AppContextType {
   groupMessages: GroupMessage[];
   sendGroupMessage: (msg: Omit<GroupMessage, 'id' | 'createdAt'>) => void;
   getGroupMessages: (groupId: string) => GroupMessage[];
+
+  // Assessments
+  assessments: StudentAssessment[];
+  addAssessment: (a: Omit<StudentAssessment, 'id' | 'createdAt'>) => StudentAssessment;
+  deleteAssessment: (id: string) => void;
+  getStudentAssessments: (studentId: string) => StudentAssessment[];
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -135,6 +142,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [weeklyPlans, setWeeklyPlans] = useState<WeeklyPlan[]>([]);
   const [weeklyPlanArchives, setWeeklyPlanArchives] = useState<WeeklyPlanArchive[]>([]);
   const [workoutSessions, setWorkoutSessions] = useState<WorkoutSession[]>([]);
+  const [assessments, setAssessments] = useState<StudentAssessment[]>([]);
   const [dynamicStudents, setDynamicStudents] = useState<User[]>(() => {
     const stored = localStorage.getItem(LS_DYNAMIC_USERS_KEY);
     return stored ? (JSON.parse(stored) as User[]).filter((u) => u.role === 'aluno') : [];
@@ -298,6 +306,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   function assignWorkout(a: Omit<WorkoutAssignment, 'id' | 'assignedAt'>) {
     const newA: WorkoutAssignment = { ...a, id: uuidv4(), assignedAt: new Date().toISOString() };
     setAssignments((prev) => [...prev, newA]);
+  }
+
+  function updateAssignment(id: string, data: Partial<WorkoutAssignment>) {
+    setAssignments((prev) => prev.map((a) => (a.id === id ? { ...a, ...data } : a)));
   }
 
   function removeAssignment(id: string) {
@@ -531,6 +543,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return groupMessages.filter((m) => m.groupId === groupId).sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
+  // ── Assessments ───────────────────────────────────────────────────────────────
+  function addAssessment(a: Omit<StudentAssessment, 'id' | 'createdAt'>): StudentAssessment {
+    const newA: StudentAssessment = { ...a, id: uuidv4(), createdAt: new Date().toISOString() };
+    setAssessments((prev) => [...prev, newA]);
+    return newA;
+  }
+
+  function deleteAssessment(id: string) {
+    setAssessments((prev) => prev.filter((a) => a.id !== id));
+  }
+
+  function getStudentAssessments(studentId: string): StudentAssessment[] {
+    return assessments
+      .filter((a) => a.studentId === studentId)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }
+
   return (
     <AppContext.Provider
       value={{
@@ -559,6 +588,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         removeExerciseFromWorkout,
         updateExerciseInWorkout,
         assignWorkout,
+        updateAssignment,
         removeAssignment,
         addLog,
         sendMessage,
@@ -604,6 +634,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         groupMessages,
         sendGroupMessage,
         getGroupMessages,
+        // Assessments
+        assessments,
+        addAssessment,
+        deleteAssessment,
+        getStudentAssessments,
       }}
     >
       {children}

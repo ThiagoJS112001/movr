@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
+import { useWorkoutLogs } from '../../hooks/useWorkouts';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
   BarChart,
@@ -46,15 +46,12 @@ function getLastNWeeks(n: number): string[] {
 
 export default function AlunoProgressoPage() {
   const { user } = useAuth();
-  const { logs, workouts } = useApp();
+  const { data: allLogs = [] } = useWorkoutLogs(user?.id ?? '');
   const { theme } = useTheme();
 
   const myLogs = useMemo(
-    () =>
-      logs
-        .filter((l) => l.studentId === user?.id)
-        .sort((a, b) => a.completedAt.localeCompare(b.completedAt)),
-    [logs, user]
+    () => [...allLogs].sort((a, b) => a.completedAt.localeCompare(b.completedAt)),
+    [allLogs]
   );
 
   const weekLabels = useMemo(() => getLastNWeeks(8), []);
@@ -101,19 +98,14 @@ export default function AlunoProgressoPage() {
     const map = new Map<string, string>();
     for (const log of myLogs) {
       if (!log.exerciseWeights) continue;
-      const workout = workouts.find((w) => w.id === log.workoutId);
-      if (!workout) continue;
       for (const exId of Object.keys(log.exerciseWeights)) {
-        if (!map.has(exId)) {
-          const ex = workout.exercises.find((e) => e.id === exId);
-          if (ex) map.set(exId, ex.exerciseName);
-        }
+        if (!map.has(exId)) map.set(exId, exId); // id as fallback name
       }
     }
     return Array.from(map.entries())
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [myLogs, workouts]);
+  }, [myLogs]);
 
   const [selectedExId, setSelectedExId] = useState('');
   const effectiveExId = selectedExId || exercisesWithWeights[0]?.id || '';

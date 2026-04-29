@@ -1,15 +1,12 @@
-import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
+import { useStudentDiet } from '../../hooks/useDiets';
 import { Clock, Salad } from 'lucide-react';
 
 export default function AlunoDietaPage() {
-  const { user } = useAuth();
-  const { dietAssignments, diets } = useApp();
+  const { data, isLoading } = useStudentDiet();
+  const diet = data?.diet ?? null;
 
-  const myAssignment = dietAssignments.find((a) => a.studentId === user?.id);
-  const diet = myAssignment ? diets.find((d) => d.id === myAssignment.dietId) : null;
-
-  if (!myAssignment || !diet) {
+  if (isLoading) return <div className="p-6 text-slate-400">Carregando...</div>;
+  if (!diet) {
     return (
       <div className="p-6 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-6">Minha Dieta</h1>

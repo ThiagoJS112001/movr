@@ -6,6 +6,7 @@ export interface User {
   email: string;
   role: UserRole;
   avatarUrl?: string;
+  isBlocked?: boolean;
 }
 
 export interface Exercise {
@@ -103,6 +104,10 @@ export interface Diet {
   personalId: string;
   meals: Meal[];
   createdAt: string;
+  targetCalories?: number;
+  targetProtein?: number;
+  targetCarbs?: number;
+  targetFat?: number;
 }
 
 export interface DietAssignment {
@@ -215,5 +220,26 @@ export interface GroupMessage {
   imageUrl?: string;
   offerGymId?: string;
   offerGymName?: string;
+  createdAt: string;
+}
+
+// ── Student Assessments ───────────────────────────────────────────────────────
+export interface StudentAssessment {
+  id: string;
+  studentId: string;
+  personalId: string;
+  date: string;          // ISO date string
+  weight?: number;       // kg
+  bodyFat?: number;      // %
+  muscleMass?: number;   // kg
+  leanMass?: number;     // kg (massa magra)
+  chest?: number;        // cm (peitoral)
+  waist?: number;        // cm (cintura)
+  hip?: number;          // cm (quadril)
+  thigh?: number;        // cm (coxa)
+  arm?: number;          // cm (braço)
+  calf?: number;         // cm (panturrilha)
+  abdomen?: number;      // cm (abdômen)
+  notes?: string;
   createdAt: string;
 }

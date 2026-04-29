@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
+import { useWorkoutLogs } from '../../hooks/useWorkouts';
+import { useMyWeeklyPlan } from '../../hooks/useWeeklyPlans';
 import { Play, CheckCircle2, Moon } from 'lucide-react';
 
 const DAYS = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'] as const;
@@ -31,24 +32,24 @@ function getStartOfWeek(): Date {
 
 export default function AlunoDashboard() {
   const { user } = useAuth();
-  const { getWeeklyPlan, workoutSessions } = useApp();
+  const { data: logs = [] } = useWorkoutLogs(user?.id ?? '');
+  const { data: plan } = useMyWeeklyPlan();
   const navigate = useNavigate();
 
-  const plan = user ? getWeeklyPlan(user.id) : undefined;
   const todayKey = TODAY_MAP[new Date().getDay()];
 
   const weekStart = getStartOfWeek();
   const weekEnd   = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 7);
 
-  const sessionsThisWeek = workoutSessions.filter((s) => {
-    if (s.studentId !== user?.id) return false;
+  const sessionsThisWeek = logs.filter((s) => {
     const d = new Date(s.completedAt);
     return d >= weekStart && d < weekEnd;
   });
 
   const sessionsByDay = sessionsThisWeek.reduce<Record<string, number>>((acc, s) => {
-    acc[s.dayOfWeek] = (acc[s.dayOfWeek] ?? 0) + 1;
+    const dow = TODAY_MAP[new Date(s.completedAt).getDay()];
+    acc[dow] = (acc[dow] ?? 0) + 1;
     return acc;
   }, {});
 
@@ -78,7 +79,7 @@ export default function AlunoDashboard() {
         </div>
         <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/60 shadow-sm text-center">
           <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
-            {sessionsThisWeek.reduce((sum, s) => sum + s.durationMinutes, 0)}
+            {sessionsThisWeek.reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Min. totais</div>
         </div>

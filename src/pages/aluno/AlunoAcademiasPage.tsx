@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Building2, Star, Search, MapPin, Phone, Clock, User, Salad, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
 import type { Gym } from '../../types';
 
 const DAYS_PT: Record<string, string> = {
@@ -49,7 +48,10 @@ function ClickableStars({ value, onChange }: { value: number; onChange: (n: numb
 
 export default function AlunoAcademiasPage() {
   const { user } = useAuth();
-  const { gyms, gymRatings, getGymAvgRating, addGymRating } = useApp();
+  const gyms: never[] = [];
+  const gymRatings: never[] = [];
+  function getGymAvgRating(_gymId: string) { return 0; }
+  function addGymRating(_data: unknown) { toast.error('Academias ainda não disponíveis.'); }
 
   const [search, setSearch] = useState('');
   const [filterPersonal, setFilterPersonal] = useState(false);

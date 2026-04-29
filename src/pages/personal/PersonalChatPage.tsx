@@ -1,9 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useStudents } from '../../hooks/useStudents';
+import { useAssignments, usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
+import {
+  useMessages,
+  useConversation,
+  useSendMessage,
+  useMarkConversationRead,
+} from '../../hooks/useMessages';
 import { Send, Search, Clock, MoreHorizontal, Paperclip, Dumbbell, Target } from 'lucide-react';
 import type { User } from '../../types';
-import { MOCK_USERS } from '../../data/mockData';
 
 // ── Static mock data per student ─────────────────────────────────────────────
 const WEIGHT_GOALS: Record<string, { from: number; to: number; current: number }> = {
@@ -91,22 +97,53 @@ function parseWorkoutLabel(name: string) {
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function PersonalChatPage() {
   const { user } = useAuth();
-  const { getConversation, sendMessage, markMessagesRead, messages, assignments, logs } = useApp();
+  const { data: studentsRaw = [] } = useStudents();
+  const { data: assignments = [] } = useAssignments();
+  const { data: allLogs = [] } = usePersonalWorkoutLogs();
+  const { data: allMessages = [] } = useMessages();
+  const sendMessageMutation = useSendMessage();
+
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [text, setText] = useState('');
   const [search, setSearch] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const students = MOCK_USERS.filter((u) => u.role === 'aluno');
+  // Map students to User shape
+  const students: User[] = studentsRaw.map((s) => ({
+    id: s.id,
+    name: s.name,
+    email: s.email ?? '',
+    role: 'aluno' as const,
+    avatarUrl: s.avatarUrl,
+  }));
 
   const filteredStudents = useMemo(
     () => students.filter((s) => s.name.toLowerCase().includes(search.toLowerCase())),
     [students, search],
   );
 
-  const conversation = selectedStudent && user
-    ? getConversation(user.id, selectedStudent.id)
-    : [];
+  const conversation = useConversation(selectedStudent?.id ?? null);
+  const markReadMutation = useMarkConversationRead(selectedStudent?.id ?? '');
+
+  // Per-student last message and unread derived from shared cache
+  const lastMessageByStudent = useMemo(() => {
+    const map: Record<string, typeof allMessages[number]> = {};
+    for (const m of allMessages) {
+      const otherId = m.fromId === user?.id ? m.toId : m.fromId;
+      if (!map[otherId] || m.sentAt > map[otherId].sentAt) map[otherId] = m;
+    }
+    return map;
+  }, [allMessages, user?.id]);
+
+  const unreadByStudent = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const m of allMessages) {
+      if (m.toId === user?.id && !m.read) map[m.fromId] = (map[m.fromId] ?? 0) + 1;
+    }
+    return map;
+  }, [allMessages, user?.id]);
+
+
 
   const groupedMessages = useMemo(() => {
     const groups: { date: string; msgs: typeof conversation }[] = [];
@@ -119,24 +156,13 @@ export default function PersonalChatPage() {
     return groups;
   }, [conversation]);
 
-  function getLastMessage(studentId: string) {
-    if (!user) return null;
-    const conv = getConversation(user.id, studentId);
-    return conv.length > 0 ? conv[conv.length - 1] : null;
-  }
-
-  function getUnreadCount(studentId: string) {
-    if (!user) return 0;
-    return messages.filter((m) => m.fromId === studentId && m.toId === user.id && !m.read).length;
-  }
-
   // Student info panel data
   const studentAssignments = selectedStudent
     ? assignments.filter((a) => a.studentId === selectedStudent.id)
     : [];
 
   const studentLogs = selectedStudent
-    ? logs.filter((l) => l.studentId === selectedStudent.id)
+    ? allLogs.filter((l) => l.studentId === selectedStudent.id)
     : [];
 
   const logsThisMonth = studentLogs.filter((l) => {
@@ -164,8 +190,9 @@ export default function PersonalChatPage() {
   const genderLabel = selectedStudent?.name.split(' ')[0].endsWith('a') ? 'ALUNA' : 'ALUNO';
 
   useEffect(() => {
-    if (selectedStudent && user) markMessagesRead(selectedStudent.id, user.id);
-  }, [selectedStudent, conversation.length]);
+    if (selectedStudent) markReadMutation.mutate();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStudent?.id, conversation.length]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -174,13 +201,13 @@ export default function PersonalChatPage() {
   function handleSend(e?: React.FormEvent) {
     e?.preventDefault();
     if (!text.trim() || !user || !selectedStudent) return;
-    sendMessage({ fromId: user.id, fromName: user.name, toId: selectedStudent.id, content: text.trim() });
+    sendMessageMutation.mutate({ toId: selectedStudent.id, content: text.trim() });
     setText('');
   }
 
   function handleQuickReply(reply: string) {
     if (!user || !selectedStudent) return;
-    sendMessage({ fromId: user.id, fromName: user.name, toId: selectedStudent.id, content: reply });
+    sendMessageMutation.mutate({ toId: selectedStudent.id, content: reply });
   }
 
   return (
@@ -205,8 +232,8 @@ export default function PersonalChatPage() {
         {/* Contact rows */}
         <div className="flex-1 overflow-y-auto">
           {filteredStudents.map((s) => {
-            const lastMsg = getLastMessage(s.id);
-            const unread = getUnreadCount(s.id);
+            const lastMsg = lastMessageByStudent[s.id] ?? null;
+            const unread = unreadByStudent[s.id] ?? 0;
             const isSelected = selectedStudent?.id === s.id;
             return (
               <button

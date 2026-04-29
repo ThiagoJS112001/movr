@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
+import { useTotalUnread } from '../../hooks/useMessages';
 import { useSettings } from '../../contexts/SettingsContext';
 import { APP_NAME } from '../../lib/constants';
 import SettingsModal from '../SettingsModal';
@@ -29,13 +29,11 @@ const ALL_NAV_ITEMS = [
 
 export default function PersonalSidebar() {
   const { user, logout } = useAuth();
-  const { unreadCount } = useApp();
+  const unread = useTotalUnread();
   const { isNavVisible } = useSettings();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const unread = user ? unreadCount(user.id) : 0;
   const navItems = ALL_NAV_ITEMS.filter((item) => isNavVisible(item.to));
 
   function handleLogout() {

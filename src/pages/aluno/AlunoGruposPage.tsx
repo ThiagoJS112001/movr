@@ -3,22 +3,19 @@ import { Users, UserPlus, Plus, Check, X, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
-import { useApp } from '../../contexts/AppContext';
 
 type Tab = 'grupos' | 'amigos';
 
 export default function AlunoGruposPage() {
   const { user } = useAuth();
-  const {
-    students,
-    studentGroups,
-    createGroup,
-    getUserGroups,
-    friendRequests,
-    sendFriendRequest,
-    respondFriendRequest,
-    getFriends,
-  } = useApp();
+  const students: never[] = [];
+  const studentGroups: never[] = [];
+  const friendRequests: never[] = [];
+  function createGroup(_data: unknown) { toast.error('Grupos ainda não disponíveis.'); }
+  function getUserGroups(_userId: string) { return []; }
+  function sendFriendRequest(_data: unknown) { toast.error('Amigos ainda não disponíveis.'); }
+  function respondFriendRequest(_data: unknown) { return; }
+  function getFriends(_userId: string) { return []; }
   const navigate = useNavigate();
 
   const [tab, setTab] = useState<Tab>('grupos');

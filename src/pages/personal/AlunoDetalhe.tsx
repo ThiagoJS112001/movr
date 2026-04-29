@@ -1,19 +1,36 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useApp } from '../../contexts/AppContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useStudents, useBlockStudent } from '../../hooks/useStudents';
+import {
+  useWorkouts,
+  useAssignments,
+  useAssignWorkout,
+  useRemoveAssignment,
+  useWorkoutLogs,
+} from '../../hooks/useWorkouts';
+import { useDiets, useDietAssignments, useAssignDiet, useRemoveDietAssignment } from '../../hooks/useDiets';
+import { useExercises } from '../../hooks/useExercises';
+import { usePlanArchives } from '../../hooks/useWeeklyPlans';
+import { useAssessments, useDeleteAssessment } from '../../hooks/useAssessments';
+import type { StudentAssessment } from '../../types';
 import { toast } from 'sonner';
 import {
   ArrowLeft, MessageSquare, ShieldOff, ShieldCheck,
   Dumbbell, Salad, History,
   Eye, Pencil, Copy, Trash2, Plus, CalendarDays,
   ChevronDown, ChevronUp, Archive, MoreHorizontal,
-  TrendingUp, Target, Clock, Zap, MoreVertical,
+  TrendingUp, TrendingDown, Target, Clock, Zap, MoreVertical, Activity,
 } from 'lucide-react';
 import type { Workout, Diet } from '../../types';
 import WorkoutViewModal from '../../components/WorkoutViewModal';
 import WorkoutEditModal from '../../components/WorkoutEditModal';
-import WeeklyPlanModal from '../../components/WeeklyPlanModal';
+import NewWorkoutModal from '../../components/NewWorkoutModal';
+import NewDietModal from '../../components/NewDietModal';
+import NewAssessmentModal from '../../components/NewAssessmentModal';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -58,21 +75,28 @@ function muscleBadge(g: string) {
   return MUSCLE_BADGE[g] ?? 'bg-slate-500/20 text-slate-300';
 }
 
-type Tab = 'treinos' | 'dieta' | 'historico';
+type Tab = 'treinos' | 'dieta' | 'historico' | 'evolucao';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function AlunoDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const {
-    students, workouts, assignments, logs, exercises,
-    diets, dietAssignments,
-    assignWorkout, removeAssignment,
-    assignDiet, removeDietAssignment,
-    isStudentBlocked, blockStudent, unblockStudent,
-    workoutSessions, weeklyPlanArchives,
-  } = useApp();
+  const { data: students = [], isLoading: studentsLoading } = useStudents();
+  const { data: workouts = [] } = useWorkouts();
+  const { data: assignments = [] } = useAssignments();
+  const { data: logs = [] } = useWorkoutLogs(id ?? '');
+  const { data: catalogExercises = [] } = useExercises();
+  const { data: diets = [] } = useDiets();
+  const { data: dietAssignments = [] } = useDietAssignments();
+  const assignWorkoutMutation = useAssignWorkout();
+  const removeAssignmentMutation = useRemoveAssignment();
+  const assignDietMutation = useAssignDiet();
+  const removeDietAssignmentMutation = useRemoveDietAssignment();
+  const blockStudentMutation = useBlockStudent();
+  const { data: allArchives = [] } = usePlanArchives();
+  const { data: allAssessmentsData = [] } = useAssessments(id ?? '');
+  const deleteAssessmentMutation = useDeleteAssessment(id ?? '');
 
   const [activeTab, setActiveTab] = useState<Tab>('treinos');
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
@@ -96,6 +120,17 @@ export default function AlunoDetalhe() {
   const [assignDietOpen, setAssignDietOpen] = useState(false);
   const [selectedDietId, setSelectedDietId] = useState('');
 
+  // New diet modal
+  const [newDietOpen, setNewDietOpen] = useState(false);
+
+  // New assessment modal
+  const [newAssessmentOpen, setNewAssessmentOpen] = useState(false);
+
+  // Evolução tab state
+  const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
+  const [chartPeriod, setChartPeriod] = useState(30);
+  const [showAllAssessments, setShowAllAssessments] = useState(false);
+
   // Plan archives
   const [expandedArchiveIds, setExpandedArchiveIds] = useState<Set<string>>(new Set());
   function toggleArchiveExpanded(archiveId: string) {
@@ -108,6 +143,7 @@ export default function AlunoDetalhe() {
 
   // ── Student data ──────────────────────────────────────────────────────────
   const student = students.find((s) => s.id === id);
+  if (studentsLoading) return <div className="p-5 text-slate-400">Carregando...</div>;
   if (!student) {
     return (
       <div className="p-6 text-center text-slate-400 dark:text-slate-500 py-20">
@@ -119,7 +155,7 @@ export default function AlunoDetalhe() {
     );
   }
 
-  const blocked = isStudentBlocked(student.id);
+  const blocked = student.isBlocked ?? false;
   const avatarColor = blocked ? 'bg-red-500' : getAvatarColor(student.name);
 
   // Since date: earliest assignment
@@ -159,17 +195,11 @@ export default function AlunoDetalhe() {
     [logs, id],
   );
 
-  // Sessions
-  const studentSessions = useMemo(
-    () => [...workoutSessions.filter((s) => s.studentId === id)].sort((a, b) => b.completedAt.localeCompare(a.completedAt)),
-    [workoutSessions, id],
-  );
-
   // Plan archives for this student
   const studentArchives = useMemo(
-    () => [...weeklyPlanArchives.filter((a) => a.studentId === id && a.personalId === user?.id)]
+    () => [...allArchives.filter((a) => a.studentId === id && a.personalId === user?.id)]
       .sort((a, b) => b.archivedAt.localeCompare(a.archivedAt)),
-    [weeklyPlanArchives, id, user?.id],
+    [allArchives, id, user?.id],
   );
 
   // Unassigned workouts (available to assign)
@@ -228,7 +258,7 @@ export default function AlunoDetalhe() {
   function getWorkoutMuscleGroups(workout: Workout): string[] {
     const groups = new Set<string>();
     for (const we of workout.exercises) {
-      const ex = exercises.find((e) => e.id === we.exerciseId);
+      const ex = catalogExercises.find((e) => e.id === we.exerciseId);
       if (ex) groups.add(ex.muscleGroup);
     }
     return [...groups];
@@ -251,7 +281,7 @@ export default function AlunoDetalhe() {
     if (!selectedWorkoutId || !user) return;
     const w = myWorkouts.find((wk) => wk.id === selectedWorkoutId);
     if (!w) return;
-    assignWorkout({ workoutId: w.id, workoutName: w.name, studentId: student.id, personalId: user.id });
+    assignWorkoutMutation.mutate({ workoutId: w.id, workoutName: w.name, studentId: student.id, personalId: user.id });
     setAssignWorkoutOpen(false);
     setSelectedWorkoutId('');
     toast.success(`"${w.name}" atribuído!`);
@@ -261,7 +291,7 @@ export default function AlunoDetalhe() {
     if (!selectedDietId || !user) return;
     const d = myDiets.find((dt) => dt.id === selectedDietId);
     if (!d) return;
-    assignDiet({ dietId: d.id, dietName: d.name, studentId: student.id, personalId: user.id });
+    assignDietMutation.mutate({ dietId: d.id, dietName: d.name, studentId: student.id, personalId: user.id });
     setAssignDietOpen(false);
     setSelectedDietId('');
     toast.success(`"${d.name}" atribuída!`);
@@ -269,18 +299,19 @@ export default function AlunoDetalhe() {
 
   function handleRemoveWorkout(workoutId: string) {
     const a = studentAssignments.find((sa) => sa.workoutId === workoutId);
-    if (a) { removeAssignment(a.id); toast.success('Treino removido.'); }
+    if (a) { removeAssignmentMutation.mutate(a.id); toast.success('Treino removido.'); }
   }
 
   function handleRemoveDiet(dietId: string) {
     const a = studentDietAssignments.find((da) => da.dietId === dietId);
-    if (a) { removeDietAssignment(a.id); toast.success('Dieta removida.'); }
+    if (a) { removeDietAssignmentMutation.mutate(a.id); toast.success('Dieta removida.'); }
   }
 
   // ── Tabs config ───────────────────────────────────────────────────────────
   const TABS: { key: Tab; label: string; Icon: typeof Dumbbell }[] = [
-    { key: 'treinos',   label: 'Treinos',     Icon: Dumbbell },
-    { key: 'dieta',     label: 'Dieta',       Icon: Salad },
+    { key: 'treinos',   label: 'Treinos',             Icon: Dumbbell },
+    { key: 'dieta',     label: 'Dieta',               Icon: Salad },
+    { key: 'evolucao',  label: 'Evolução',            Icon: Activity },
     { key: 'historico', label: 'Histórico de Treinos', Icon: History },
   ];
 
@@ -354,7 +385,7 @@ export default function AlunoDetalhe() {
               {headerMenuOpen && (
                 <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1.5">
                   <button
-                    onClick={() => { blocked ? unblockStudent(student.id) : blockStudent(student.id); setHeaderMenuOpen(false); }}
+                    onClick={() => { blockStudentMutation.mutate({ id: student.id, blocked: !blocked }); setHeaderMenuOpen(false); }}
                     className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
                       blocked
                         ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
@@ -492,13 +523,6 @@ export default function AlunoDetalhe() {
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => { setSelectedWorkoutId(''); setAssignWorkoutOpen(true); }}
-                  className="flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 text-sm font-medium px-3 py-2 rounded-xl transition-colors"
-                  title="Atribuir treino existente"
-                >
-                  Atribuir existente
-                </button>
-                <button
                   onClick={() => setWeeklyPlanOpen(true)}
                   className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
                 >
@@ -634,139 +658,253 @@ export default function AlunoDetalhe() {
       )}
 
       {/* ── Tab: Dieta ────────────────────────────────────────────────────── */}
-      {activeTab === 'dieta' && (
-        <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <Salad size={15} className="text-emerald-400" />
-              </div>
-              <div>
-                <p className="font-semibold text-slate-800 dark:text-white">Dietas</p>
-                <p className="text-xs text-slate-400">Crie, edite e gerencie as dietas do aluno.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-                <button
-                onClick={() => { setSelectedDietId(''); setAssignDietOpen(true); }}
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition-colors"
-              >
-                <Plus size={14} />
-                Nova dieta
-              </button>
-            </div>
-          </div>
+      {activeTab === 'dieta' && (() => {
+        const panelDietId = selectedDietId || assignedDiets[0]?.id || null;
+        const panelDiet = assignedDiets.find((d) => d.id === panelDietId) ?? assignedDiets[0] ?? null;
 
-          {assignedDiets.length === 0 ? (
-            <div className="py-16 text-center text-slate-400 dark:text-slate-500">
-              <Salad size={32} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Nenhuma dieta atribuída.</p>
-              <button
-                onClick={() => setAssignDietOpen(true)}
-                className="mt-3 text-xs text-emerald-500 hover:underline"
-              >
-                Atribuir uma dieta
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-700/50">
-                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome da dieta</th>
-                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Objetivo</th>
-                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Calorias</th>
-                      <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Status</th>
-                      <th className="text-right text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/40">
+        const panelTotalCals  = panelDiet ? panelDiet.meals.reduce((s, m) => s + m.foods.reduce((fs, f) => fs + (f.calories ?? 0), 0), 0) : 0;
+        const panelTotalProt  = panelDiet ? panelDiet.meals.reduce((s, m) => s + m.foods.reduce((fs, f) => fs + (f.protein  ?? 0), 0), 0) : 0;
+        const panelTotalCarbs = panelDiet ? panelDiet.meals.reduce((s, m) => s + m.foods.reduce((fs, f) => fs + (f.carbs    ?? 0), 0), 0) : 0;
+        const panelTotalFat   = panelDiet ? panelDiet.meals.reduce((s, m) => s + m.foods.reduce((fs, f) => fs + (f.fat      ?? 0), 0), 0) : 0;
+        const panelMacroTotal = panelTotalProt + panelTotalCarbs + panelTotalFat;
+        const pctProt  = panelMacroTotal > 0 ? Math.round((panelTotalProt  / panelMacroTotal) * 100) : 0;
+        const pctCarbs = panelMacroTotal > 0 ? Math.round((panelTotalCarbs / panelMacroTotal) * 100) : 0;
+        const pctFat   = panelMacroTotal > 0 ? Math.round((panelTotalFat   / panelMacroTotal) * 100) : 0;
+
+        const MEAL_ICONS: Record<string, string> = {
+          'café': '☀️', 'cafe': '☀️', 'manhã': '☀️', 'manha': '☀️',
+          'almoço': '🍽️', 'almoco': '🍽️',
+          'tarde': '🧃', 'lanche': '🥙',
+          'pré': '⚡', 'pre': '⚡', 'treino': '⚡',
+          'pós': '🌙', 'pos': '🌙', 'jantar': '🌙', 'ceia': '🌙',
+        };
+        function getMealIcon(name: string): string {
+          const n = name.toLowerCase();
+          for (const [key, icon] of Object.entries(MEAL_ICONS)) {
+            if (n.includes(key)) return icon;
+          }
+          return '🍴';
+        }
+
+        return (
+          <div className="grid grid-cols-[300px_1fr] gap-4 items-start">
+
+            {/* Left panel: diet list */}
+            <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-700/50">
+                <div>
+                  <p className="text-sm font-semibold text-white">Dietas</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Crie, edite e gerencie as dietas do aluno.</p>
+                </div>
+                <button
+                  onClick={() => setNewDietOpen(true)}
+                  className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3 py-1.5 rounded-xl transition-colors shrink-0"
+                >
+                  <Plus size={13} />
+                  Nova dieta
+                </button>
+              </div>
+              {assignedDiets.length === 0 ? (
+                <div className="py-12 text-center text-slate-400">
+                  <Salad size={28} className="mx-auto mb-2 opacity-30" />
+                  <p className="text-xs">Nenhuma dieta atribuída.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="divide-y divide-slate-700/40">
                     {assignedDiets.map((diet) => {
-                      const totalCals = getDietTotalCals(diet);
+                      const cals = getDietTotalCals(diet);
+                      const isSelected = diet.id === panelDietId;
                       return (
-                        <tr key={diet.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                          <td className="px-6 py-3.5">
-                            <p className="font-medium text-slate-800 dark:text-slate-100">{diet.name}</p>
-                            <p className="text-xs text-slate-400">{diet.meals.length} refeições</p>
-                          </td>
-                          <td className="px-4 py-3.5">
-                            <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-teal-500/20 text-teal-300">
-                              {diet.goal ?? diet.description?.split(' ')[0] ?? 'Geral'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3.5 text-slate-500 dark:text-slate-400">
-                            {totalCals > 0 ? `${totalCals} kcal` : '—'}
-                          </td>
-                          <td className="px-4 py-3.5">
-                            {diet.status === 'pausada' ? (
-                              <span className="flex items-center gap-1.5 text-xs font-medium text-amber-500">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                Pausada
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-500">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                Ativa
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                onClick={() => navigate(`/personal/dietas/${diet.id}`)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-colors"
-                                title="Editar"
-                              >
-                                <Pencil size={14} />
-                              </button>
-                              <div className="relative">
-                                <button
-                                  onClick={() => setDietMenuOpenId(dietMenuOpenId === diet.id ? null : diet.id)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                                >
-                                  <MoreHorizontal size={14} />
-                                </button>
-                                {dietMenuOpenId === diet.id && (
-                                  <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1.5">
-                                    <button
-                                      onClick={() => { navigate(`/personal/dietas/${diet.id}`); setDietMenuOpenId(null); }}
-                                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
-                                    >
-                                      <Eye size={13} className="text-indigo-400" /> Visualizar
-                                    </button>
-                                    <button
-                                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
-                                    >
-                                      <Copy size={13} className="text-slate-400" /> Duplicar
-                                    </button>
-                                    <div className="my-1 border-t border-slate-100 dark:border-slate-700/60" />
-                                    <button
-                                      onClick={() => { handleRemoveDiet(diet.id); setDietMenuOpenId(null); }}
-                                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                    >
-                                      <Trash2 size={13} /> Remover
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
+                        <button
+                          key={diet.id}
+                          onClick={() => setSelectedDietId(diet.id)}
+                          className={`w-full flex items-start gap-3 px-4 py-3.5 text-left transition-all ${
+                            isSelected
+                              ? 'bg-emerald-500/10 border-l-2 border-emerald-500'
+                              : 'hover:bg-slate-700/30 border-l-2 border-transparent'
+                          }`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-sm font-semibold text-slate-100 truncate">{diet.name}</p>
+                              {diet.status === 'pausada' ? (
+                                <span className="shrink-0 text-[10px] font-semibold text-amber-400 bg-amber-500/15 px-1.5 py-0.5 rounded-full">Pausada</span>
+                              ) : (
+                                <span className="shrink-0 text-[10px] font-semibold text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded-full">Ativa</span>
+                              )}
                             </div>
-                          </td>
-                        </tr>
+                            <p className="text-xs text-slate-400">{diet.meals.length} refeições • {cals > 0 ? `${cals} kcal` : '—'}</p>
+                          </div>
+                          <ChevronDown size={14} className={`shrink-0 mt-0.5 -rotate-90 ${isSelected ? 'text-emerald-400' : 'text-slate-600'}`} />
+                        </button>
                       );
                     })}
-                  </tbody>
-                </table>
+                  </div>
+                  <div className="px-4 py-3 border-t border-slate-700/40">
+                    <p className="text-xs text-slate-500">Mostrando 1 a {assignedDiets.length} de {assignedDiets.length} dieta{assignedDiets.length !== 1 ? 's' : ''}</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Right panel: diet detail */}
+            {panelDiet ? (
+              <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl overflow-hidden">
+
+                {/* Diet header */}
+                <div className="flex items-start justify-between px-5 py-4 border-b border-slate-700/50">
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-base font-bold text-white">{panelDiet.name}</p>
+                      {panelDiet.status === 'pausada' ? (
+                        <span className="text-xs font-semibold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" /> Pausada
+                        </span>
+                      ) : (
+                        <span className="text-xs font-semibold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Ativa
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      {panelDiet.goal ? `Objetivo: ${panelDiet.goal} • ` : ''}{panelDiet.meals.length} refeições por dia
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => navigate(`/personal/dietas/${panelDiet.id}`)}
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-600 text-slate-300 text-xs font-medium hover:bg-slate-700 transition-colors"
+                    >
+                      <Pencil size={13} /> Editar dieta
+                    </button>
+                    <button
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-colors"
+                      onClick={() => toast.info('Função em desenvolvimento.')}
+                    >
+                      <TrendingUp size={13} /> Enviar para aluno
+                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={() => setDietMenuOpenId(dietMenuOpenId === panelDiet.id ? null : panelDiet.id)}
+                        className="p-2 rounded-xl border border-slate-600 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                      >
+                        <MoreVertical size={15} />
+                      </button>
+                      {dietMenuOpenId === panelDiet.id && (
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-slate-800 rounded-xl shadow-lg border border-slate-700 z-20 py-1.5">
+                          <button
+                            onClick={() => { navigate(`/personal/dietas/${panelDiet.id}`); setDietMenuOpenId(null); }}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700/60 transition-colors"
+                          >
+                            <Eye size={13} className="text-indigo-400" /> Visualizar
+                          </button>
+                          <button className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700/60 transition-colors">
+                            <Copy size={13} className="text-slate-400" /> Duplicar
+                          </button>
+                          <div className="my-1 border-t border-slate-700/60" />
+                          <button
+                            onClick={() => { handleRemoveDiet(panelDiet.id); setDietMenuOpenId(null); setSelectedDietId(''); }}
+                            className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 transition-colors"
+                          >
+                            <Trash2 size={13} /> Remover
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Macro cards */}
+                <div className="grid grid-cols-4 divide-x divide-slate-700/50 border-b border-slate-700/50">
+                  {[
+                    { label: 'Calorias',     value: panelTotalCals,  unit: 'kcal', pct: null,     color: 'bg-emerald-500' },
+                    { label: 'Proteínas',    value: panelTotalProt,  unit: 'g',    pct: pctProt,  color: 'bg-violet-500'  },
+                    { label: 'Carboidratos', value: panelTotalCarbs, unit: 'g',    pct: pctCarbs, color: 'bg-amber-500'   },
+                    { label: 'Gorduras',     value: panelTotalFat,   unit: 'g',    pct: pctFat,   color: 'bg-rose-500'    },
+                  ].map(({ label, value, unit, pct, color }) => (
+                    <div key={label} className="px-5 py-4">
+                      <p className="text-xs text-slate-400 mb-2">{label}</p>
+                      <p className="text-2xl font-bold text-white">
+                        {value > 0 ? Math.round(value) : '—'}
+                        <span className="text-sm font-normal text-slate-400 ml-1">{unit}</span>
+                        {pct != null && value > 0 && (
+                          <span className="text-xs font-normal text-slate-500 ml-1.5">{pct}%</span>
+                        )}
+                      </p>
+                      <div className="mt-2 h-1 rounded-full bg-slate-700 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${color} transition-all`}
+                          style={{ width: label === 'Calorias' ? '100%' : `${pct ?? 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Meals list */}
+                <div className="px-5 py-4">
+                  <p className="text-sm font-semibold text-white mb-3">Refeições</p>
+                  <div className="flex flex-col divide-y divide-slate-700/40">
+                    {panelDiet.meals.map((meal) => {
+                      const mealCals = meal.foods.reduce((s, f) => s + (f.calories ?? 0), 0);
+                      const foodNames = meal.foods.map((f) => f.name).join(', ');
+                      return (
+                        <div key={meal.id} className="flex items-center gap-3 py-3">
+                          <span className="text-xl w-8 text-center shrink-0">{getMealIcon(meal.name)}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-slate-100">{meal.name}</p>
+                            {(meal.time || foodNames) && (
+                              <p className="text-xs text-slate-500 truncate">
+                                {meal.time && <span className="mr-2">{meal.time}</span>}
+                                {foodNames}
+                              </p>
+                            )}
+                          </div>
+                          <p className="text-sm font-semibold text-slate-300 shrink-0">{mealCals > 0 ? `${mealCals} kcal` : '—'}</p>
+                          <ChevronDown size={14} className="text-slate-600 shrink-0 -rotate-90" />
+                          <button
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-700 transition-colors shrink-0"
+                          >
+                            <MoreVertical size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Daily summary footer */}
+                <div className="px-5 py-3 border-t border-slate-700/50 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-300 mb-0.5">Resumo diário</p>
+                    <p className="text-xs text-slate-500">
+                      {panelTotalCals > 0 ? `${Math.round(panelTotalCals)} kcal` : '—'}
+                      {panelTotalProt  > 0 && ` • ${Math.round(panelTotalProt)}g proteínas`}
+                      {panelTotalCarbs > 0 && ` • ${Math.round(panelTotalCarbs)}g carboidratos`}
+                      {panelTotalFat   > 0 && ` • ${Math.round(panelTotalFat)}g gorduras`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/personal/dietas/${panelDiet.id}`)}
+                    className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white border border-slate-600 px-3 py-1.5 rounded-xl transition-colors"
+                  >
+                    Ver detalhes nutricionais <ChevronDown size={12} className="-rotate-90" />
+                  </button>
+                </div>
               </div>
-              <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
-                <p className="text-xs text-slate-400">
-                  Mostrando 1 a {assignedDiets.length} de {assignedDiets.length} dieta{assignedDiets.length !== 1 ? 's' : ''}
-                </p>
+            ) : (
+              <div className="bg-slate-800/80 border border-slate-700/50 rounded-2xl py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
+                <Salad size={32} className="opacity-30" />
+                <p className="text-sm">Nenhuma dieta atribuída ainda.</p>
+                <button onClick={() => setNewDietOpen(true)} className="text-xs text-emerald-400 hover:underline">
+                  Criar primeira dieta
+                </button>
               </div>
-            </>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Tab: Histórico ────────────────────────────────────────────────── */}
       {activeTab === 'historico' && (
@@ -862,7 +1000,7 @@ export default function AlunoDetalhe() {
                                 {dayData.exerciseIds.length > 0 ? (
                                   <div className="flex flex-col gap-1 pl-2">
                                     {dayData.exerciseIds.map((exId) => {
-                                      const ex = exercises.find((e) => e.id === exId);
+                                      const ex = catalogExercises.find((e) => e.id === exId);
                                       return (
                                         <div key={exId} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-white dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
                                           <span className="text-sm text-slate-700 dark:text-slate-200">
@@ -955,9 +1093,294 @@ export default function AlunoDetalhe() {
         </div>
       )}
 
-      {/* ── Modal: Weekly Plan ────────────────────────────────────────────── */}
+      {/* ── Tab: Evolução ─────────────────────────────────────────────────── */}
+      {activeTab === 'evolucao' && (() => {
+        const allAssessments: StudentAssessment[] = allAssessmentsData;
+
+        // Selected assessment for detail view
+        const selectedId = selectedAssessmentId ?? allAssessments[0]?.id ?? null;
+        const selected = allAssessments.find((a) => a.id === selectedId) ?? allAssessments[0] ?? null;
+        const latest = allAssessments[0] ?? null;
+
+        // Visible list
+        const VISIBLE_LIMIT = 4;
+        const visibleAssessments = showAllAssessments ? allAssessments : allAssessments.slice(0, VISIBLE_LIMIT);
+
+        // 30-day comparison
+        const cutoff30 = Date.now() - 30 * 86_400_000;
+        const ref30 = allAssessments.find((a) => new Date(a.date).getTime() <= cutoff30) ?? null;
+        const weightDiff30 = (latest?.weight != null && ref30?.weight != null) ? latest.weight - ref30.weight : null;
+        const bfDiff30     = (latest?.bodyFat != null && ref30?.bodyFat != null) ? latest.bodyFat - ref30.bodyFat : null;
+        const weeklyAvg    = (weightDiff30 != null && ref30 != null && latest != null) ? (() => {
+          const days = Math.max(1, (new Date(latest.date).getTime() - new Date(ref30.date).getTime()) / 86_400_000);
+          return weightDiff30 / (days / 7);
+        })() : null;
+
+        // Chart data filtered by period
+        const chartCutoff = chartPeriod === 0 ? 0 : Date.now() - chartPeriod * 86_400_000;
+        const chartData = [...allAssessments]
+          .filter((a) => chartPeriod === 0 || new Date(a.date).getTime() >= chartCutoff)
+          .sort((a, b) => a.date.localeCompare(b.date))
+          .map((a) => ({
+            date: new Date(a.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+            peso: a.weight,
+          }));
+
+        const PERIOD_OPTIONS = [
+          { label: 'Últimos 30 dias', value: 30 },
+          { label: 'Últimos 60 dias', value: 60 },
+          { label: 'Últimos 90 dias', value: 90 },
+          { label: 'Tudo',            value: 0  },
+        ];
+
+        const _hasWeight = allAssessments.some((a) => a.weight != null);
+        const _hasBF = allAssessments.some((a) => a.bodyFat != null);
+        void _hasWeight; void _hasBF;
+
+        return (
+          <div className="grid grid-cols-[300px_1fr] gap-4 items-start">
+
+            {/* ── Left: Assessment list ─────────────────────────────── */}
+            <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-700/50">
+                <p className="text-sm font-semibold text-white">Avaliações</p>
+                <button
+                  onClick={() => setNewAssessmentOpen(true)}
+                  className="flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium px-3 py-1.5 rounded-xl transition-colors"
+                >
+                  <Plus size={13} />
+                  Nova avaliação
+                </button>
+              </div>
+
+              {allAssessments.length === 0 ? (
+                <div className="py-12 text-center text-slate-400">
+                  <Activity size={28} className="mx-auto mb-2 opacity-30" />
+                  <p className="text-xs">Nenhuma avaliação ainda.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="divide-y divide-slate-700/40">
+                    {visibleAssessments.map((a) => {
+                      const isSelected = a.id === selectedId;
+                      return (
+                        <button
+                          key={a.id}
+                          onClick={() => setSelectedAssessmentId(a.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all ${
+                            isSelected
+                              ? 'bg-violet-500/10 border-l-2 border-violet-500'
+                              : 'hover:bg-slate-700/30 border-l-2 border-transparent'
+                          }`}
+                        >
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-violet-500/20' : 'bg-slate-700/50'}`}>
+                            <CalendarDays size={16} className={isSelected ? 'text-violet-400' : 'text-slate-500'} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-slate-200 mb-1.5">
+                              {new Date(a.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                            </p>
+                            <div className="flex gap-4">
+                              {a.weight != null && (
+                                <div>
+                                  <p className="text-sm font-bold text-white leading-none">{a.weight} kg</p>
+                                  <p className="text-[10px] text-slate-500 mt-0.5">Peso</p>
+                                </div>
+                              )}
+                              {a.bodyFat != null && (
+                                <div>
+                                  <p className="text-sm font-bold text-white leading-none">{a.bodyFat} %</p>
+                                  <p className="text-[10px] text-slate-500 mt-0.5">Gordura</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <ChevronDown size={14} className={`shrink-0 -rotate-90 ${isSelected ? 'text-violet-400' : 'text-slate-600'}`} />
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {allAssessments.length > VISIBLE_LIMIT && (
+                    <button
+                      onClick={() => setShowAllAssessments((p) => !p)}
+                      className="w-full flex items-center justify-center gap-1.5 py-3 text-xs text-violet-400 hover:text-violet-300 border-t border-slate-700/40 transition-colors"
+                    >
+                      {showAllAssessments
+                        ? <><ChevronUp size={13} /> Mostrar menos</>
+                        : <><ChevronDown size={13} /> Ver todas avaliações ({allAssessments.length})</>
+                      }
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* ── Right: Detail panel ──────────────────────────────── */}
+            {selected ? (
+              <div className="flex flex-col gap-4">
+
+                {/* Metric cards row */}
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                    <p className="text-xs text-slate-400 mb-1.5">Peso atual</p>
+                    <p className="text-2xl font-bold text-white">{latest?.weight != null ? `${latest.weight} kg` : '—'}</p>
+                    {weightDiff30 != null && (
+                      <p className={`text-xs mt-1.5 flex items-center gap-1 ${weightDiff30 <= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {weightDiff30 <= 0 ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
+                        {weightDiff30 > 0 ? '+' : ''}{weightDiff30.toFixed(1)} kg (30 dias)
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                    <p className="text-xs text-slate-400 mb-1.5">Méd. 30 dias</p>
+                    <p className="text-2xl font-bold text-white">
+                      {weeklyAvg != null ? `${weeklyAvg > 0 ? '+' : ''}${weeklyAvg.toFixed(1)}` : '—'}
+                    </p>
+                    {weeklyAvg != null && (
+                      <p className={`text-xs mt-1.5 flex items-center gap-1 ${weeklyAvg <= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {weeklyAvg <= 0 ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
+                        {Math.abs(weeklyAvg).toFixed(2)} kg/semana
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                    <p className="text-xs text-slate-400 mb-1.5">Gordura atual</p>
+                    <p className="text-2xl font-bold text-white">{latest?.bodyFat != null ? `${latest.bodyFat} %` : '—'}</p>
+                    {bfDiff30 != null && (
+                      <p className={`text-xs mt-1.5 flex items-center gap-1 ${bfDiff30 <= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {bfDiff30 <= 0 ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
+                        {bfDiff30 > 0 ? '+' : ''}{bfDiff30.toFixed(1)} p.p. (30 dias)
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                    <p className="text-xs text-slate-400 mb-1.5">Massa muscular</p>
+                    <p className="text-2xl font-bold text-white">{latest?.muscleMass != null ? `${latest.muscleMass} kg` : '—'}</p>
+                    {latest?.muscleMass != null && allAssessments[1]?.muscleMass != null && (() => {
+                      const diff = latest.muscleMass - allAssessments[1].muscleMass;
+                      return (
+                        <p className={`text-xs mt-1.5 flex items-center gap-1 ${diff >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                          {diff >= 0 ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+                          {diff > 0 ? '+' : ''}{diff.toFixed(1)} kg
+                        </p>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Chart */}
+                <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-sm font-semibold text-white">Evolução do peso (kg)</p>
+                    <div className="relative">
+                      <select
+                        value={chartPeriod}
+                        onChange={(e) => setChartPeriod(Number(e.target.value))}
+                        className="appearance-none bg-slate-700/60 border border-slate-600 text-xs text-slate-300 rounded-xl pl-3 pr-7 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer"
+                      >
+                        {PERIOD_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                  {chartData.length >= 2 ? (
+                    <ResponsiveContainer width="100%" height={200}>
+                      <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                        <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }} />
+                        <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} domain={['auto', 'auto']} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '10px', fontSize: '12px' }}
+                          labelStyle={{ color: '#e2e8f0' }}
+                        />
+                        <Line type="monotone" dataKey="peso" name="Peso (kg)" stroke="#818cf8" strokeWidth={2.5} dot={{ r: 4, fill: '#818cf8' }} activeDot={{ r: 6 }} connectNulls />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="h-[200px] flex items-center justify-center text-xs text-slate-500">
+                      {allAssessments.length < 2
+                        ? 'Registre pelo menos 2 avaliações para ver o gráfico.'
+                        : 'Sem dados no período. Selecione um intervalo mais amplo.'}
+                    </div>
+                  )}
+                </div>
+
+                {/* Outras medidas */}
+                <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl p-5">
+                  <p className="text-sm font-semibold text-white mb-4">Outras medidas</p>
+                  {[selected.leanMass, selected.waist, selected.hip, selected.arm, selected.thigh, selected.chest, selected.calf, selected.abdomen].every((v) => v == null) ? (
+                    <p className="text-xs text-slate-500 italic">Nenhuma medida registrada.</p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2.5">
+                      {[
+                        { label: 'Massa magra',  value: selected.leanMass   != null ? `${selected.leanMass} kg`   : null },
+                        { label: 'Cintura',      value: selected.waist      != null ? `${selected.waist} cm`      : null },
+                        { label: 'Quadril',      value: selected.hip        != null ? `${selected.hip} cm`        : null },
+                        { label: 'Braço',        value: selected.arm        != null ? `${selected.arm} cm`        : null },
+                        { label: 'Coxa',         value: selected.thigh      != null ? `${selected.thigh} cm`      : null },
+                        { label: 'Peitoral',     value: selected.chest      != null ? `${selected.chest} cm`      : null },
+                        { label: 'Panturrilha',  value: selected.calf       != null ? `${selected.calf} cm`       : null },
+                        { label: 'Abdômen',      value: selected.abdomen    != null ? `${selected.abdomen} cm`    : null },
+                      ].filter((m) => m.value != null).map(({ label, value }) => (
+                        <div key={label} className="flex items-center justify-between py-1.5 border-b border-slate-700/30 last:border-0">
+                          <p className="text-xs text-slate-400">{label}</p>
+                          <p className="text-xs font-semibold text-slate-200">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {selected.notes && (
+                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-5 py-4">
+                    <p className="text-sm font-semibold text-white mb-2">Observações da avaliação</p>
+                    <p className="text-sm text-slate-300">{selected.notes}</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-slate-800/80 border border-slate-700/50 rounded-2xl py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
+                <Activity size={32} className="opacity-30" />
+                <p className="text-sm">Nenhuma avaliação registrada ainda.</p>
+                <button
+                  onClick={() => setNewAssessmentOpen(true)}
+                  className="text-xs text-violet-400 hover:underline"
+                >
+                  Registrar primeira avaliação
+                </button>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* ── Modal: New Assessment ─────────────────────────────────────────── */}
+      {newAssessmentOpen && (
+        <NewAssessmentModal
+          studentId={student.id}
+          studentName={student.name}
+          onClose={() => setNewAssessmentOpen(false)}
+        />
+      )}
+
+      {/* ── Modal: New Diet ─────────────────────────────────────────────── */}
+      {newDietOpen && (
+        <NewDietModal
+          studentId={student.id}
+          studentName={student.name}
+          onClose={() => setNewDietOpen(false)}
+        />
+      )}
+
+      {/* ── Modal: New Workout ────────────────────────────────────────────── */}
       {weeklyPlanOpen && (
-        <WeeklyPlanModal
+        <NewWorkoutModal
           studentId={student.id}
           studentName={student.name}
           onClose={() => setWeeklyPlanOpen(false)}
@@ -1050,6 +1473,7 @@ export default function AlunoDetalhe() {
         <WorkoutEditModal
           workout={editingWorkout}
           exercises={exercises}
+          assignment={studentAssignments.find((a) => a.workoutId === editingWorkout.id)}
           onClose={() => setEditingWorkout(null)}
         />
       )}

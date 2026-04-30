@@ -6,7 +6,6 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './contexts/AuthContext.tsx'
-import { AppProvider } from './contexts/AppContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
 import { SettingsProvider } from './contexts/SettingsContext.tsx'
 import { queryClient } from './lib/queryClient.ts'
@@ -18,9 +17,7 @@ createRoot(document.getElementById('root')!).render(
         <SettingsProvider>
           <BrowserRouter>
             <AuthProvider>
-              <AppProvider>
                 <App />
-              </AppProvider>
             </AuthProvider>
           </BrowserRouter>
         </SettingsProvider>

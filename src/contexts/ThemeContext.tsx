@@ -9,7 +9,7 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
-const LS_KEY = 'fitcoach_theme';
+const LS_KEY = 'movr_theme';
 
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem(LS_KEY);

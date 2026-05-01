@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- FitCoach — Row Level Security Policies
+-- Movr — Row Level Security Policies
 -- Execute AFTER schema.sql in the Supabase SQL Editor
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -8,18 +8,26 @@ CREATE OR REPLACE FUNCTION public.my_role()
 RETURNS TEXT
 LANGUAGE SQL STABLE
 SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
 $$;
+-- Only authenticated users should call this — revoke from anon/public
+REVOKE EXECUTE ON FUNCTION public.my_role() FROM PUBLIC, anon;
+GRANT  EXECUTE ON FUNCTION public.my_role() TO authenticated;
 
 -- Helper function: get current user's personal_id (for alunos)
 CREATE OR REPLACE FUNCTION public.my_personal_id()
 RETURNS UUID
 LANGUAGE SQL STABLE
 SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT personal_id FROM public.profiles WHERE id = auth.uid();
 $$;
+-- Only authenticated users should call this — revoke from anon/public
+REVOKE EXECUTE ON FUNCTION public.my_personal_id() FROM PUBLIC, anon;
+GRANT  EXECUTE ON FUNCTION public.my_personal_id() TO authenticated;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Enable RLS on all tables

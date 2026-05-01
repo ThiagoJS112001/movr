@@ -37,6 +37,7 @@ import AcessoBloqueadoPage from './pages/aluno/AcessoBloqueadoPage';
 import AlunoGruposPage from './pages/aluno/AlunoGruposPage';
 import AlunoGrupoChatPage from './pages/aluno/AlunoGrupoChatPage';
 import AlunoAcademiasPage from './pages/aluno/AlunoAcademiasPage';
+import AlunoAmigosPage from './pages/aluno/AlunoAmigosPage';
 
 // Academia pages
 import AcademiaDashboard from './pages/academia/AcademiaDashboard';
@@ -92,6 +93,7 @@ export default function App() {
             <Route path="/aluno/grupos" element={<AlunoGruposPage />} />
             <Route path="/aluno/grupos/:id" element={<AlunoGrupoChatPage />} />
             <Route path="/aluno/academias" element={<AlunoAcademiasPage />} />
+            <Route path="/aluno/amigos" element={<AlunoAmigosPage />} />
           </Route>
         </Route>
 

@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- FitCoach — Full Database Schema
+-- Movr — Full Database Schema
 -- Execute this in the Supabase SQL Editor (Dashboard → SQL Editor → New query)
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -8,11 +8,22 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ─── 1. PROFILES ─────────────────────────────────────────────────────────────
 -- Extends auth.users. Created automatically via trigger (see triggers.sql).
+-- role_prefix is a generated column — derived automatically from role:
+--   personal  → PT
+--   aluno     → ALN
+--   academia  → ACD
 CREATE TABLE IF NOT EXISTS public.profiles (
   id          UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name        TEXT NOT NULL,
   email       TEXT NOT NULL UNIQUE,
   role        TEXT NOT NULL CHECK (role IN ('personal', 'aluno', 'academia')),
+  role_prefix TEXT GENERATED ALWAYS AS (
+    CASE role
+      WHEN 'personal' THEN 'PT'
+      WHEN 'aluno'    THEN 'ALN'
+      WHEN 'academia' THEN 'ACD'
+    END
+  ) STORED,
   avatar_url  TEXT,
   -- For alunos: reference to their personal trainer
   personal_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -261,6 +272,7 @@ CREATE TABLE IF NOT EXISTS public.gym_ratings (
 -- INDEXES (for common query patterns)
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_profiles_personal_id        ON public.profiles(personal_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_role_prefix         ON public.profiles(role_prefix);
 CREATE INDEX IF NOT EXISTS idx_exercises_personal_id       ON public.exercises(personal_id);
 CREATE INDEX IF NOT EXISTS idx_workouts_personal_id        ON public.workouts(personal_id);
 CREATE INDEX IF NOT EXISTS idx_workout_exercises_workout   ON public.workout_exercises(workout_id);
@@ -277,3 +289,17 @@ CREATE INDEX IF NOT EXISTS idx_messages_to                 ON public.messages(to
 CREATE INDEX IF NOT EXISTS idx_group_messages_group        ON public.group_messages(group_id);
 CREATE INDEX IF NOT EXISTS idx_assessments_student         ON public.assessments(student_id);
 CREATE INDEX IF NOT EXISTS idx_gym_ratings_gym             ON public.gym_ratings(gym_id);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- MIGRATION — apply to existing databases that were created before role_prefix
+-- Run this once in Supabase SQL Editor if the table already exists:
+-- ─────────────────────────────────────────────────────────────────────────────
+-- ALTER TABLE public.profiles
+--   ADD COLUMN IF NOT EXISTS role_prefix TEXT GENERATED ALWAYS AS (
+--     CASE role
+--       WHEN 'personal' THEN 'PT'
+--       WHEN 'aluno'    THEN 'ALN'
+--       WHEN 'academia' THEN 'ACD'
+--     END
+--   ) STORED;
+-- CREATE INDEX IF NOT EXISTS idx_profiles_role_prefix ON public.profiles(role_prefix);

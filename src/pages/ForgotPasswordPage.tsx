@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Dumbbell,
   Mail,
   ArrowLeft,
   Lock,
@@ -10,6 +9,7 @@ import {
   Moon,
   Sun,
 } from 'lucide-react';
+import MovrLogo from '../components/ui/MovrLogo';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 import { APP_NAME } from '../lib/constants';
@@ -42,11 +42,9 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col items-center justify-center px-4 py-10 transition-colors duration-300">
       {/* Top branding */}
       <div className="flex flex-col items-center mb-8">
-        <div className="bg-indigo-600 p-3 rounded-2xl mb-3 shadow-lg shadow-indigo-900/30">
-          <Dumbbell size={30} className="text-white" />
-        </div>
+        <MovrLogo size={60} withContainer className="mb-3" />
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{APP_NAME}</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Personal trainer &amp; aluno, juntos.</p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Treine. Acompanhe. Evolua.</p>
       </div>
 
       {/* Two-panel card */}

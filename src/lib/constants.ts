@@ -1,4 +1,4 @@
-export const APP_NAME = 'FitCoach' as const;
+export const APP_NAME = 'Movr' as const;
 
 // ── UI tokens ─────────────────────────────────────────────────────────────────
 /** Standard card shell — white/dark-800, rounded-2xl, shadow, border */

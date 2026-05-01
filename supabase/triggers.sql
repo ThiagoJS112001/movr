@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- FitCoach — Auth Trigger
+-- Movr — Auth Trigger
 -- Execute AFTER schema.sql and rls.sql
 -- ─────────────────────────────────────────────────────────────────────────────
 
@@ -23,6 +23,9 @@ BEGIN
   RETURN NEW;
 END;
 $$;
+-- This is a trigger function — invoked by the trigger, not directly by users
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon;
+GRANT  EXECUTE ON FUNCTION public.handle_new_user() TO authenticated;
 
 -- Attach the trigger to auth.users
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

@@ -1,55 +1,62 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Dumbbell,
   Mail,
   Lock,
   Eye,
   EyeOff,
   TrendingUp,
-  ClipboardList,
   Users,
+  Target,
   ShieldCheck,
   Moon,
   Sun,
+  ArrowRight,
 } from 'lucide-react';
+import MovrLogo from '../components/ui/MovrLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { APP_NAME } from '../lib/constants';
 
 const FEATURES = [
   {
     icon: TrendingUp,
-    title: 'Gestão inteligente de treinos',
-    description: 'Crie, organize e acompanhe treinos de forma prática e eficiente.',
-    color: 'indigo',
-  },
-  {
-    icon: ClipboardList,
-    title: 'Dietas personalizadas',
-    description: 'Monte dietas, planeje refeições e acompanhe a evolução nutricional.',
-    color: 'emerald',
+    title: 'Evolução que se vê',
+    description: 'Acompanhe métricas, resultados e performance em tempo real.',
   },
   {
     icon: Users,
-    title: 'Acompanhamento completo',
-    description: 'Relatórios, métricas e evolução em tempo real de todos os seus alunos.',
-    color: 'amber',
+    title: 'Conexão que transforma',
+    description: 'Conecte personal, alunos e academias em um só lugar.',
+  },
+  {
+    icon: Target,
+    title: 'Foco que gera resultado',
+    description: 'Planeje treinos, dietas e acompanhamentos com mais clareza e eficiência.',
   },
   {
     icon: ShieldCheck,
-    title: 'Seus dados estão seguros',
+    title: 'Seus dados estão protegidos',
     description: 'Utilizamos criptografia e boas práticas para garantir a segurança das suas informações.',
-    color: 'slate',
   },
 ];
 
-const ICON_COLOR: Record<string, string> = {
-  indigo: 'bg-indigo-600/20 text-indigo-400',
-  emerald: 'bg-emerald-600/20 text-emerald-400',
-  amber: 'bg-amber-600/20 text-amber-400',
-  slate: 'bg-slate-600/30 text-slate-400',
-};
+/** Logo com fallback para o SVG se a imagem não existir */
+function BrandLogo({ size = 38 }: { size?: number }) {
+  const [imgError, setImgError] = useState(false);
+  if (!imgError) {
+    return (
+      <img
+        src="/images/logo_escura.png"
+        alt="Movr"
+        width={size}
+        height={size}
+        className="object-contain"
+        onError={() => setImgError(true)}
+      />
+    );
+  }
+  return <MovrLogo size={size} withContainer />;
+}
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -82,30 +89,35 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col items-center justify-center px-4 py-10 transition-colors duration-300">
-      {/* Top branding */}
-      <div className="flex flex-col items-center mb-8">
-        <div className="bg-indigo-600 p-3 rounded-2xl mb-3 shadow-lg shadow-indigo-900/30">
-          <Dumbbell size={30} className="text-white" />
-        </div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">{APP_NAME}</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Personal trainer &amp; aluno, juntos.</p>
-      </div>
+    <div className="min-h-screen bg-[#080B18] flex flex-col items-center justify-center px-4 py-8">
 
-      {/* Two-panel card */}
-      <div className="w-full max-w-3xl bg-white dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2">
+      {/* Card */}
+      <div className="w-full max-w-5xl bg-[#0D1025] border border-white/[0.07] rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
 
-        {/* Left: Login form */}
-        <div className="p-8 flex flex-col justify-center">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">Entrar na sua conta</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Acesse sua conta para continuar.</p>
+        {/* ── LEFT: Login form ── */}
+        <div className="p-10 flex flex-col">
+
+          {/* Logo */}
+          <div className="mb-6 shrink-0">
+            <img src="/images/logo_escrita.png" alt="movr." className="w-56 max-h-16 object-contain object-left" />
+          </div>
+
+          <div className="flex-1 flex flex-col justify-center">
+
+          <h2 className="text-2xl font-bold text-white mb-1">
+            Bem-vindo de volta! 👋
+          </h2>
+          <p className="text-slate-400 text-sm mb-7">
+            Faça login para continuar{' '}
+            <span className="text-indigo-400 font-medium">evoluindo.</span>
+          </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">E-mail</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1.5">E-mail</label>
               <div className="relative">
-                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   type="email"
                   required
@@ -113,29 +125,38 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="w-full bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-slate-600 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
               </div>
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Senha</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-medium text-slate-300">Senha</label>
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-xs text-indigo-400 hover:text-indigo-300 transition"
+                >
+                  Esqueci minha senha
+                </button>
+              </div>
               <div className="relative">
-                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Digite sua senha"
-                  className="w-full bg-slate-50 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  placeholder="••••••••••••"
+                  className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-slate-600 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition"
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -143,45 +164,50 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Remember me + Forgot password */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 accent-indigo-500 rounded"
-                />
-                <span className="text-sm text-slate-600 dark:text-slate-300">Lembrar de mim</span>
-              </label>
-              <button type="button" onClick={() => navigate('/forgot-password')} className="text-sm text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition">
-                Esqueci minha senha
-              </button>
-            </div>
+            {/* Remember me */}
+            <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 accent-indigo-500 rounded"
+              />
+              <span className="text-sm text-slate-400">Lembrar de mim</span>
+            </label>
 
             {error && (
-              <p className="text-red-500 dark:text-red-400 text-sm bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700/50 rounded-xl px-3 py-2">
+              <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
                 {error}
               </p>
             )}
 
+            {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold rounded-xl py-2.5 text-sm transition-colors"
+              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
             >
-              {loading ? 'Entrando…' : 'Entrar'}
+              {loading ? (
+                'Entrando...'
+              ) : (
+                <>
+                  Entrar
+                  <ArrowRight size={15} />
+                </>
+              )}
             </button>
 
+            {/* Divider */}
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-              <span className="text-xs text-slate-400 dark:text-slate-500">ou</span>
-              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-xs text-slate-600">ou</span>
+              <div className="flex-1 h-px bg-white/10" />
             </div>
 
+            {/* Google */}
             <button
               type="button"
-              className="flex items-center justify-center gap-2 bg-transparent border border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-400 text-slate-800 dark:text-white rounded-xl py-2.5 text-sm font-medium transition"
+              className="flex items-center justify-center gap-2 bg-transparent border border-white/10 hover:border-white/25 text-slate-300 hover:text-white rounded-xl py-2.5 text-sm font-medium transition"
             >
               <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
                 <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
@@ -192,57 +218,148 @@ export default function LoginPage() {
               Entrar com Google
             </button>
 
-            <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-center text-sm text-slate-500">
               Não tem uma conta?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/register')}
-                className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 font-medium transition"
+                className="text-indigo-400 hover:text-indigo-300 font-medium transition"
               >
                 Criar conta →
               </button>
             </p>
           </form>
+          </div>
         </div>
 
-        {/* Right: Features promo */}
-        <div className="bg-slate-50 dark:bg-slate-900/50 border-l border-slate-200 dark:border-slate-700/50 p-8 flex flex-col justify-center gap-2">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Uma plataforma completa</h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">para personal, alunos e academias.</p>
-          <ul className="space-y-3">
-            {FEATURES.map(({ icon: Icon, title, description, color }) => (
-              <li key={title} className="flex items-start gap-3">
-                <div className={`mt-0.5 flex-shrink-0 rounded-xl p-2 ${ICON_COLOR[color]}`}>
-                  <Icon size={18} />
+        {/* ── RIGHT: Marketing panel ── */}
+        <div className="relative hidden lg:grid grid-cols-[1fr_auto] border-l border-white/[0.07] bg-[#0A0D1F] overflow-hidden">
+
+          {/* Trend line decoration — top right */}
+          <svg
+            className="absolute top-0 right-0 w-72 h-56 opacity-25 pointer-events-none"
+            viewBox="0 0 280 200"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M 10 180 C 50 155, 80 130, 110 105 S 160 65, 195 42 S 245 18, 275 8"
+              stroke="url(#trendGrad)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <circle cx="110" cy="105" r="4.5" fill="#818CF8" opacity="0.9"/>
+            <circle cx="175" cy="55" r="4.5" fill="#818CF8" opacity="0.9"/>
+            <circle cx="275" cy="8" r="7" fill="#EF4444"/>
+            <defs>
+              <linearGradient id="trendGrad" x1="10" y1="180" x2="275" y2="8" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="#4338CA" />
+                <stop offset="100%" stopColor="#818CF8" />
+              </linearGradient>
+            </defs>
+          </svg>
+
+          {/* Features column */}
+          <div className="flex flex-col justify-between p-8 pr-4">
+            <div>
+              <p className="text-[10px] font-semibold tracking-[0.18em] text-indigo-400 uppercase mb-4">
+                Uma plataforma completa
+              </p>
+              <h3 className="text-3xl font-bold text-white leading-snug mb-2">
+                Para treinar,<br />acompanhar<br />
+                e{' '}
+                <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+                  evoluir.
+                </span>
+              </h3>
+              <p className="text-slate-400 text-sm mt-3 leading-relaxed">
+                Tudo o que você precisa para levar<br />
+                seus treinos e seus alunos mais longe.
+              </p>
+            </div>
+
+            <ul className="space-y-4 mt-6">
+              {FEATURES.map(({ icon: Icon, title, description }) => (
+                <li key={title} className="flex items-start gap-3">
+                  <div className="mt-0.5 flex-shrink-0 rounded-lg p-2 bg-indigo-600/20 text-indigo-400">
+                    <Icon size={15} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{title}</p>
+                    <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Connection diagram column */}
+          <div className="flex items-center justify-center p-6 pl-2">
+            <div className="relative w-44 h-64">
+
+              {/* Orbital circle */}
+              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 176 256" fill="none" aria-hidden="true">
+                <ellipse cx="88" cy="128" rx="70" ry="100" stroke="#4338CA" strokeWidth="1" strokeDasharray="5 4" opacity="0.35"/>
+              </svg>
+
+              {/* PERSONAL — top */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
+                <div className="w-10 h-10 rounded-full bg-[#141830] border border-indigo-500/40 flex items-center justify-center shadow-lg">
+                  <Users size={16} className="text-indigo-400" />
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{title}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{description}</p>
+                <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Personal</span>
+              </div>
+
+              {/* Center M logo */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="w-14 h-14 rounded-2xl bg-[#141830] border border-indigo-500/30 flex items-center justify-center shadow-xl">
+                  <BrandLogo size={36} />
                 </div>
-              </li>
-            ))}
-          </ul>
+              </div>
+
+              {/* ALUNO — bottom left */}
+              <div className="absolute bottom-0 left-0 flex flex-col items-center gap-1.5">
+                <div className="w-10 h-10 rounded-full bg-[#141830] border border-violet-500/40 flex items-center justify-center shadow-lg">
+                  <Users size={16} className="text-violet-400" />
+                </div>
+                <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Aluno</span>
+              </div>
+
+              {/* ACADEMIA — bottom right */}
+              <div className="absolute bottom-0 right-0 flex flex-col items-center gap-1.5">
+                <div className="w-10 h-10 rounded-full bg-[#141830] border border-indigo-500/40 flex items-center justify-center shadow-lg">
+                  <ShieldCheck size={16} className="text-indigo-400" />
+                </div>
+                <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Academia</span>
+              </div>
+
+              {/* Dot on orbital */}
+              <div className="absolute bottom-[30%] left-[2px] w-2 h-2 rounded-full bg-indigo-400 shadow-[0_0_6px_2px_rgba(99,102,241,0.6)]" />
+            </div>
+          </div>
+
         </div>
       </div>
 
       {/* Footer */}
-      <p className="mt-6 text-xs text-slate-400 dark:text-slate-500 text-center">
-        Ao continuar, você concorda com nossos{' '}
-        <button type="button" className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition">Termos de Uso</button>
-        {' '}e{' '}
-        <button type="button" className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition">Política de Privacidade</button>
-        .
-      </p>
-
-      {/* Theme toggle */}
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="mt-4 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition"
-      >
-        {theme === 'dark' ? <Moon size={13} /> : <Sun size={13} />}
-        Modo {theme === 'dark' ? 'escuro' : 'claro'} ativado
-      </button>
+      <div className="mt-5 flex flex-col items-center gap-2">
+        <p className="text-xs text-slate-600 text-center">
+          Ao continuar, você concorda com nossos{' '}
+          <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Termos de Uso</button>
+          {' '}e{' '}
+          <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Política de Privacidade</button>
+          .
+        </p>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-400 transition"
+        >
+          {theme === 'dark' ? <Moon size={12} /> : <Sun size={12} />}
+          Modo {theme === 'dark' ? 'escuro' : 'claro'} ativado
+        </button>
+      </div>
     </div>
   );
 }

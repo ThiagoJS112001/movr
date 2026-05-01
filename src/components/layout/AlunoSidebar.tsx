@@ -1,6 +1,5 @@
 ﻿import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  Dumbbell,
   LayoutDashboard,
   MessageCircle,
   ClipboardList,
@@ -12,6 +11,7 @@ import {
   Settings,
   Users,
   Building2,
+  UserPlus,
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -19,14 +19,15 @@ import { useTotalUnread } from '../../hooks/useMessages';
 import { useSettings } from '../../contexts/SettingsContext';
 import { APP_NAME } from '../../lib/constants';
 import SettingsModal from '../SettingsModal';
+import MovrLogo from '../ui/MovrLogo';
 
 const ALL_NAV_ITEMS = [
   { to: '/aluno/dashboard', label: 'Meus Treinos', icon: LayoutDashboard },
   { to: '/aluno/dieta', label: 'Minha Dieta', icon: Salad },
   { to: '/aluno/historico', label: 'Histórico', icon: ClipboardList },
   { to: '/aluno/progresso', label: 'Progresso', icon: TrendingUp },
-  { to: '/aluno/grupos', label: 'Grupos', icon: Users },
   { to: '/aluno/academias', label: 'Academias', icon: Building2 },
+  { to: '/aluno/amigos', label: 'Adicionar Amigos', icon: UserPlus },
   { to: '/aluno/chat', label: 'Chat', icon: MessageCircle },
 ];
 
@@ -78,7 +79,7 @@ export default function AlunoSidebar() {
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-slate-900 text-white px-4 py-3 fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-2 font-bold text-emerald-400">
-          <Dumbbell size={20} />
+          <MovrLogo size={22} />
           <span>{APP_NAME}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -104,7 +105,7 @@ export default function AlunoSidebar() {
         } flex flex-col`}
       >
         <div className="flex items-center gap-2 font-bold text-emerald-400 px-4 pt-5 pb-2 text-lg">
-          <Dumbbell size={22} />
+          <MovrLogo size={22} />
           {APP_NAME}
         </div>
         <div className="px-3 flex-1 overflow-y-auto">{links}</div>
@@ -123,7 +124,7 @@ export default function AlunoSidebar() {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 bg-slate-900 min-h-screen py-5 px-3 fixed top-0 left-0 h-full">
         <div className="flex items-center gap-2 font-bold text-emerald-400 px-4 mb-2 text-lg">
-          <Dumbbell size={22} />
+          <MovrLogo size={22} />
           {APP_NAME}
         </div>
         <div className="flex-1 overflow-y-auto">{links}</div>

@@ -17,6 +17,7 @@ import { useTotalUnread } from '../../hooks/useMessages';
 import { useSettings } from '../../contexts/SettingsContext';
 import { APP_NAME } from '../../lib/constants';
 import SettingsModal from '../SettingsModal';
+import MovrLogo from '../ui/MovrLogo';
 
 const ALL_NAV_ITEMS = [
   { to: '/personal/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -73,7 +74,7 @@ export default function PersonalSidebar() {
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-slate-900 text-white px-4 py-3 fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-2 font-bold text-indigo-400">
-          <Dumbbell size={20} />
+          <MovrLogo size={22} />
           <span>{APP_NAME}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -101,7 +102,7 @@ export default function PersonalSidebar() {
         } flex flex-col`}
       >
         <div className="flex items-center gap-2 font-bold text-indigo-400 px-4 pt-5 pb-2 text-lg">
-          <Dumbbell size={22} />
+          <MovrLogo size={22} />
           {APP_NAME}
         </div>
         <div className="px-3 flex-1 overflow-y-auto">{links}</div>
@@ -120,7 +121,7 @@ export default function PersonalSidebar() {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 bg-slate-900 min-h-screen py-5 px-3 fixed top-0 left-0 h-full">
         <div className="flex items-center gap-2 font-bold text-indigo-400 px-4 mb-2 text-lg">
-          <Dumbbell size={22} />
+          <MovrLogo size={22} />
           {APP_NAME}
         </div>
         <div className="flex-1 overflow-y-auto">{links}</div>

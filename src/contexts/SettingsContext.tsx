@@ -8,7 +8,7 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
-const LS_KEY = 'fitcoach_hidden_nav';
+const LS_KEY = 'movr_hidden_nav';
 
 function getInitialHidden(): string[] {
   try {

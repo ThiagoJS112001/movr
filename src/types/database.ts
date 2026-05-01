@@ -1,4 +1,4 @@
-// Auto-generated Supabase database types for FitCoach.
+// Auto-generated Supabase database types for Movr.
 // Reflects the schema defined in supabase/schema.sql.
 
 export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];

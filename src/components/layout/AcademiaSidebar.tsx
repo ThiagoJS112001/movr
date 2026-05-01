@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { APP_NAME } from '../../lib/constants';
 import SettingsModal from '../SettingsModal';
+import MovrLogo from '../ui/MovrLogo';
 
 const NAV_ITEMS = [
   { to: '/academia/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -76,7 +77,7 @@ export default function AcademiaSidebar() {
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-slate-900 text-white px-4 py-3 fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-2 font-bold text-violet-400">
-          <Building2 size={20} />
+          <MovrLogo size={22} />
           <span>{APP_NAME}</span>
         </div>
         <button onClick={() => setMobileOpen((v) => !v)} aria-label="Menu">
@@ -95,7 +96,7 @@ export default function AcademiaSidebar() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 font-bold text-violet-400 mb-2 px-2">
-              <Building2 size={20} />
+              <MovrLogo size={22} />
               <span>{APP_NAME}</span>
             </div>
             {user && (
@@ -110,7 +111,7 @@ export default function AcademiaSidebar() {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex md:flex-col w-56 bg-slate-900 fixed top-0 left-0 h-full z-20 p-4">
         <div className="flex items-center gap-2 font-bold text-violet-400 mb-1 px-2">
-          <Building2 size={20} />
+          <MovrLogo size={22} />
           <span>{APP_NAME}</span>
         </div>
         {user && (

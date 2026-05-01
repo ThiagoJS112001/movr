@@ -59,7 +59,7 @@ async function sendWelcomeEmail(
   const testOverride = import.meta.env.VITE_EMAILJS_TEST_TO as string | undefined;
   const recipient = testOverride?.trim() || toEmail;
   try {
-    await emailjs.send(serviceId, templateId, { to_email: recipient, to_name: toName, password, app_name: 'FitCoach' }, publicKey);
+    await emailjs.send(serviceId, templateId, { to_email: recipient, to_name: toName, password, app_name: 'Movr' }, publicKey);
     return true;
   } catch {
     return false;

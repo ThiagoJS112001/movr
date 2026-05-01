@@ -1,10 +1,12 @@
 export type UserRole = 'personal' | 'aluno' | 'academia';
+export type RolePrefix = 'PT' | 'ALN' | 'ACD';
 
 export interface User {
   id: string;
   name: string;
   email: string;
   role: UserRole;
+  rolePrefix: RolePrefix;
   avatarUrl?: string;
   isBlocked?: boolean;
 }

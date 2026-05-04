@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import {
   fetchWorkouts,
   fetchWorkoutById,
+  fetchWorkoutsByIds,
   createWorkout,
   updateWorkout,
   deleteWorkout,
@@ -124,6 +125,14 @@ export function useStudentAssignments() {
     queryKey: studentAssignmentsKey(user?.id ?? ''),
     queryFn: () => fetchStudentAssignments(user!.id),
     enabled: !!user && user.role === 'aluno',
+  });
+}
+
+export function useStudentWorkouts(workoutIds: string[]) {
+  return useQuery({
+    queryKey: ['student_workouts', [...workoutIds].sort().join(',')],
+    queryFn: () => fetchWorkoutsByIds(workoutIds),
+    enabled: workoutIds.length > 0,
   });
 }
 

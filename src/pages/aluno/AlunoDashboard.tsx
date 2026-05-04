@@ -1,190 +1,437 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Bell, User, ArrowRight, CheckCircle2, Moon, Star, MessageCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useWorkoutLogs } from '../../hooks/useWorkouts';
-import { useMyWeeklyPlan } from '../../hooks/useWeeklyPlans';
-import { Play, CheckCircle2, Moon } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import AlunoPerfilModal from '../../components/AlunoPerfilModal';
 
-const DAYS = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'] as const;
-type DayKey = typeof DAYS[number];
+// ── Mock types ─────────────────────────────────────────────────────────────────
 
-const DAYS_LABEL: Record<DayKey, string> = {
-  segunda: 'Segunda',
-  terca:   'Terça',
-  quarta:  'Quarta',
-  quinta:  'Quinta',
-  sexta:   'Sexta',
-  sabado:  'Sábado',
-  domingo: 'Domingo',
+interface WeekDay {
+  key: string;
+  abbr: string;
+  date: number;
+  workoutLabel: string | null;
+  status: 'done' | 'today' | 'upcoming' | 'rest';
+}
+
+interface ExercisePreview {
+  id: string;
+  name: string;
+  sets: number;
+  reps: string;
+  weight: string;
+}
+
+interface TodayWorkout {
+  name: string;
+  letter: string;
+  exerciseCount: number;
+  durationMin: number;
+  exercises: ExercisePreview[];
+}
+
+interface PersonalTrainer {
+  name: string;
+  avatarInitial: string;
+  specialties: string[];
+  rating: number;
+  weeksTogether: number;
+}
+
+interface Meal {
+  name: string;
+  time: string;
+  kcal: number;
+  done: boolean;
+  items: string;
+}
+
+interface DietToday {
+  meals: Meal[];
+  totalKcal: number;
+}
+
+// ── Mock data ──────────────────────────────────────────────────────────────────
+
+const MOCK_WEEK: WeekDay[] = [
+  { key: 'seg', abbr: 'SEG', date: 28, workoutLabel: 'Peito',  status: 'done'     },
+  { key: 'ter', abbr: 'TER', date: 29, workoutLabel: 'Costas', status: 'done'     },
+  { key: 'qua', abbr: 'QUA', date: 30, workoutLabel: null,     status: 'rest'     },
+  { key: 'qui', abbr: 'QUI', date:  1, workoutLabel: 'Pernas', status: 'today'    },
+  { key: 'sex', abbr: 'SEX', date:  2, workoutLabel: 'Ombro',  status: 'upcoming' },
+  { key: 'sab', abbr: 'SÁB', date:  3, workoutLabel: null,     status: 'rest'     },
+  { key: 'dom', abbr: 'DOM', date:  4, workoutLabel: null,     status: 'rest'     },
+];
+
+const MOCK_WORKOUT: TodayWorkout = {
+  name: 'Treino D — Pernas',
+  letter: 'D',
+  exerciseCount: 8,
+  durationMin: 55,
+  exercises: [
+    { id: '1', name: 'Agachamento livre',   sets: 4, reps: '10', weight: '80kg'     },
+    { id: '2', name: 'Leg press 45°',       sets: 3, reps: '12', weight: '120kg'    },
+    { id: '3', name: 'Cadeira extensora',   sets: 3, reps: '15', weight: '45kg'     },
+    { id: '4', name: 'Mesa flexora',        sets: 3, reps: '12', weight: '40kg'     },
+    { id: '5', name: 'Panturrilha em pé',   sets: 4, reps: '20', weight: '60kg'     },
+    { id: '6', name: 'Afundo alternado',    sets: 3, reps: '12', weight: 'corporal' },
+    { id: '7', name: 'Stiff',               sets: 3, reps: '12', weight: '50kg'     },
+    { id: '8', name: 'Abdução de quadril',  sets: 3, reps: '15', weight: '30kg'     },
+  ],
 };
 
-// JS getDay(): 0=Sunday, 1=Monday … 6=Saturday
-const TODAY_MAP: DayKey[] = ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'];
+const MOCK_STATS = {
+  workoutsThisWeek: 3,
+  workoutsDiff: 1,
+  daysThisMonth: 12,
+  totalMinutes: 247,
+};
 
-function getStartOfWeek(): Date {
-  const now = new Date();
-  const day = now.getDay(); // 0=Sun
-  const diff = day === 0 ? -6 : 1 - day; // adjust to Monday
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  monday.setHours(0, 0, 0, 0);
-  return monday;
+const MOCK_PERSONAL: PersonalTrainer = {
+  name: 'Rafael Costa',
+  avatarInitial: 'R',
+  specialties: ['Hipertrofia', 'Funcional', 'Emagrecimento'],
+  rating: 4.9,
+  weeksTogether: 12,
+};
+
+const MOCK_DIET: DietToday = {
+  totalKcal: 2450,
+  meals: [
+    { name: 'Café da manhã', time: '07:00', kcal: 520, done: true,  items: 'Ovos mexidos, pão integral, iogurte'     },
+    { name: 'Lanche',        time: '10:00', kcal: 280, done: true,  items: 'Banana, pasta de amendoim'              },
+    { name: 'Almoço',        time: '13:00', kcal: 780, done: false, items: 'Frango grelhado, arroz, feijão, salada' },
+    { name: 'Lanche tarde',  time: '16:00', kcal: 300, done: false, items: 'Whey, aveia, leite'                     },
+    { name: 'Jantar',        time: '20:00', kcal: 570, done: false, items: 'Salmão, batata doce, brócolis'          },
+  ],
+};
+
+// computed dynamically — see useEffect below
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+function DayChip({ day }: { day: WeekDay }) {
+  const isToday = day.status === 'today';
+  const isDone  = day.status === 'done';
+  const isRest  = day.status === 'rest';
+
+  let chipCls  = 'flex flex-col items-center px-3 py-2.5 rounded-xl border min-w-[52px] transition-colors ';
+  let abbrCls  = 'text-[10px] font-semibold tracking-widest mb-1 ';
+  let dateCls  = 'text-xl font-bold leading-none mb-1 ';
+  let labelCls = 'text-[9px] font-medium tracking-wide uppercase ';
+
+  if (isToday) {
+    chipCls  += 'border-[#7c5cfc] bg-[#7c5cfc]/10';
+    abbrCls  += 'text-[#7c5cfc]';
+    dateCls  += 'text-white';
+    labelCls += 'text-[#7c5cfc]';
+  } else if (isDone) {
+    chipCls  += 'border-[#22c55e]/25 bg-[#22c55e]/8';
+    abbrCls  += 'text-[#22c55e]';
+    dateCls  += 'text-[#22c55e]';
+    labelCls += 'text-[#22c55e]/70';
+  } else if (isRest) {
+    chipCls  += 'border-white/5 bg-transparent';
+    abbrCls  += 'text-slate-600';
+    dateCls  += 'text-slate-500';
+    labelCls += 'text-slate-600';
+  } else {
+    chipCls  += 'border-white/10 bg-transparent';
+    abbrCls  += 'text-slate-400';
+    dateCls  += 'text-slate-200';
+    labelCls += 'text-slate-500';
+  }
+
+  return (
+    <div className={chipCls}>
+      <span className={abbrCls}>{day.abbr}</span>
+      <span className={dateCls}>{day.date}</span>
+      <span className={labelCls}>{day.workoutLabel ?? 'Desc.'}</span>
+      {isToday && <span className="mt-1 w-1.5 h-1.5 rounded-full bg-[#7c5cfc]" />}
+    </div>
+  );
+}
+
+function PersonalCard({ personal, onChat }: { personal: PersonalTrainer; onChat: () => void }) {
+  return (
+    <div className="rounded-2xl bg-[#131722] border border-white/5 p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-full bg-[#7c5cfc]/20 flex items-center justify-center text-[#7c5cfc] font-bold text-lg shrink-0">
+          {personal.avatarInitial}
+        </div>
+        <div className="min-w-0">
+          <p className="font-semibold text-white text-sm truncate">{personal.name}</p>
+          <div className="flex items-center gap-1 mt-0.5">
+            <Star size={11} fill="#f59e0b" className="text-amber-400" />
+            <span className="text-xs text-amber-400 font-medium">{personal.rating}</span>
+            <span className="text-xs text-slate-500 ml-1">· {personal.weeksTogether} sem. juntos</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {personal.specialties.map((s) => (
+          <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#7c5cfc]/15 text-[#7c5cfc]">
+            {s}
+          </span>
+        ))}
+      </div>
+
+      <button
+        onClick={onChat}
+        className="w-full flex items-center justify-center gap-2 bg-[#7c5cfc]/15 hover:bg-[#7c5cfc]/25 text-[#7c5cfc] text-sm font-semibold py-2.5 rounded-xl transition-colors"
+      >
+        <MessageCircle size={15} />
+        Enviar mensagem
+      </button>
+    </div>
+  );
+}
+
+function DietCard({ diet }: { diet: DietToday }) {
+  const consumed = diet.meals.filter((m) => m.done).reduce((s, m) => s + m.kcal, 0);
+  const pct = Math.round((consumed / diet.totalKcal) * 100);
+
+  return (
+    <div className="rounded-2xl bg-[#131722] border border-white/5 p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold text-white text-sm">Dieta de hoje</h3>
+        <span className="text-xs text-slate-400">{consumed} / {diet.totalKcal} kcal</span>
+      </div>
+
+      <div className="h-1.5 bg-white/5 rounded-full mb-4 overflow-hidden">
+        <div className="h-full rounded-full bg-[#22c55e] transition-all" style={{ width: `${pct}%` }} />
+      </div>
+
+      <div className="space-y-3">
+        {diet.meals.map((meal) => (
+          <div key={meal.name} className="flex items-start gap-3">
+            <div className={`mt-0.5 w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+              meal.done ? 'bg-[#22c55e] border-[#22c55e]' : 'border-white/15 bg-transparent'
+            }`}>
+              {meal.done && <CheckCircle2 size={10} className="text-white" strokeWidth={3} />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className={`text-xs font-medium ${meal.done ? 'text-white' : 'text-slate-400'}`}>
+                  {meal.name}
+                </span>
+                <span className="text-[10px] text-slate-500 ml-2 shrink-0">{meal.kcal} kcal</span>
+              </div>
+              <p className="text-[10px] text-slate-600 truncate mt-0.5">{meal.items}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ─────────────────────────────────────────────────────────────
+
+function calcCompletion(data: { phone?: string | null; city?: string | null; state?: string | null; bio?: string | null; birth_date?: string | null }) {
+  const fields = [data.phone, data.city, data.state, data.bio, data.birth_date];
+  const filled = fields.filter(Boolean).length;
+  // name is always filled (required at signup) → base 1 of 6 = ~17%
+  return Math.round(((1 + filled) / 6) * 100);
 }
 
 export default function AlunoDashboard() {
   const { user } = useAuth();
-  const { data: logs = [] } = useWorkoutLogs(user?.id ?? '');
-  const { data: plan } = useMyWeeklyPlan();
   const navigate = useNavigate();
+  const [perfilOpen, setPerfilOpen] = useState(false);
+  const [profileCompletion, setProfileCompletion] = useState(0);
 
-  const todayKey = TODAY_MAP[new Date().getDay()];
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('phone, city, state, bio, birth_date')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data) setProfileCompletion(calcCompletion(data));
+      });
+  }, [user, perfilOpen]); // re-fetch when modal closes after saving
 
-  const weekStart = getStartOfWeek();
-  const weekEnd   = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 7);
+  const firstName = user?.name?.split(' ')[0] ?? 'Atleta';
 
-  const sessionsThisWeek = logs.filter((s) => {
-    const d = new Date(s.completedAt);
-    return d >= weekStart && d < weekEnd;
-  });
+  const today = new Date();
+  const dateLabel = today.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+  const dateFormatted = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
 
-  const sessionsByDay = sessionsThisWeek.reduce<Record<string, number>>((acc, s) => {
-    const dow = TODAY_MAP[new Date(s.completedAt).getDay()];
-    acc[dow] = (acc[dow] ?? 0) + 1;
-    return acc;
-  }, {});
+  const PREVIEW_COUNT = 3;
+  const previewExercises = MOCK_WORKOUT.exercises.slice(0, PREVIEW_COUNT);
+  const remaining = MOCK_WORKOUT.exerciseCount - PREVIEW_COUNT;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      {/* Greeting */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-white">
-          Olá, {user?.name?.split(' ')[0]} 👋
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-          Aqui está seu plano da semana.
-        </p>
-      </div>
+    <>
+    <div className="min-h-screen bg-[#0d0f14] text-white">
+      <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
 
-      {/* Stats strip */}
-      <div className="flex gap-3 mb-6">
-        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/60 shadow-sm text-center">
-          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{sessionsThisWeek.length}</div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Treinos esta semana</div>
-        </div>
-        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/60 shadow-sm text-center">
-          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-            {plan ? plan.days.filter((d) => d.exerciseIds.length > 0 || d.label.trim()).length : 0}
-          </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Dias com treino</div>
-        </div>
-        <div className="flex-1 bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700/60 shadow-sm text-center">
-          <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
-            {sessionsThisWeek.reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0)}
-          </div>
-          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Min. totais</div>
-        </div>
-      </div>
-
-      {/* Weekly plan grid */}
-      {!plan ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-8 text-center">
-          <p className="text-slate-400 dark:text-slate-500 text-sm">
-            Nenhum plano semanal configurado ainda. Seu personal trainer irá criar um para você em breve.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-2">
-          {DAYS.map((day) => {
-            const dayData     = plan.days.find((d) => d.dayOfWeek === day);
-            const isToday     = day === todayKey;
-            const hasWorkout  = !!(dayData && (dayData.exerciseIds.length > 0 || dayData.label.trim()));
-            const doneSessions = sessionsByDay[day] ?? 0;
-            const isDone      = doneSessions > 0;
-
-            return (
-              <div
-                key={day}
-                className={`flex items-center gap-3 rounded-2xl px-4 py-3 border transition-colors ${
-                  isToday
-                    ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700/50'
-                    : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700/60'
-                }`}
-              >
-                {/* Day label */}
-                <div className="w-20 shrink-0">
-                  <p className={`text-sm font-semibold ${
-                    isToday ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'
-                  }`}>
-                    {DAYS_LABEL[day]}
-                  </p>
-                  {isToday && (
-                    <span className="text-xs text-emerald-500 dark:text-emerald-400">Hoje</span>
-                  )}
-                </div>
-
-                {/* Workout info */}
-                <div className="flex-1 min-w-0">
-                  {hasWorkout ? (
-                    <div>
-                      <p className={`text-sm font-medium truncate ${
-                        isToday ? 'text-emerald-800 dark:text-emerald-200' : 'text-slate-700 dark:text-slate-200'
-                      }`}>
-                        {dayData?.label || 'Treino'}
-                      </p>
-                      {dayData && dayData.exerciseIds.length > 0 && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500">
-                          {dayData.exerciseIds.length} exercício{dayData.exerciseIds.length !== 1 ? 's' : ''}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500">
-                      <Moon size={13} />
-                      <span className="text-sm">Descanso</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Status / action */}
-                {hasWorkout && (
-                  isDone ? (
-                    <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 shrink-0">
-                      <CheckCircle2 size={16} />
-                      <span className="text-xs font-medium">Feito</span>
-                    </div>
-                  ) : isToday ? (
-                    <button
-                      onClick={() => navigate('/aluno/treino')}
-                      className="shrink-0 flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
-                    >
-                      <Play size={11} fill="currentColor" />
-                      Iniciar
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => navigate('/aluno/treino')}
-                      className="shrink-0 text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-medium"
-                    >
-                      Ver
-                    </button>
-                  )
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* CTA */}
-      {plan && (
+        {/* ── Profile completion banner ── */}
+        {profileCompletion < 100 && (
         <button
-          onClick={() => navigate('/aluno/treino')}
-          className="w-full mt-5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-2xl transition-colors flex items-center justify-center gap-2"
+          onClick={() => setPerfilOpen(true)}
+          className="w-full rounded-2xl bg-[#131722] border border-white/5 px-4 py-3 flex items-center gap-3 hover:border-[#7c5cfc]/30 hover:bg-[#131722]/80 transition-colors text-left"
         >
-          <Play size={16} fill="currentColor" />
-          Iniciar treino
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-300 mb-1.5">
+              Perfil{' '}
+              <span className="font-semibold text-[#7c5cfc]">{profileCompletion}% completo</span>
+              {' '}— complete seu perfil para ver personais perto de você
+            </p>
+            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-[#7c5cfc] transition-all duration-500" style={{ width: `${profileCompletion}%` }} />
+            </div>
+          </div>
+          <span className="shrink-0 flex items-center gap-1 text-xs font-semibold text-[#7c5cfc] hover:text-[#9b7fff] transition-colors whitespace-nowrap">
+            Completar <ArrowRight size={13} />
+          </span>
         </button>
-      )}
+        )}
+
+        {/* ── Header: date + greeting + icons ── */}
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs text-slate-500 mb-0.5">{dateFormatted}</p>
+            <h1 className="text-2xl font-bold text-white">Olá, {firstName} 👋</h1>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <button className="relative w-10 h-10 rounded-xl bg-[#131722] border border-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+              <Bell size={18} />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#7c5cfc]" />
+            </button>
+            <button
+              onClick={() => navigate('/aluno/progresso')}
+              className="w-10 h-10 rounded-xl bg-[#131722] border border-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            >
+              <User size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* ── Stats row ── */}
+        <div className="flex gap-3">
+          <div className="flex-1 min-w-0 rounded-2xl p-4 bg-[#0a1f14] border border-[#22c55e]/15">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+              <span className="text-[11px] text-slate-400">Treinos esta semana</span>
+            </div>
+            <div className="text-3xl font-bold text-white leading-none mb-1">{MOCK_STATS.workoutsThisWeek}</div>
+            <p className="text-[11px] text-[#22c55e] flex items-center gap-1">
+              <TrendingUp size={10} />
+              +{MOCK_STATS.workoutsDiff} vs semana passada
+            </p>
+          </div>
+
+          <div className="flex-1 min-w-0 rounded-2xl p-4 bg-[#0a1f14] border border-[#22c55e]/15">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+              <span className="text-[11px] text-slate-400">Dias com treino</span>
+            </div>
+            <div className="text-3xl font-bold text-white leading-none mb-1">{MOCK_STATS.daysThisMonth}</div>
+            <p className="text-[11px] text-slate-500">este mês</p>
+          </div>
+
+          <div className="flex-1 min-w-0 rounded-2xl p-4 bg-[#0c0e1f] border border-[#7c5cfc]/15">
+            <div className="flex items-center gap-1.5 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#7c5cfc]" />
+              <span className="text-[11px] text-slate-400">Min. totais</span>
+            </div>
+            <div className="text-3xl font-bold text-white leading-none mb-1">{MOCK_STATS.totalMinutes}</div>
+            <p className="text-[11px] text-slate-500">essa semana</p>
+          </div>
+        </div>
+
+        {/* ── Main grid: content + right column ── */}
+        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-5 space-y-4 lg:space-y-0">
+
+          {/* Left column */}
+          <div className="space-y-4">
+
+            {/* Plano da semana */}
+            <div className="rounded-2xl bg-[#131722] border border-white/5 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-semibold text-white text-base">Plano da semana</h2>
+                <button
+                  onClick={() => navigate('/aluno/treino')}
+                  className="text-xs text-[#7c5cfc] hover:text-[#9b7fff] font-medium transition-colors"
+                >
+                  Ver todos
+                </button>
+              </div>
+
+              {/* Day chips — horizontal scroll */}
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1"
+                style={{ scrollbarWidth: 'none' }}>
+                {MOCK_WEEK.map((day) => <DayChip key={day.key} day={day} />)}
+              </div>
+
+              {/* Today's workout card */}
+              <div className="mt-4 rounded-xl bg-[#1a1f2e] border border-[#7c5cfc]/20 p-4 flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-[#7c5cfc]/20 flex items-center justify-center text-[#7c5cfc] font-bold text-lg shrink-0">
+                  {MOCK_WORKOUT.letter}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-white text-sm truncate">{MOCK_WORKOUT.name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Hoje · {MOCK_WORKOUT.exerciseCount} exercícios · ~{MOCK_WORKOUT.durationMin} min
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate('/aluno/treino')}
+                  className="shrink-0 flex items-center gap-1.5 bg-white text-[#0d0f14] text-xs font-bold px-4 py-2 rounded-xl hover:bg-slate-100 transition-colors"
+                >
+                  Iniciar <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+
+            {/* Exercise preview list */}
+            <div className="rounded-2xl bg-[#131722] border border-white/5 divide-y divide-white/5">
+              {previewExercises.map((ex, i) => (
+                <div key={ex.id} className="flex items-center gap-4 px-5 py-3.5">
+                  <span className="text-sm font-bold text-slate-600 w-4 shrink-0 text-right">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{ex.name}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {ex.sets} series &middot; {ex.reps} reps &middot; {ex.weight}
+                    </p>
+                  </div>
+                  <div className="w-5 h-5 rounded border border-white/10 shrink-0" />
+                </div>
+              ))}
+
+              {remaining > 0 && (
+                <button
+                  onClick={() => navigate('/aluno/treino')}
+                  className="w-full flex items-center gap-2 px-5 py-3.5 text-xs text-slate-500 hover:text-[#7c5cfc] transition-colors"
+                >
+                  <span className="font-semibold text-slate-400">+{remaining}</span>
+                  Ver todos os exercícios
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Right column — desktop */}
+          <div className="hidden lg:flex flex-col gap-4">
+            <PersonalCard personal={MOCK_PERSONAL} onChat={() => navigate('/aluno/chat')} />
+            <DietCard diet={MOCK_DIET} />
+          </div>
+
+          {/* Diet card — mobile (below exercises) */}
+          <div className="lg:hidden">
+            <DietCard diet={MOCK_DIET} />
+          </div>
+        </div>
+
+      </div>
     </div>
+
+    <AlunoPerfilModal open={perfilOpen} onClose={() => setPerfilOpen(false)} />
+    </>
   );
 }

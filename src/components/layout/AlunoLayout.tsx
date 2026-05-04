@@ -3,9 +3,10 @@ import AlunoSidebar from './AlunoSidebar';
 
 export default function AlunoLayout() {
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors">
+    <div className="min-h-screen bg-[#0d0f14] transition-colors">
       <AlunoSidebar />
-      <main className="md:ml-56 pt-14 md:pt-0 min-h-screen">
+      {/* pb-16 reserves space for the mobile bottom nav (h-16) */}
+      <main className="md:ml-[220px] pb-16 md:pb-0 min-h-screen">
         <Outlet />
       </main>
     </div>

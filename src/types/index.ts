@@ -24,6 +24,7 @@ export interface WorkoutExercise {
   id: string;
   exerciseId: string;
   exerciseName: string;
+  muscleGroup?: string;
   sets: number;
   reps: string; // e.g. "12" or "12-15"
   weight?: string; // e.g. "20kg" or "bodyweight"

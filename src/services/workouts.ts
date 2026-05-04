@@ -18,10 +18,13 @@ function mapWorkout(row: Record<string, unknown>, exercises: WorkoutExercise[] =
 }
 
 function mapExercise(row: Record<string, unknown>): WorkoutExercise {
+  // Support joined exercises table: row.exercises may be { muscle_group: string }
+  const joined = row.exercises as Record<string, unknown> | null | undefined;
   return {
     id: row.id as string,
     exerciseId: (row.exercise_id as string | null) ?? '',
     exerciseName: row.exercise_name as string,
+    muscleGroup: (joined?.muscle_group as string | null) ?? undefined,
     sets: row.sets as number,
     reps: row.reps as string,
     weight: (row.weight as string | null) ?? undefined,
@@ -60,7 +63,7 @@ export async function fetchWorkouts(personalId: string): Promise<Workout[]> {
 
   const { data: exRows, error: exErr } = await supabase
     .from('workout_exercises')
-    .select('*')
+    .select('*, exercises(muscle_group)')
     .in('workout_id', workoutIds)
     .order('order_index', { ascending: true });
 
@@ -85,12 +88,39 @@ export async function fetchWorkoutById(id: string): Promise<Workout | null> {
 
   const { data: exRows } = await supabase
     .from('workout_exercises')
-    .select('*')
+    .select('*, exercises(muscle_group)')
     .eq('workout_id', id)
     .order('order_index', { ascending: true });
 
   const exercises = (exRows ?? []).map((e) => mapExercise(e as Record<string, unknown>));
   return mapWorkout(w as Record<string, unknown>, exercises);
+}
+
+export async function fetchWorkoutsByIds(ids: string[]): Promise<Workout[]> {
+  if (!ids.length) return [];
+
+  const { data: workoutRows, error: wErr } = await supabase
+    .from('workouts')
+    .select('*')
+    .in('id', ids);
+
+  if (wErr) throw wErr;
+  if (!workoutRows?.length) return [];
+
+  const { data: exRows, error: exErr } = await supabase
+    .from('workout_exercises')
+    .select('*, exercises(muscle_group)')
+    .in('workout_id', ids)
+    .order('order_index', { ascending: true });
+
+  if (exErr) throw exErr;
+
+  return workoutRows.map((w) => {
+    const exercises = (exRows ?? [])
+      .filter((e) => e.workout_id === w.id)
+      .map((e) => mapExercise(e as Record<string, unknown>));
+    return mapWorkout(w as Record<string, unknown>, exercises);
+  });
 }
 
 export async function createWorkout(

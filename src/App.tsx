@@ -34,10 +34,10 @@ import AlunoChatPage from './pages/aluno/AlunoChatPage';
 import AlunoDietaPage from './pages/aluno/AlunoDietaPage';
 import AlunoProgressoPage from './pages/aluno/AlunoProgressoPage';
 import AcessoBloqueadoPage from './pages/aluno/AcessoBloqueadoPage';
-import AlunoGruposPage from './pages/aluno/AlunoGruposPage';
-import AlunoGrupoChatPage from './pages/aluno/AlunoGrupoChatPage';
 import AlunoAcademiasPage from './pages/aluno/AlunoAcademiasPage';
 import AlunoAmigosPage from './pages/aluno/AlunoAmigosPage';
+import PersonalPerfilPage from './pages/aluno/PersonalPerfilPage';
+import CheckoutPage from './pages/aluno/CheckoutPage';
 
 // Academia pages
 import AcademiaDashboard from './pages/academia/AcademiaDashboard';
@@ -90,9 +90,9 @@ export default function App() {
             <Route path="/aluno/dieta" element={<AlunoDietaPage />} />
             <Route path="/aluno/progresso" element={<AlunoProgressoPage />} />
             <Route path="/aluno/chat" element={<AlunoChatPage />} />
-            <Route path="/aluno/grupos" element={<AlunoGruposPage />} />
-            <Route path="/aluno/grupos/:id" element={<AlunoGrupoChatPage />} />
             <Route path="/aluno/academias" element={<AlunoAcademiasPage />} />
+            <Route path="/aluno/personais/:id" element={<PersonalPerfilPage />} />
+            <Route path="/aluno/checkout/:id" element={<CheckoutPage />} />
             <Route path="/aluno/amigos" element={<AlunoAmigosPage />} />
           </Route>
         </Route>

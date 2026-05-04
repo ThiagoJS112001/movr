@@ -29,6 +29,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   personal_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   -- For alunos: whether they are blocked by their personal
   is_blocked  BOOLEAN NOT NULL DEFAULT FALSE,
+  -- Aluno profile fields
+  birth_date  DATE,
   -- Academia-specific fields
   bio         TEXT,
   address     TEXT,

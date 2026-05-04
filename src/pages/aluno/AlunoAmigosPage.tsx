@@ -7,7 +7,7 @@ import {
   useSendFriendRequest,
   useRespondFriendRequest,
   useRequestStatus,
-  FriendProfile,
+  type FriendProfile,
 } from '../../hooks/useFriends';
 
 // ── Sub-component: Search result card ─────────────────────────────────────────
@@ -19,7 +19,7 @@ function SearchResultCard({ profile }: { profile: FriendProfile }) {
   const avatar = profile.avatar_url
     ? <img src={profile.avatar_url} alt={profile.name} className="w-10 h-10 rounded-full object-cover" />
     : (
-      <div className="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-sm flex items-center justify-center">
+      <div className="w-10 h-10 rounded-full bg-[#7c5cfc]/15 text-[#7c5cfc] font-bold text-sm flex items-center justify-center">
         {profile.name.charAt(0).toUpperCase()}
       </div>
     );
@@ -48,7 +48,7 @@ function SearchResultCard({ profile }: { profile: FriendProfile }) {
       <button
         onClick={() => send.mutate(profile.id)}
         disabled={send.isPending}
-        className="flex items-center gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white px-3 py-1.5 rounded-lg font-medium transition"
+        className="flex items-center gap-1.5 text-xs bg-[#7c5cfc] hover:bg-[#9b7fff] disabled:opacity-60 text-white px-3 py-1.5 rounded-lg font-medium transition"
       >
         <UserPlus size={13} />
         {send.isPending ? 'Enviando...' : 'Adicionar'}
@@ -86,14 +86,18 @@ export default function AlunoAmigosPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8 space-y-8">
+    <div className="min-h-screen bg-[#0d0f14] text-white">
+      <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
 
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-white mb-1">Adicionar Amigos</h1>
-        <p className="text-sm text-slate-400">
-          Busque pelo e-mail de outra pessoa para adicioná-la como amigo e conversar no chat.
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-[#7c5cfc]/10 flex items-center justify-center">
+          <Users size={18} className="text-[#7c5cfc]" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-white leading-none">Amigos</h1>
+          <p className="text-xs text-slate-500 mt-0.5">Busque e adicione amigos por e-mail</p>
+        </div>
       </div>
 
       {/* Search */}
@@ -105,12 +109,12 @@ export default function AlunoAmigosPage() {
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
             placeholder="email@exemplo.com"
-            className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-slate-600 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-slate-600 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7c5cfc] focus:border-transparent transition"
           />
         </div>
         <button
           type="submit"
-          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-xl transition"
+          className="px-4 py-2.5 bg-[#7c5cfc] hover:bg-[#9b7fff] text-white text-sm font-medium rounded-xl transition"
         >
           Buscar
         </button>
@@ -140,7 +144,7 @@ export default function AlunoAmigosPage() {
               const p = req.from_profile!;
               return (
                 <div key={req.id} className="flex items-center gap-3 p-3 bg-white/[0.04] border border-white/[0.07] rounded-xl">
-                  <div className="w-10 h-10 rounded-full bg-violet-500/20 text-violet-400 font-bold text-sm flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#7c5cfc]/15 text-[#7c5cfc] font-bold text-sm flex items-center justify-center shrink-0">
                     {p.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -188,7 +192,7 @@ export default function AlunoAmigosPage() {
                 {f.avatar_url ? (
                   <img src={f.avatar_url} alt={f.name} className="w-10 h-10 rounded-full object-cover" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-sm flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-[#7c5cfc]/15 text-[#7c5cfc] font-bold text-sm flex items-center justify-center">
                     {f.name.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -203,6 +207,7 @@ export default function AlunoAmigosPage() {
         )}
       </div>
 
+      </div>{/* end max-w container */}
     </div>
   );
 }

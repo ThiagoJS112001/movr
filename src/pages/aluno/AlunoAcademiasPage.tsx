@@ -1,343 +1,539 @@
-import { useState } from 'react';
-import { Building2, Star, Search, MapPin, Phone, Clock, User, Salad, X, ChevronDown, ChevronUp } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '../../contexts/AuthContext';
-import type { Gym } from '../../types';
+﻿import { useState } from 'react';
+import {
+  Search,
+  MapPin,
+  Map,
+  Star,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  MessageCircle,
+  Award,
+  GraduationCap,
+  Wifi,
+  Calendar,
+} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const DAYS_PT: Record<string, string> = {
-  segunda: 'Seg', terca: 'Ter', quarta: 'Qua',
-  quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb', domingo: 'Dom',
-};
+// ── Types ──────────────────────────────────────────────────────────────────────
 
-function StarRow({ rating, size = 16 }: { rating: number; size?: number }) {
+type Modality = 'online' | 'presencial' | 'ambos';
+
+interface Certification {
+  label: string;
+  type: 'cref' | 'grad' | 'cert';
+}
+
+interface Personal {
+  id: string;
+  name: string;
+  initials: string;
+  avatarColor: string;
+  verified: boolean;
+  title: string;
+  yearsExp: number;
+  specialties: string[];
+  certifications: Certification[];
+  modality: Modality;
+  city: string;
+  state: string;
+  schedule: string;
+  priceMonth: number;
+  planLabel: string;
+  sessionsPerWeek: number;
+  rating: number;
+  reviewCount: number;
+  distanceKm: number;
+}
+
+type FilterKey = 'todos' | 'perto' | 'avaliados' | 'online' | 'presencial';
+type SpecialtyFilter = string | null;
+
+// ── Mock data ──────────────────────────────────────────────────────────────────
+
+const SPECIALTIES_LIST = [
+  'Musculação', 'Hipertrofia', 'Emagrecimento', 'Funcional',
+  'Crossfit', 'Corrida', 'Pilates', 'Nutrição', 'Reabilitação',
+];
+
+const MOCK_PERSONALS: Personal[] = [
+  {
+    id: '1',
+    name: 'Rafael Costa',
+    initials: 'RC',
+    avatarColor: 'from-violet-500 to-indigo-600',
+    verified: true,
+    title: 'Personal Trainer · Nutricionista',
+    yearsExp: 8,
+    specialties: ['Musculação', 'Nutrição', 'Emagrecimento', 'Funcional'],
+    certifications: [
+      { label: 'CREF 012345-G/SC', type: 'cref' },
+      { label: 'Pós-grad. Nutrição Esportiva · UNIVALI', type: 'grad' },
+      { label: 'Cert. Funcional · CrossFit L1', type: 'cert' },
+    ],
+    modality: 'ambos',
+    city: 'Blumenau',
+    state: 'SC',
+    schedule: 'Atende fins de semana',
+    priceMonth: 350,
+    planLabel: 'Plano mensal',
+    sessionsPerWeek: 3,
+    rating: 4.9,
+    reviewCount: 127,
+    distanceKm: 1.2,
+  },
+  {
+    id: '2',
+    name: 'Ana Martins',
+    initials: 'AM',
+    avatarColor: 'from-emerald-500 to-teal-600',
+    verified: true,
+    title: 'Personal Trainer',
+    yearsExp: 5,
+    specialties: ['Emagrecimento', 'Funcional', 'Corrida', 'Pilates'],
+    certifications: [
+      { label: 'CREF 054321-G/SC', type: 'cref' },
+      { label: 'Grad. Ed. Física · FURB', type: 'grad' },
+      { label: 'Cert. Treinamento Funcional · NASM', type: 'cert' },
+    ],
+    modality: 'presencial',
+    city: 'Blumenau',
+    state: 'SC',
+    schedule: 'Seg a Sex',
+    priceMonth: 280,
+    planLabel: 'Plano mensal',
+    sessionsPerWeek: 2,
+    rating: 4.8,
+    reviewCount: 89,
+    distanceKm: 2.8,
+  },
+  {
+    id: '3',
+    name: 'Bruno Lima',
+    initials: 'BL',
+    avatarColor: 'from-orange-500 to-rose-500',
+    verified: false,
+    title: 'Personal Trainer',
+    yearsExp: 3,
+    specialties: ['Hipertrofia', 'Crossfit', 'Musculação'],
+    certifications: [
+      { label: 'CREF 078900-G/SC', type: 'cref' },
+      { label: 'CrossFit Level 2 Trainer', type: 'cert' },
+    ],
+    modality: 'ambos',
+    city: 'Blumenau',
+    state: 'SC',
+    schedule: 'Seg a Sáb',
+    priceMonth: 220,
+    planLabel: 'Plano mensal',
+    sessionsPerWeek: 3,
+    rating: 4.6,
+    reviewCount: 41,
+    distanceKm: 4.1,
+  },
+  {
+    id: '4',
+    name: 'Carla Souza',
+    initials: 'CS',
+    avatarColor: 'from-pink-500 to-purple-600',
+    verified: true,
+    title: 'Personal Trainer · Fisioterapeuta',
+    yearsExp: 10,
+    specialties: ['Reabilitação', 'Pilates', 'Funcional'],
+    certifications: [
+      { label: 'CREF 011223-G/SC', type: 'cref' },
+      { label: 'Fisioterapia · UFSC', type: 'grad' },
+      { label: 'Pilates Avançado · Stott', type: 'cert' },
+    ],
+    modality: 'online',
+    city: 'Florianópolis',
+    state: 'SC',
+    schedule: 'Seg, Qua, Sex',
+    priceMonth: 400,
+    planLabel: 'Plano mensal',
+    sessionsPerWeek: 3,
+    rating: 5.0,
+    reviewCount: 214,
+    distanceKm: 12.5,
+  },
+];
+
+const PRICE_RANGES = [
+  { label: 'Até R$ 200', min: 0,   max: 200  },
+  { label: 'R$ 200–300', min: 200, max: 300  },
+  { label: 'R$ 300–400', min: 300, max: 400  },
+  { label: 'Acima de R$ 400', min: 400, max: Infinity },
+];
+
+const DISTANCE_OPTIONS = [
+  { label: 'Até 2 km',  max: 2   },
+  { label: 'Até 5 km',  max: 5   },
+  { label: 'Até 10 km', max: 10  },
+  { label: 'Qualquer',  max: Infinity },
+];
+
+// ── Sub-components ─────────────────────────────────────────────────────────────
+
+function CertBadge({ cert }: { cert: Certification }) {
+  if (cert.type === 'cref') {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#22c55e]/10 border border-[#22c55e]/20 text-[#22c55e]">
+        <CheckCircle2 size={10} />
+        {cert.label}
+      </span>
+    );
+  }
+  if (cert.type === 'grad') {
+    return (
+      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400">
+        <GraduationCap size={10} />
+        {cert.label}
+      </span>
+    );
+  }
   return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <Star
-          key={s}
-          size={size}
-          className={s <= Math.round(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300 dark:text-slate-600'}
-        />
-      ))}
-    </div>
+    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#7c5cfc]/10 border border-[#7c5cfc]/20 text-[#7c5cfc]">
+      <Award size={10} />
+      {cert.label}
+    </span>
   );
 }
 
-function ClickableStars({ value, onChange }: { value: number; onChange: (n: number) => void }) {
-  const [hover, setHover] = useState(0);
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <button
-          key={s}
-          type="button"
-          onMouseEnter={() => setHover(s)}
-          onMouseLeave={() => setHover(0)}
-          onClick={() => onChange(s)}
-          className="focus:outline-none"
-        >
-          <Star
-            size={28}
-            className={(hover || value) >= s ? 'text-yellow-400 fill-yellow-400' : 'text-slate-300 dark:text-slate-600'}
-          />
-        </button>
-      ))}
-    </div>
-  );
+function ModalityDot({ modality }: { modality: Modality }) {
+  if (modality === 'ambos') return <span className="w-2 h-2 rounded-full bg-[#22c55e] inline-block" />;
+  if (modality === 'online') return <span className="w-2 h-2 rounded-full bg-[#7c5cfc] inline-block" />;
+  return <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />;
 }
 
-export default function AlunoAcademiasPage() {
-  const { user } = useAuth();
-  const gyms: never[] = [];
-  const gymRatings: never[] = [];
-  function getGymAvgRating(_gymId: string) { return 0; }
-  function addGymRating(_data: unknown) { toast.error('Academias ainda não disponíveis.'); }
+function ModalityLabel({ modality }: { modality: Modality }) {
+  if (modality === 'ambos')      return 'Online e presencial';
+  if (modality === 'online')     return 'Apenas online';
+  return 'Apenas presencial';
+}
 
-  const [search, setSearch] = useState('');
-  const [filterPersonal, setFilterPersonal] = useState(false);
-  const [filterNutrition, setFilterNutrition] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [ratingModal, setRatingModal] = useState<Gym | null>(null);
-  const [myRating, setMyRating] = useState(0);
-  const [ratingComment, setRatingComment] = useState('');
-
-  const sorted = [...gyms]
-    .filter((g) => {
-      const q = search.toLowerCase();
-      const match = g.name.toLowerCase().includes(q) || (g.city ?? '').toLowerCase().includes(q);
-      if (!match) return false;
-      if (filterPersonal && !g.hasPersonal) return false;
-      if (filterNutrition && !g.hasNutrition) return false;
-      return true;
-    })
-    .sort((a, b) => getGymAvgRating(b.id) - getGymAvgRating(a.id));
-
-  function openRatingModal(gym: Gym) {
-    const existing = user ? gymRatings.find((r) => r.gymId === gym.id && r.userId === user.id) : undefined;
-    setRatingModal(gym);
-    setMyRating(existing?.rating ?? 0);
-    setRatingComment(existing?.comment ?? '');
-  }
-
-  function handleSubmitRating() {
-    if (!user || !ratingModal || myRating === 0) return;
-    addGymRating({
-      gymId: ratingModal.id,
-      userId: user.id,
-      userName: user.name,
-      rating: myRating,
-      comment: ratingComment.trim() || undefined,
-    });
-    toast.success('Avaliação enviada!');
-    setRatingModal(null);
-    setMyRating(0);
-    setRatingComment('');
-  }
-
+function AccordionSection({
+  label,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-violet-600/20 border border-violet-500/30 p-2 rounded-xl">
-          <Building2 size={22} className="text-violet-400" />
+    <div className="border border-white/8 rounded-xl overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-4 py-3.5 bg-[#131722] text-left"
+      >
+        <span className="text-sm font-medium text-slate-300">{label}</span>
+        {open ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+      </button>
+      {open && (
+        <div className="bg-[#0f111a] border-t border-white/5 px-4 py-3">
+          {children}
         </div>
-        <h1 className="text-3xl font-bold dark:text-white">Academias</h1>
+      )}
+    </div>
+  );
+}
+
+function PersonalCard({
+  personal,
+  onContact,
+  onViewProfile,
+}: {
+  personal: Personal;
+  onContact: (p: Personal) => void;
+  onViewProfile: (p: Personal) => void;
+}) {
+  return (
+    <div className="rounded-2xl bg-[#131722] border border-white/5 p-5 space-y-4">
+      {/* Top row */}
+      <div className="flex items-start gap-3">
+        {/* Avatar */}
+        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${personal.avatarColor} flex items-center justify-center text-white font-bold text-lg shrink-0`}>
+          {personal.initials}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold text-white text-base">{personal.name}</h3>
+            {personal.verified && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded bg-[#22c55e]/15 text-[#22c55e]">
+                <CheckCircle2 size={10} />
+                Verificado
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            {personal.title} · {personal.yearsExp} anos de experiência
+          </p>
+          {/* Specialty chips */}
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {personal.specialties.map((s) => (
+              <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-slate-300">
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Rating + distance */}
+        <div className="text-right shrink-0">
+          <div className="flex items-center gap-1 justify-end">
+            <Star size={13} fill="#f59e0b" className="text-amber-400" />
+            <span className="text-sm font-bold text-white">{personal.rating.toFixed(1)}</span>
+          </div>
+          <p className="text-[10px] text-slate-500 mt-0.5">{personal.reviewCount} avaliações</p>
+          <div className="flex items-center gap-1 justify-end mt-1">
+            <MapPin size={10} className="text-slate-500" />
+            <span className="text-[10px] text-slate-500">{personal.distanceKm} km</span>
+          </div>
+        </div>
       </div>
 
-      <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-        Descubra academias parceiras ordenadas por avaliação dos alunos.
-      </p>
+      {/* Certifications */}
+      <div className="flex flex-wrap gap-1.5">
+        {personal.certifications.map((c) => (
+          <CertBadge key={c.label} cert={c} />
+        ))}
+      </div>
 
-      {/* Search & Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-6">
-        <div className="relative flex-1">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-          <input
-            className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
-            placeholder="Buscar por nome ou cidade..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      {/* Modality + location + schedule */}
+      <div className="flex items-center gap-1.5 text-xs text-slate-400 flex-wrap">
+        <ModalityDot modality={personal.modality} />
+        <ModalityLabel modality={personal.modality} />
+        <span className="text-slate-600">·</span>
+        {personal.city}, {personal.state}
+        <span className="text-slate-600">·</span>
+        <Calendar size={11} />
+        {personal.schedule}
+        {personal.modality === 'online' || personal.modality === 'ambos' ? (
+          <>
+            <span className="text-slate-600">·</span>
+            <Wifi size={11} className="text-[#7c5cfc]" />
+            <span className="text-[#7c5cfc]">Remoto disponível</span>
+          </>
+        ) : null}
+      </div>
+
+      {/* Price + actions */}
+      <div className="flex items-end justify-between pt-1 border-t border-white/5">
+        <div>
+          <span className="text-2xl font-bold text-white">R$ {personal.priceMonth}</span>
+          <span className="text-sm text-slate-400">/mês</span>
+          <p className="text-[11px] text-slate-500 mt-0.5">
+            {personal.planLabel} · {personal.sessionsPerWeek}x/semana
+          </p>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setFilterPersonal((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
-              filterPersonal
-                ? 'bg-indigo-600 text-white border-indigo-600'
-                : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-indigo-500'
-            }`}
+            onClick={() => onViewProfile(personal)}
+            className="px-4 py-2 rounded-xl text-sm font-semibold border border-white/10 text-slate-200 hover:bg-white/5 transition-colors"
           >
-            <User size={14} />
-            Personal
+            Ver perfil
           </button>
           <button
-            onClick={() => setFilterNutrition((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors ${
-              filterNutrition
-                ? 'bg-emerald-600 text-white border-emerald-600'
-                : 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-emerald-500'
-            }`}
+            onClick={() => onContact(personal)}
+            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#7c5cfc] hover:bg-[#6d4ef0] text-white transition-colors"
           >
-            <Salad size={14} />
-            Nutrição
+            Entrar em contato
           </button>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Gym list */}
-      {sorted.length === 0 ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-10 text-center">
-          <Building2 size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-          <p className="font-semibold dark:text-white">Nenhuma academia encontrada</p>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Tente outros filtros.</p>
+// ── Main page ──────────────────────────────────────────────────────────────────
+
+export default function AlunoAcademiasPage() {
+  const navigate = useNavigate();
+
+  const [search, setSearch]               = useState('');
+  const [activeFilter, setActiveFilter]   = useState<FilterKey>('todos');
+  const [specialtyOpen, setSpecialtyOpen] = useState(false);
+  const [priceOpen, setPriceOpen]         = useState(false);
+  const [distanceOpen, setDistanceOpen]   = useState(false);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<SpecialtyFilter>(null);
+  const [selectedPrice, setSelectedPrice]   = useState<number | null>(null);
+  const [selectedDistance, setSelectedDistance] = useState<number>(Infinity);
+
+  const FILTERS: { key: FilterKey; label: string }[] = [
+    { key: 'todos',      label: 'Todos'          },
+    { key: 'perto',      label: 'Perto de mim'   },
+    { key: 'avaliados',  label: 'Melhor avaliados'},
+    { key: 'online',     label: 'Online'         },
+    { key: 'presencial', label: 'Presencial'     },
+  ];
+
+  const filtered = MOCK_PERSONALS
+    .filter((p) => {
+      const q = search.toLowerCase();
+      if (q && !p.name.toLowerCase().includes(q) &&
+          !p.specialties.some((s) => s.toLowerCase().includes(q)) &&
+          !p.city.toLowerCase().includes(q)) return false;
+
+      if (activeFilter === 'online' && p.modality === 'presencial') return false;
+      if (activeFilter === 'presencial' && p.modality === 'online')  return false;
+
+      if (selectedSpecialty && !p.specialties.includes(selectedSpecialty)) return false;
+
+      if (selectedPrice !== null) {
+        const range = PRICE_RANGES[selectedPrice];
+        if (p.priceMonth < range.min || p.priceMonth > range.max) return false;
+      }
+
+      if (p.distanceKm > selectedDistance) return false;
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (activeFilter === 'avaliados') return b.rating - a.rating;
+      if (activeFilter === 'perto')     return a.distanceKm - b.distanceKm;
+      return 0;
+    });
+
+  function handleContact(p: Personal) {
+    navigate('/aluno/chat');
+  }
+
+  function handleViewProfile(p: Personal) {
+    navigate(`/aluno/personais/${p.id}`);
+  }
+
+  function handleViewProfile(p: Personal) {
+    navigate(`/aluno/personais/${p.id}`);
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0d0f14] text-white">
+      <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
+
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-white">Encontrar Personal</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Profissionais verificados perto de você, prontos para te acompanhar
+          </p>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {sorted.map((gym, idx) => {
-            const avg = getGymAvgRating(gym.id);
-            const ratingsCount = gymRatings.filter((r) => r.gymId === gym.id).length;
-            const isExpanded = expandedId === gym.id;
-            const myExistingRating = user ? gymRatings.find((r) => r.gymId === gym.id && r.userId === user.id) : undefined;
 
-            return (
-              <div
-                key={gym.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm overflow-hidden"
-              >
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      {/* Rank badge */}
-                      <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-bold text-violet-600 dark:text-violet-400">#{idx + 1}</span>
-                      </div>
-                      <div>
-                        <h2 className="font-semibold dark:text-white">{gym.name}</h2>
-                        {(gym.city || gym.state) && (
-                          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                            <MapPin size={11} />
-                            {gym.city}{gym.state ? `, ${gym.state}` : ''}
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <StarRow rating={avg} size={14} />
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {avg > 0 ? `${avg.toFixed(1)} (${ratingsCount})` : 'Sem avaliações'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => openRatingModal(gym)}
-                        className="text-xs font-medium text-yellow-600 dark:text-yellow-400 border border-yellow-300 dark:border-yellow-600/50 px-3 py-1.5 rounded-xl hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-colors"
-                      >
-                        {myExistingRating ? 'Editar nota' : 'Avaliar'}
-                      </button>
-                      <button
-                        onClick={() => setExpandedId(isExpanded ? null : gym.id)}
-                        className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                      >
-                        {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Badges */}
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {gym.hasPersonal && (
-                      <span className="inline-flex items-center gap-1 text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-xl">
-                        <User size={11} />
-                        Personal
-                      </span>
-                    )}
-                    {gym.hasNutrition && (
-                      <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-2.5 py-1 rounded-xl">
-                        <Salad size={11} />
-                        Nutricionista
-                      </span>
-                    )}
-                    {gym.amenities.slice(0, 3).map((a) => (
-                      <span key={a} className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-xl">
-                        {a}
-                      </span>
-                    ))}
-                    {gym.amenities.length > 3 && (
-                      <span className="text-xs text-slate-400 dark:text-slate-500 px-2.5 py-1">
-                        +{gym.amenities.length - 3}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Expanded details */}
-                {isExpanded && (
-                  <div className="border-t border-slate-100 dark:border-slate-700/50 p-5 space-y-4 bg-slate-50 dark:bg-slate-900/30">
-                    {gym.bio && (
-                      <p className="text-sm text-slate-600 dark:text-slate-300">{gym.bio}</p>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                      {gym.address && (
-                        <div className="flex items-start gap-2">
-                          <MapPin size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
-                          <span className="dark:text-slate-300">{gym.address}{gym.city ? `, ${gym.city}` : ''}</span>
-                        </div>
-                      )}
-                      {gym.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone size={14} className="text-slate-400 flex-shrink-0" />
-                          <span className="dark:text-slate-300">{gym.phone}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {gym.openingHours && (
-                      <div>
-                        <div className="flex items-center gap-1.5 text-sm font-medium dark:text-white mb-2">
-                          <Clock size={14} />
-                          Horários
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
-                          {Object.entries(gym.openingHours).map(([day, time]) => (
-                            <div key={day} className="bg-white dark:bg-slate-800 rounded-lg px-2 py-1.5 border border-slate-200 dark:border-slate-700/50">
-                              <span className="font-medium text-slate-500 dark:text-slate-400">{DAYS_PT[day] ?? day}</span>
-                              <br />
-                              <span className="dark:text-white">{time}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {gym.amenities.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium dark:text-white mb-2">Comodidades</p>
-                        <div className="flex flex-wrap gap-2">
-                          {gym.amenities.map((a) => (
-                            <span key={a} className="text-xs bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-xl">
-                              {a}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Rating modal */}
-      {ratingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-lg dark:text-white">Avaliar {ratingModal.name}</h2>
-              <button onClick={() => setRatingModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="mb-5">
-              <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">Sua nota:</p>
-              <ClickableStars value={myRating} onChange={setMyRating} />
-            </div>
-
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Comentário (opcional)
-              </label>
-              <textarea
-                className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition resize-none"
-                rows={3}
-                value={ratingComment}
-                onChange={(e) => setRatingComment(e.target.value)}
-                placeholder="Conte sua experiência..."
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setRatingModal(null)}
-                className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSubmitRating}
-                disabled={myRating === 0}
-                className="flex-1 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-60 text-white font-semibold rounded-xl py-2.5 text-sm transition-colors"
-              >
-                Enviar avaliação
-              </button>
-            </div>
+        {/* Search + map */}
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nome, especialidade ou modalidade..."
+              className="w-full bg-[#131722] border border-white/8 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-[#7c5cfc]/50 transition-colors"
+            />
           </div>
+          <button className="shrink-0 flex items-center gap-2 bg-[#131722] border border-white/8 hover:border-[#7c5cfc]/40 text-slate-300 hover:text-white text-sm font-medium px-4 py-3 rounded-xl transition-colors">
+            <Map size={15} />
+            Ver mapa
+          </button>
         </div>
-      )}
+
+        {/* Filter chips */}
+        <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+          {FILTERS.map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setActiveFilter(key)}
+              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-medium border transition-colors ${
+                activeFilter === key
+                  ? 'bg-white text-[#0d0f14] border-white'
+                  : 'bg-transparent border-white/10 text-slate-400 hover:border-white/25 hover:text-slate-200'
+              }`}
+            >
+              {key === 'perto' && <MapPin size={12} />}
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Accordion filters */}
+        <div className="space-y-2">
+          <AccordionSection label="Especialidade" open={specialtyOpen} onToggle={() => setSpecialtyOpen((v) => !v)}>
+            <div className="flex flex-wrap gap-2">
+              {SPECIALTIES_LIST.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSelectedSpecialty(selectedSpecialty === s ? null : s)}
+                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                    selectedSpecialty === s
+                      ? 'bg-[#7c5cfc] border-[#7c5cfc] text-white'
+                      : 'border-white/10 text-slate-400 hover:border-[#7c5cfc]/40 hover:text-slate-200'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </AccordionSection>
+
+          <AccordionSection label="Preço / mês" open={priceOpen} onToggle={() => setPriceOpen((v) => !v)}>
+            <div className="flex flex-wrap gap-2">
+              {PRICE_RANGES.map((r, i) => (
+                <button
+                  key={r.label}
+                  onClick={() => setSelectedPrice(selectedPrice === i ? null : i)}
+                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                    selectedPrice === i
+                      ? 'bg-[#7c5cfc] border-[#7c5cfc] text-white'
+                      : 'border-white/10 text-slate-400 hover:border-[#7c5cfc]/40 hover:text-slate-200'
+                  }`}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </AccordionSection>
+
+          <AccordionSection label="Distância" open={distanceOpen} onToggle={() => setDistanceOpen((v) => !v)}>
+            <div className="flex flex-wrap gap-2">
+              {DISTANCE_OPTIONS.map((d) => (
+                <button
+                  key={d.label}
+                  onClick={() => setSelectedDistance(d.max)}
+                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                    selectedDistance === d.max
+                      ? 'bg-[#7c5cfc] border-[#7c5cfc] text-white'
+                      : 'border-white/10 text-slate-400 hover:border-[#7c5cfc]/40 hover:text-slate-200'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          </AccordionSection>
+        </div>
+
+        {/* Results count */}
+        <p className="text-xs text-slate-500">
+          {filtered.length} profissional{filtered.length !== 1 ? 'is' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
+        </p>
+
+        {/* Cards */}
+        {filtered.length === 0 ? (
+          <div className="rounded-2xl bg-[#131722] border border-white/5 p-12 text-center">
+            <Search size={32} className="mx-auto text-slate-700 mb-3" />
+            <p className="font-semibold text-slate-300">Nenhum personal encontrado</p>
+            <p className="text-sm text-slate-600 mt-1">Tente ajustar os filtros.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filtered.map((p) => (
+              <PersonalCard key={p.id} personal={p} onContact={handleContact} onViewProfile={handleViewProfile} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

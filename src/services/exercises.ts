@@ -7,8 +7,17 @@ function mapExercise(row: Record<string, unknown>): Exercise {
     name: row.name as string,
     muscleGroup: row.muscle_group as string,
     description: (row.description as string | null) ?? undefined,
+    equipment: (row.equipment as string | null) ?? undefined,
+    level: (row.level as string | null) ?? undefined,
+    exerciseType: (row.exercise_type as string | null) ?? undefined,
     imageUrl: (row.image_url as string | null) ?? undefined,
     videoUrl: (row.video_url as string | null) ?? undefined,
+    tips: (row.tips as string[] | null) ?? undefined,
+    suggestedRest: (row.suggested_rest as number | null) ?? undefined,
+    suggestedSets: (row.suggested_sets as number | null) ?? undefined,
+    suggestedReps: (row.suggested_reps as string | null) ?? undefined,
+    primaryMuscles: (row.primary_muscles as string[] | null) ?? undefined,
+    secondaryMuscles: (row.secondary_muscles as string[] | null) ?? undefined,
   };
 }
 
@@ -34,8 +43,17 @@ export async function createExercise(
       name: data.name,
       muscle_group: data.muscleGroup,
       description: data.description ?? null,
+      equipment: data.equipment ?? null,
+      level: data.level ?? null,
+      exercise_type: data.exerciseType ?? null,
       image_url: data.imageUrl ?? null,
       video_url: data.videoUrl ?? null,
+      tips: data.tips ?? null,
+      suggested_rest: data.suggestedRest ?? null,
+      suggested_sets: data.suggestedSets ?? null,
+      suggested_reps: data.suggestedReps ?? null,
+      primary_muscles: data.primaryMuscles ?? null,
+      secondary_muscles: data.secondaryMuscles ?? null,
     })
     .select()
     .single();
@@ -51,8 +69,17 @@ export async function updateExercise(id: string, data: Partial<Exercise>): Promi
       ...(data.name !== undefined && { name: data.name }),
       ...(data.muscleGroup !== undefined && { muscle_group: data.muscleGroup }),
       ...(data.description !== undefined && { description: data.description ?? null }),
+      ...(data.equipment !== undefined && { equipment: data.equipment ?? null }),
+      ...(data.level !== undefined && { level: data.level ?? null }),
+      ...(data.exerciseType !== undefined && { exercise_type: data.exerciseType ?? null }),
       ...(data.imageUrl !== undefined && { image_url: data.imageUrl ?? null }),
       ...(data.videoUrl !== undefined && { video_url: data.videoUrl ?? null }),
+      ...(data.tips !== undefined && { tips: data.tips ?? null }),
+      ...(data.suggestedRest !== undefined && { suggested_rest: data.suggestedRest ?? null }),
+      ...(data.suggestedSets !== undefined && { suggested_sets: data.suggestedSets ?? null }),
+      ...(data.suggestedReps !== undefined && { suggested_reps: data.suggestedReps ?? null }),
+      ...(data.primaryMuscles !== undefined && { primary_muscles: data.primaryMuscles ?? null }),
+      ...(data.secondaryMuscles !== undefined && { secondary_muscles: data.secondaryMuscles ?? null }),
     })
     .eq('id', id);
 

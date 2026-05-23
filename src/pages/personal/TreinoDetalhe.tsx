@@ -45,7 +45,7 @@ export default function TreinoDetalhe() {
   if (!workout) {
     return (
       <div className="p-5">
-        <p className="text-slate-500">Treino não encontrado.</p>
+        <p className="text-slate-500">Treino nÃ£o encontrado.</p>
         <button onClick={() => navigate('/personal/treinos')} className="text-indigo-600 text-sm mt-2">
           Voltar
         </button>
@@ -134,7 +134,7 @@ export default function TreinoDetalhe() {
       <div className="flex flex-col gap-3 mb-4">
         {workout.exercises.length === 0 && (
           <p className="text-slate-400 dark:text-slate-500 text-sm py-4 text-center">
-            Nenhum exercício adicionado ainda.
+            Nenhum exercÃ­cio adicionado ainda.
           </p>
         )}
         {workout.exercises.map((ex) => (
@@ -159,17 +159,17 @@ export default function TreinoDetalhe() {
         className="flex items-center gap-2 text-sm text-indigo-600 font-medium hover:text-indigo-800"
       >
         <Plus size={16} />
-        Adicionar exercício
+        Adicionar exercÃ­cio
       </button>
 
       {/* Add exercise modal */}
       {showAddEx && (
         <div className="fixed inset-0 bg-black/50 flex items-end md:items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Adicionar exercício</h2>
+          <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Adicionar exercÃ­cio</h2>
             <form onSubmit={handleAddExercise} className="flex flex-col gap-3">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Exercício</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">ExercÃ­cio</label>
                 <input
                   required
                   list="catalog-exercises"
@@ -179,7 +179,7 @@ export default function TreinoDetalhe() {
                     const match = catalogExercises.find((ex) => ex.name === val);
                     setNewEx((prev) => ({ ...prev, exerciseName: val, exerciseId: match?.id ?? '' }));
                   }}
-                  placeholder="Nome do exercício ou selecione do catálogo"
+                  placeholder="Nome do exercÃ­cio ou selecione do catÃ¡logo"
                   className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <datalist id="catalog-exercises">
@@ -191,7 +191,7 @@ export default function TreinoDetalhe() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Séries</label>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">SÃ©ries</label>
                   <input
                     type="number"
                     min={1}
@@ -232,17 +232,17 @@ export default function TreinoDetalhe() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Observações</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">ObservaÃ§Ãµes</label>
                 <input
                   value={newEx.notes}
                   onChange={(e) => setNewEx((p) => ({ ...p, notes: e.target.value }))}
-                  placeholder="Ex: manter escápulas retraídas"
+                  placeholder="Ex: manter escÃ¡pulas retraÃ­das"
                   className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">URL do vídeo (YouTube embed ou link)</label>
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">URL do vÃ­deo (YouTube embed ou link)</label>
                 <input
                   value={newEx.videoUrl}
                   onChange={(e) => setNewEx((p) => ({ ...p, videoUrl: e.target.value }))}
@@ -252,10 +252,10 @@ export default function TreinoDetalhe() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">Imagem do exercício</label>
+                <label className="block text-xs font-medium text-slate-700 mb-1">Imagem do exercÃ­cio</label>
                 <label className="flex items-center gap-2 cursor-pointer border border-dashed border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-500 dark:text-slate-400 hover:border-indigo-400 transition-colors">
                   <Image size={14} />
-                  {newEx.imageUrl ? 'Imagem selecionada ✓' : 'Selecionar imagem'}
+                  {newEx.imageUrl ? 'Imagem selecionada âœ“' : 'Selecionar imagem'}
                   <input
                     type="file"
                     accept="image/*"
@@ -291,7 +291,7 @@ export default function TreinoDetalhe() {
   );
 }
 
-// ── Sub-component: ExerciseCard ───────────────────────────────────────────────
+// â”€â”€ Sub-component: ExerciseCard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface ExerciseCardProps {
   ex: WorkoutExercise;
   editing: boolean;
@@ -316,10 +316,10 @@ function ExerciseCard({
 
   if (editing) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4 border-2 border-indigo-300 dark:border-indigo-700">
+      <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm p-4 border-2 border-indigo-300 dark:border-indigo-700">
         <div className="grid grid-cols-3 gap-3 mb-3">
           <div>
-            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Séries</label>
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">SÃ©ries</label>
             <input
               type="number"
               min={1}
@@ -355,7 +355,7 @@ function ExerciseCard({
           />
         </div>
         <div className="mb-3">
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Observações</label>
+          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">ObservaÃ§Ãµes</label>
           <input
             value={form.notes ?? ''}
             onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
@@ -363,7 +363,7 @@ function ExerciseCard({
           />
         </div>
         <div className="mb-3">
-          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">URL do vídeo</label>
+          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">URL do vÃ­deo</label>
           <input
             value={form.videoUrl ?? ''}
             onChange={(e) => setForm((p) => ({ ...p, videoUrl: e.target.value }))}
@@ -399,14 +399,14 @@ function ExerciseCard({
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-4">
+    <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm p-4">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{ex.exerciseName}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            {ex.sets} séries × {ex.reps} reps
-            {ex.weight && ` · ${ex.weight}`}
-            {` · descanso: ${ex.restSeconds}s`}
+            {ex.sets} sÃ©ries Ã— {ex.reps} reps
+            {ex.weight && ` Â· ${ex.weight}`}
+            {` Â· descanso: ${ex.restSeconds}s`}
           </p>
           {ex.notes && <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 italic">{ex.notes}</p>}
         </div>
@@ -429,7 +429,7 @@ function ExerciseCard({
           className="mt-2 flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 transition-colors"
         >
           <Video size={12} />
-          Ver vídeo
+          Ver vÃ­deo
         </button>
       )}
       {videoOpen && ex.videoUrl && (

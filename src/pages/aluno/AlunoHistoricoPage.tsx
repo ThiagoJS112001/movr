@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkoutLogs } from '../../hooks/useWorkouts';
 import { ChevronDown, ChevronUp, Dumbbell, Clock, CheckCircle2, History } from 'lucide-react';
@@ -19,7 +19,7 @@ export default function AlunoHistoricoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] text-white">
+    <div className="min-h-screen bg-[#080B18] text-white">
       <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
 
         {/* Header */}

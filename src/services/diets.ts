@@ -21,6 +21,7 @@ function mapMeal(row: Record<string, unknown>, foods: FoodItem[] = []): Meal {
     name: row.name as string,
     time: row.time as string,
     notes: (row.notes as string | null) ?? undefined,
+    targetCalories: (row.target_calories as number | null) ?? undefined,
     foods,
   };
 }
@@ -37,6 +38,10 @@ function mapDiet(row: Record<string, unknown>, meals: Meal[] = []): Diet {
     targetProtein: (row.target_protein as number | null) ?? undefined,
     targetCarbs: (row.target_carbs as number | null) ?? undefined,
     targetFat: (row.target_fat as number | null) ?? undefined,
+    durationDays: (row.duration_days as number | null) ?? undefined,
+    restrictionLevel: (row.restriction_level as string | null) ?? undefined,
+    preferences: (row.preferences as string[] | null) ?? [],
+    favoriteFoods: (row.favorite_foods as string[] | null) ?? [],
     createdAt: row.created_at as string,
     meals,
   };
@@ -124,6 +129,10 @@ export async function createDiet(data: Omit<Diet, 'id' | 'createdAt' | 'meals'>)
       target_protein: data.targetProtein ?? null,
       target_carbs: data.targetCarbs ?? null,
       target_fat: data.targetFat ?? null,
+      duration_days: data.durationDays ?? null,
+      restriction_level: data.restrictionLevel ?? null,
+      preferences: data.preferences ?? [],
+      favorite_foods: data.favoriteFoods ?? [],
     })
     .select()
     .single();
@@ -170,6 +179,7 @@ export async function addMealToDiet(dietId: string, meal: Omit<Meal, 'id'>): Pro
       name: meal.name,
       time: meal.time,
       notes: meal.notes ?? null,
+      target_calories: meal.targetCalories ?? null,
       order_index: count ?? 0,
     })
     .select()

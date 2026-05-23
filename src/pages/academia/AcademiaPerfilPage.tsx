@@ -6,23 +6,23 @@ import type { GymHours } from '../../types';
 
 const DAYS: { key: keyof GymHours; label: string }[] = [
   { key: 'segunda', label: 'Segunda-feira' },
-  { key: 'terca', label: 'Terça-feira' },
+  { key: 'terca', label: 'TerÃ§a-feira' },
   { key: 'quarta', label: 'Quarta-feira' },
   { key: 'quinta', label: 'Quinta-feira' },
   { key: 'sexta', label: 'Sexta-feira' },
-  { key: 'sabado', label: 'Sábado' },
+  { key: 'sabado', label: 'SÃ¡bado' },
   { key: 'domingo', label: 'Domingo' },
 ];
 
 const AMENITY_OPTIONS = [
-  'Estacionamento', 'Vestiário', 'Sauna', 'Wi-Fi', 'Área Kids',
-  'Piscina', 'Lanchonete', 'Loja de suplementos', 'Espaço de alongamento',
+  'Estacionamento', 'VestiÃ¡rio', 'Sauna', 'Wi-Fi', 'Ãrea Kids',
+  'Piscina', 'Lanchonete', 'Loja de suplementos', 'EspaÃ§o de alongamento',
 ];
 
 export default function AcademiaPerfilPage() {
   const { user } = useAuth();
   function getGymById(_id: string) { return undefined; }
-  function updateGym(_id: string, _data: unknown) { toast.error('Perfil da academia ainda não disponível.'); }
+  function updateGym(_id: string, _data: unknown) { toast.error('Perfil da academia ainda nÃ£o disponÃ­vel.'); }
 
   const gym = user ? getGymById(user.id) : undefined;
 
@@ -83,16 +83,16 @@ export default function AcademiaPerfilPage() {
 
       <div className="space-y-6">
         {/* Basic info */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5 space-y-4">
-          <h2 className="font-semibold dark:text-white">Informações básicas</h2>
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5 space-y-4">
+          <h2 className="font-semibold dark:text-white">InformaÃ§Ãµes bÃ¡sicas</h2>
 
           <div>
             <label className={label}>Nome da academia</label>
-            <input className={input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Academia Força Total" />
+            <input className={input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Academia ForÃ§a Total" />
           </div>
 
           <div>
-            <label className={label}>Descrição / Bio</label>
+            <label className={label}>DescriÃ§Ã£o / Bio</label>
             <textarea
               className={`${input} resize-none`}
               rows={3}
@@ -115,18 +115,18 @@ export default function AcademiaPerfilPage() {
 
           <div>
             <label className={label}>Cidade</label>
-            <input className={input} value={city} onChange={(e) => setCity(e.target.value)} placeholder="São Paulo" />
+            <input className={input} value={city} onChange={(e) => setCity(e.target.value)} placeholder="SÃ£o Paulo" />
           </div>
 
           <div>
-            <label className={label}>Endereço</label>
+            <label className={label}>EndereÃ§o</label>
             <input className={input} value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rua das Flores, 123" />
           </div>
         </div>
 
         {/* Services */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5">
-          <h2 className="font-semibold dark:text-white mb-4">Serviços</h2>
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5">
+          <h2 className="font-semibold dark:text-white mb-4">ServiÃ§os</h2>
           <div className="flex flex-col gap-3">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -150,7 +150,7 @@ export default function AcademiaPerfilPage() {
         </div>
 
         {/* Amenities */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5">
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5">
           <h2 className="font-semibold dark:text-white mb-4">Comodidades</h2>
           <div className="flex flex-wrap gap-2 mb-3">
             {AMENITY_OPTIONS.map((a) => (
@@ -196,8 +196,8 @@ export default function AcademiaPerfilPage() {
         </div>
 
         {/* Opening hours */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5">
-          <h2 className="font-semibold dark:text-white mb-4">Horário de funcionamento</h2>
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5">
+          <h2 className="font-semibold dark:text-white mb-4">HorÃ¡rio de funcionamento</h2>
           <div className="space-y-2">
             {DAYS.map(({ key, label: dayLabel }) => (
               <div key={key} className="flex items-center gap-3">
@@ -206,7 +206,7 @@ export default function AcademiaPerfilPage() {
                   className={`${input} flex-1`}
                   value={hours[key] ?? ''}
                   onChange={(e) => setHours((prev) => ({ ...prev, [key]: e.target.value }))}
-                  placeholder="06:00–22:00 ou Fechado"
+                  placeholder="06:00â€“22:00 ou Fechado"
                 />
               </div>
             ))}
@@ -219,7 +219,7 @@ export default function AcademiaPerfilPage() {
           className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
         >
           <Save size={16} />
-          {saving ? 'Salvando…' : 'Salvar alterações'}
+          {saving ? 'Salvandoâ€¦' : 'Salvar alteraÃ§Ãµes'}
         </button>
       </div>
     </div>

@@ -62,7 +62,7 @@ export default function TreinosPage() {
           {myWorkouts.map((workout) => (
             <div
               key={workout.id}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-4 flex items-center justify-between"
+              className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07] p-4 flex items-center justify-between"
             >
               <button
                 onClick={() => navigate(`/personal/treinos/${workout.id}`)}
@@ -74,7 +74,7 @@ export default function TreinosPage() {
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{workout.name}</p>
                   <p className="text-xs text-slate-400 dark:text-slate-500">
-                    {workout.exercises.length} exercício{workout.exercises.length !== 1 ? 's' : ''} ·{' '}
+                    {workout.exercises.length} exercÃ­cio{workout.exercises.length !== 1 ? 's' : ''} Â·{' '}
                     {new Date(workout.createdAt).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -106,7 +106,7 @@ export default function TreinosPage() {
       {/* Create modal */}
       {showCreate && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6">
+          <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h2 className="font-bold text-slate-800 dark:text-slate-100 mb-4">Novo treino</h2>
             <form onSubmit={handleCreate} className="flex flex-col gap-4">
               <div>
@@ -115,13 +115,13 @@ export default function TreinosPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="ex: Treino A – Peito"
+                  placeholder="ex: Treino A â€“ Peito"
                   className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Descrição <span className="text-slate-400">(opcional)</span>
+                  DescriÃ§Ã£o <span className="text-slate-400">(opcional)</span>
                 </label>
                 <textarea
                   value={description}

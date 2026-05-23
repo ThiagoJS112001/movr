@@ -54,13 +54,13 @@ export default function AcademiaSidebar() {
   );
 
   const footer = (
-    <div className="mt-auto pt-4 border-t border-slate-700/50 space-y-1">
+    <div className="mt-auto pt-4 border-t border-white/[0.07] space-y-1">
       <button
         onClick={() => { setSettingsOpen(true); setMobileOpen(false); }}
         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
       >
         <Settings size={18} />
-        Configurações
+        ConfiguraÃ§Ãµes
       </button>
       <button
         onClick={handleLogout}

@@ -33,7 +33,7 @@ const PROFILES: {
   {
     role: 'personal',
     label: 'Personal Trainer',
-    description: 'Gerencie seus alunos, treinos, dietas e avaliações.',
+    description: 'Gerencie seus alunos, treinos, dietas e avaliaÃ§Ãµes.',
     icon: Dumbbell,
     ringColor: 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-500/10',
     dotColor: 'bg-rose-500',
@@ -43,7 +43,7 @@ const PROFILES: {
   {
     role: 'aluno',
     label: 'Aluno',
-    description: 'Acompanhe seus treinos, dietas e sua evolução.',
+    description: 'Acompanhe seus treinos, dietas e sua evoluÃ§Ã£o.',
     icon: User,
     ringColor: 'border-teal-500 ring-1 ring-teal-500 bg-teal-500/10',
     dotColor: 'bg-slate-500',
@@ -65,29 +65,29 @@ const PROFILES: {
 const RIGHT_FEATURES = [
   {
     icon: TrendingUp,
-    title: 'Gestão completa',
-    description: 'Gerencie treinos, dietas, avaliações e métricas de forma prática e eficiente.',
+    title: 'GestÃ£o completa',
+    description: 'Gerencie treinos, dietas, avaliaÃ§Ãµes e mÃ©tricas de forma prÃ¡tica e eficiente.',
     iconBg: 'bg-indigo-600/20',
     iconColor: 'text-indigo-400',
   },
   {
     icon: MessageCircle,
-    title: 'Comunicação facilitada',
-    description: 'Fale com seus alunos ou personal trainer de forma rápida e organizada.',
+    title: 'ComunicaÃ§Ã£o facilitada',
+    description: 'Fale com seus alunos ou personal trainer de forma rÃ¡pida e organizada.',
     iconBg: 'bg-emerald-600/20',
     iconColor: 'text-emerald-400',
   },
   {
     icon: CalendarDays,
     title: 'Acompanhamento inteligente',
-    description: 'Acompanhe seu progresso com relatórios e gráficos avançados.',
+    description: 'Acompanhe seu progresso com relatÃ³rios e grÃ¡ficos avanÃ§ados.',
     iconBg: 'bg-amber-600/20',
     iconColor: 'text-amber-400',
   },
   {
     icon: ShieldCheck,
     title: 'Seus dados protegidos',
-    description: 'Utilizamos criptografia e boas práticas para garantir sua segurança.',
+    description: 'Utilizamos criptografia e boas prÃ¡ticas para garantir sua seguranÃ§a.',
     iconBg: 'bg-slate-600/30',
     iconColor: 'text-slate-400',
   },
@@ -143,8 +143,8 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!terms) { setError('Você precisa aceitar os Termos de Uso para continuar.'); return; }
-    if (password !== confirmPassword) { setError('As senhas não coincidem.'); return; }
+    if (!terms) { setError('VocÃª precisa aceitar os Termos de Uso para continuar.'); return; }
+    if (password !== confirmPassword) { setError('As senhas nÃ£o coincidem.'); return; }
     if (password.length < 6) { setError('A senha deve ter pelo menos 6 caracteres.'); return; }
     setLoading(true);
 
@@ -172,11 +172,11 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-2xl font-bold text-white">Confirme seu e-mail</h2>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Enviamos um link de confirmação para{' '}
+            Enviamos um link de confirmaÃ§Ã£o para{' '}
             <span className="font-semibold text-white">{email}</span>.{' '}
-            Clique no link para ativar sua conta e depois faça login normalmente.
+            Clique no link para ativar sua conta e depois faÃ§a login normalmente.
           </p>
-          <p className="text-xs text-slate-600">Não recebeu? Verifique a pasta de spam.</p>
+          <p className="text-xs text-slate-600">NÃ£o recebeu? Verifique a pasta de spam.</p>
           <button type="button" onClick={() => navigate('/login')} className="mt-2 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition">
             Ir para o login
           </button>
@@ -189,7 +189,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-[#080B18] flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-5xl bg-[#0D1025] border border-white/[0.07] rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_320px]">
 
-        {/* ── LEFT: Form ── */}
+        {/* â”€â”€ LEFT: Form â”€â”€ */}
         <div className="p-8 flex flex-col">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-6">
@@ -200,13 +200,13 @@ export default function RegisterPage() {
           </div>
 
           <h2 className="text-2xl font-bold text-white mb-1">
-            Vamos começar sua{' '}
+            Vamos comeÃ§ar sua{' '}
             <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              evolução.
+              evoluÃ§Ã£o.
             </span>
           </h2>
           <p className="text-slate-400 text-sm mb-7 leading-relaxed">
-            Crie sua conta e faça parte da plataforma que conecta treinos, pessoas e resultados.
+            Crie sua conta e faÃ§a parte da plataforma que conecta treinos, pessoas e resultados.
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -312,7 +312,7 @@ export default function RegisterPage() {
                 Eu concordo com os{' '}
                 <button type="button" className="text-indigo-400 hover:text-indigo-300 transition hover:underline">Termos de Uso</button>
                 {' '}e a{' '}
-                <button type="button" className="text-indigo-400 hover:text-indigo-300 transition hover:underline">Política de Privacidade</button>
+                <button type="button" className="text-indigo-400 hover:text-indigo-300 transition hover:underline">PolÃ­tica de Privacidade</button>
                 .
               </span>
             </label>
@@ -320,6 +320,15 @@ export default function RegisterPage() {
             {error && (
               <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>
             )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
+            >
+              {loading ? 'Criando conta...' : 'Criar conta'}
+            </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3">
@@ -340,7 +349,7 @@ export default function RegisterPage() {
             </button>
 
             <p className="text-center text-sm text-slate-500">
-              Já tem uma conta?{' '}
+              JÃ¡ tem uma conta?{' '}
               <button type="button" onClick={() => navigate('/login')} className="text-indigo-400 hover:text-indigo-300 font-medium transition">
                 Fazer login
               </button>
@@ -348,12 +357,12 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        {/* ── RIGHT: Info panel ── */}
+        {/* â”€â”€ RIGHT: Info panel â”€â”€ */}
         <div className="relative hidden lg:flex flex-col justify-between border-l border-white/[0.07] bg-[#0A0D1F] p-7 overflow-hidden">
 
           {/* Features */}
           <div>
-            <h3 className="text-sm font-bold text-white mb-5">O que você terá com o Movr</h3>
+            <h3 className="text-sm font-bold text-white mb-5">O que vocÃª terÃ¡ com o Movr</h3>
             <ul className="space-y-4">
               {RIGHT_FEATURES.map(({ icon: Icon, title, description, iconBg, iconColor }) => (
                 <li key={title} className="flex items-start gap-3">
@@ -388,8 +397,8 @@ export default function RegisterPage() {
             <div className="rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 py-3 -mt-1">
               <span className="text-indigo-400 text-2xl font-serif leading-none">"</span>
               <p className="text-sm text-white font-medium leading-relaxed mt-0.5">
-                Movimento gera evolução.<br />
-                Conexão cria resultados.<br />
+                Movimento gera evoluÃ§Ã£o.<br />
+                ConexÃ£o cria resultados.<br />
                 Juntos, vamos mais longe.
               </p>
               <span className="w-2 h-2 rounded-full bg-rose-500 inline-block mt-2" />
@@ -405,10 +414,10 @@ export default function RegisterPage() {
               <p className="text-sm font-semibold text-white">Precisa de ajuda?</p>
             </div>
             <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-              Nossa equipe está pronta para te ajudar sempre que precisar.
+              Nossa equipe estÃ¡ pronta para te ajudar sempre que precisar.
             </p>
             <button type="button" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition">
-              Entrar em contato →
+              Entrar em contato â†’
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { X, Plus, Trash2, Salad, TrendingUp, TrendingDown, Activity, Scale, GripVertical, MoreVertical, CheckCircle2, Droplets } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useCreateDiet, useAssignDiet as useAssignDietMutation } from '../hooks/useDiets';
@@ -31,7 +31,7 @@ function getMealIcon(name: string): string {
 }
 
 const INPUT_CLS =
-  'w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors';
+  'w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors';
 
 interface Props {
   studentId: string;
@@ -135,10 +135,10 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
       className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-slate-900 border border-slate-700/60 rounded-2xl w-full max-w-4xl flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+      <div className="bg-slate-900 border border-white/[0.07] rounded-2xl w-full max-w-4xl flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
 
         {/* â”€â”€ Header â”€â”€ */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/60 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07] shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
               <Salad size={20} className="text-emerald-400" />
@@ -160,7 +160,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
         <div className="flex flex-1 min-h-0 overflow-hidden">
 
           {/* Left panel */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 border-r border-slate-700/60">
+          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6 border-r border-white/[0.07]">
 
             {/* Nome da dieta */}
             <div>
@@ -192,7 +192,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                     className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${
                       goal === key
                         ? 'bg-indigo-600 border-indigo-500 text-white'
-                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-500 hover:text-white'
+                        : 'bg-[#0D1025] border-white/[0.07] text-slate-300 hover:border-slate-500 hover:text-white'
                     }`}
                   >
                     <Icon size={14} />
@@ -236,7 +236,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                     { label: 'Carboidratos', g: carbG, pct: pctCarbs, color: 'bg-amber-500'  },
                     { label: 'Gorduras',     g: fatG,  pct: pctFat,   color: 'bg-rose-500'   },
                   ].map(({ label, g, pct, color }) => (
-                    <div key={label} className="bg-slate-800/60 rounded-xl p-3 border border-slate-700/50">
+                    <div key={label} className="bg-[#0D1025]/60 rounded-xl p-3 border border-white/[0.07]">
                       <p className="text-lg font-bold text-white">{g}g</p>
                       <p className="text-xs text-slate-400 mt-0.5">{label}</p>
                       <div className="flex items-center gap-2 mt-2">
@@ -273,14 +273,14 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                     onChange={(e) => setAddMealName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMeal(); } }}
                     placeholder="Nome da refeiÃ§Ã£o..."
-                    className="flex-1 bg-slate-800 border border-emerald-500/60 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="flex-1 bg-[#0D1025] border border-emerald-500/60 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     autoFocus
                   />
                   <input
                     type="time"
                     value={addMealTime}
                     onChange={(e) => setAddMealTime(e.target.value)}
-                    className="w-24 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-24 bg-[#0D1025] border border-white/[0.07] rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                   <button
                     onClick={addMeal}
@@ -293,7 +293,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               )}
 
               {meals.length === 0 && !addMealOpen ? (
-                <div className="border border-dashed border-slate-700 rounded-xl py-8 text-center">
+                <div className="border border-dashed border-white/[0.07] rounded-xl py-8 text-center">
                   <p className="text-sm text-slate-500">Nenhuma refeiÃ§Ã£o adicionada.</p>
                   <button
                     type="button"
@@ -321,7 +321,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                           <MoreVertical size={13} />
                         </button>
                         {mealMenuId === m.id && (
-                          <div className="absolute right-0 top-full mt-1 w-36 bg-slate-800 rounded-xl shadow-lg border border-slate-700 z-20 py-1">
+                          <div className="absolute right-0 top-full mt-1 w-36 bg-[#0D1025] rounded-xl shadow-lg border border-white/[0.07] z-20 py-1">
                             <button
                               onClick={() => removeMeal(m.id)}
                               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:bg-red-900/20 transition-colors"
@@ -348,21 +348,21 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                 rows={3}
                 maxLength={500}
                 placeholder="Adicione informaÃ§Ãµes adicionais sobre esta dieta..."
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition-colors"
+                className="w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition-colors"
               />
             </div>
           </div>
 
           {/* â”€â”€ Right panel: Resumo diÃ¡rio â”€â”€ */}
           <div className="w-[290px] shrink-0 flex flex-col overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-700/60 shrink-0">
+            <div className="px-5 py-4 border-b border-white/[0.07] shrink-0">
               <p className="text-sm font-bold text-white">Resumo diÃ¡rio</p>
               <p className="text-xs text-slate-400 mt-0.5">VisÃ£o geral da dieta criada.</p>
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
 
               {/* Calorias */}
-              <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3.5">
+              <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-xl px-4 py-3.5">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs text-slate-400">Calorias</p>
                   <Droplets size={14} className="text-emerald-400" />
@@ -375,7 +375,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               </div>
 
               {/* ProteÃ­nas */}
-              <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3">
+              <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <p className="text-xs text-slate-400">ProteÃ­nas</p>
                   {pctProt > 0 && <span className="text-xs text-slate-400">{pctProt}%</span>}
@@ -390,7 +390,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               </div>
 
               {/* Carboidratos */}
-              <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3">
+              <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <p className="text-xs text-slate-400">Carboidratos</p>
                   {pctCarbs > 0 && <span className="text-xs text-slate-400">{pctCarbs}%</span>}
@@ -405,7 +405,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               </div>
 
               {/* Gorduras */}
-              <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3">
+              <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <p className="text-xs text-slate-400">Gorduras</p>
                   {pctFat > 0 && <span className="text-xs text-slate-400">{pctFat}%</span>}
@@ -420,7 +420,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               </div>
 
               {/* RefeiÃ§Ãµes */}
-              <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-3">
+              <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <p className="text-xs text-slate-400">RefeiÃ§Ãµes</p>
                   <Salad size={14} className="text-emerald-400" />
@@ -435,7 +435,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
         </div>
 
         {/* â”€â”€ Footer â”€â”€ */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-700/60 shrink-0">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.07] shrink-0">
           <button
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl border border-slate-600 text-slate-300 text-sm hover:bg-slate-700 transition-colors"

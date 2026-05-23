@@ -11,7 +11,7 @@ import type { WeeklyPlanArchive } from '../../types';
 const DAYS_ORDER = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
 const DAYS_SHORT: Record<string, string> = {
   segunda: 'Seg', terca: 'Ter', quarta: 'Qua',
-  quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb', domingo: 'Dom',
+  quinta: 'Qui', sexta: 'Sex', sabado: 'SÃ¡b', domingo: 'Dom',
 };
 
 function formatDate(iso: string) {
@@ -96,7 +96,7 @@ export default function HistoricoPlanoPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight">
-              Histórico de Planos
+              HistÃ³rico de Planos
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {myArchives.length} plano{myArchives.length !== 1 ? 's' : ''} arquivado{myArchives.length !== 1 ? 's' : ''}
@@ -114,13 +114,13 @@ export default function HistoricoPlanoPage() {
             placeholder="Buscar por nome do aluno..."
             value={nameSearch}
             onChange={(e) => setNameSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 dark:border-white/[0.07] dark:bg-[#0D1025] dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500"
           />
         </div>
         <select
           value={studentFilter}
           onChange={(e) => setStudentFilter(e.target.value)}
-          className="py-2 px-3 text-sm border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+          className="py-2 px-3 text-sm border border-slate-200 dark:border-white/[0.07] dark:bg-[#0D1025] dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
         >
           <option value="">Todos os alunos</option>
           {studentsWithArchives.map((s) => (
@@ -156,7 +156,7 @@ export default function HistoricoPlanoPage() {
           return (
             <div
               key={archive.id}
-              className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60"
+              className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07]"
             >
               {/* Card header */}
               <div className="flex items-start gap-3 px-4 py-3">
@@ -206,7 +206,7 @@ export default function HistoricoPlanoPage() {
 
               {/* Expanded: exercises per day */}
               {expanded && (
-                <div className="border-t border-slate-100 dark:border-slate-700 px-4 py-3">
+                <div className="border-t border-slate-100 dark:border-white/[0.07] px-4 py-3">
                   {DAYS_ORDER.map((day) => {
                     const dayData = archive.days.find((d) => d.dayOfWeek === day);
                     const hasContent = dayData && (dayData.label.trim() || dayData.exerciseIds.length > 0);
@@ -239,7 +239,7 @@ export default function HistoricoPlanoPage() {
                           </div>
                         ) : (
                           <p className="text-xs text-slate-400 dark:text-slate-500 pl-2 italic">
-                            Sem exercícios — apenas rótulo
+                            Sem exercÃ­cios â€” apenas rÃ³tulo
                           </p>
                         )}
                       </div>

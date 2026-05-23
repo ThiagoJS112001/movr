@@ -20,27 +20,27 @@ import { useTheme } from '../contexts/ThemeContext';
 const FEATURES = [
   {
     icon: TrendingUp,
-    title: 'Evolução que se vê',
-    description: 'Acompanhe métricas, resultados e performance em tempo real.',
+    title: 'EvoluÃ§Ã£o que se vÃª',
+    description: 'Acompanhe mÃ©tricas, resultados e performance em tempo real.',
   },
   {
     icon: Users,
-    title: 'Conexão que transforma',
-    description: 'Conecte personal, alunos e academias em um só lugar.',
+    title: 'ConexÃ£o que transforma',
+    description: 'Conecte personal, alunos e academias em um sÃ³ lugar.',
   },
   {
     icon: Target,
     title: 'Foco que gera resultado',
-    description: 'Planeje treinos, dietas e acompanhamentos com mais clareza e eficiência.',
+    description: 'Planeje treinos, dietas e acompanhamentos com mais clareza e eficiÃªncia.',
   },
   {
     icon: ShieldCheck,
-    title: 'Seus dados estão protegidos',
-    description: 'Utilizamos criptografia e boas práticas para garantir a segurança das suas informações.',
+    title: 'Seus dados estÃ£o protegidos',
+    description: 'Utilizamos criptografia e boas prÃ¡ticas para garantir a seguranÃ§a das suas informaÃ§Ãµes.',
   },
 ];
 
-/** Logo com fallback para o SVG se a imagem não existir */
+/** Logo com fallback para o SVG se a imagem nÃ£o existir */
 function BrandLogo({ size = 38 }: { size?: number }) {
   const [imgError, setImgError] = useState(false);
   if (!imgError) {
@@ -89,26 +89,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080B18] flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#080B18] flex flex-col items-center justify-center px-4 py-8">
 
       {/* Card */}
-      <div className="w-full max-w-5xl bg-[#0D1025] border border-white/[0.07] rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+<div className="w-full max-w-5xl bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
 
-        {/* ── LEFT: Login form ── */}
+        {/* â”€â”€ LEFT: Login form â”€â”€ */}
         <div className="p-10 flex flex-col">
 
           {/* Logo */}
-          <div className="mb-6 shrink-0">
-            <img src="/images/logo_escrita.png" alt="movr." className="w-56 max-h-16 object-contain object-left" />
+          <div className="mb-6 shrink-0 flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#7c5cfc] flex items-center justify-center shrink-0">
+              <span className="text-white text-xs font-black">M</span>
+            </div>
+            <span className="text-white font-bold text-xl tracking-tight">movr.</span>
           </div>
 
           <div className="flex-1 flex flex-col justify-center">
 
-          <h2 className="text-2xl font-bold text-white mb-1">
-            Bem-vindo de volta! 👋
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+            Bem-vindo de volta! ðŸ‘‹
           </h2>
           <p className="text-slate-400 text-sm mb-7">
-            Faça login para continuar{' '}
+            FaÃ§a login para continuar{' '}
             <span className="text-indigo-400 font-medium">evoluindo.</span>
           </p>
 
@@ -125,7 +128,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-slate-600 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
               </div>
             </div>
@@ -150,8 +153,8 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-slate-600 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
                 <button
                   type="button"
@@ -207,7 +210,7 @@ export default function LoginPage() {
             {/* Google */}
             <button
               type="button"
-              className="flex items-center justify-center gap-2 bg-transparent border border-white/10 hover:border-white/25 text-slate-300 hover:text-white rounded-xl py-2.5 text-sm font-medium transition"
+              className="flex items-center justify-center gap-2 bg-transparent border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/25 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl py-2.5 text-sm font-medium transition"
             >
               <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
                 <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
@@ -219,23 +222,23 @@ export default function LoginPage() {
             </button>
 
             <p className="text-center text-sm text-slate-500">
-              Não tem uma conta?{' '}
+              NÃ£o tem uma conta?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/register')}
                 className="text-indigo-400 hover:text-indigo-300 font-medium transition"
               >
-                Criar conta →
+                Criar conta â†’
               </button>
             </p>
           </form>
           </div>
         </div>
 
-        {/* ── RIGHT: Marketing panel ── */}
-        <div className="relative hidden lg:grid grid-cols-[1fr_auto] border-l border-white/[0.07] bg-[#0A0D1F] overflow-hidden">
+        {/* â”€â”€ RIGHT: Marketing panel â”€â”€ */}
+<div className="relative hidden lg:grid grid-cols-[1fr_auto] border-l border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-[#0A0D1F] overflow-hidden">
 
-          {/* Trend line decoration — top right */}
+          {/* Trend line decoration â€” top right */}
           <svg
             className="absolute top-0 right-0 w-72 h-56 opacity-25 pointer-events-none"
             viewBox="0 0 280 200"
@@ -266,7 +269,7 @@ export default function LoginPage() {
               <p className="text-[10px] font-semibold tracking-[0.18em] text-indigo-400 uppercase mb-4">
                 Uma plataforma completa
               </p>
-              <h3 className="text-3xl font-bold text-white leading-snug mb-2">
+              <h3 className="text-3xl font-bold text-slate-900 dark:text-white leading-snug mb-2">
                 Para treinar,<br />acompanhar<br />
                 e{' '}
                 <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
@@ -274,7 +277,7 @@ export default function LoginPage() {
                 </span>
               </h3>
               <p className="text-slate-400 text-sm mt-3 leading-relaxed">
-                Tudo o que você precisa para levar<br />
+                Tudo o que vocÃª precisa para levar<br />
                 seus treinos e seus alunos mais longe.
               </p>
             </div>
@@ -286,7 +289,7 @@ export default function LoginPage() {
                     <Icon size={15} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">{title}</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{title}</p>
                     <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
                   </div>
                 </li>
@@ -303,32 +306,32 @@ export default function LoginPage() {
                 <ellipse cx="88" cy="128" rx="70" ry="100" stroke="#4338CA" strokeWidth="1" strokeDasharray="5 4" opacity="0.35"/>
               </svg>
 
-              {/* PERSONAL — top */}
+              {/* PERSONAL â€” top */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5">
-                <div className="w-10 h-10 rounded-full bg-[#141830] border border-indigo-500/40 flex items-center justify-center shadow-lg">
+                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-[#141830] border border-indigo-500/40 flex items-center justify-center shadow-lg">
                   <Users size={16} className="text-indigo-400" />
                 </div>
                 <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Personal</span>
               </div>
 
-              {/* Center M logo */}
+              {/* Center icon */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="w-14 h-14 rounded-2xl bg-[#141830] border border-indigo-500/30 flex items-center justify-center shadow-xl">
-                  <BrandLogo size={36} />
+                <div className="w-14 h-14 rounded-2xl bg-slate-200 dark:bg-[#141830] border border-indigo-500/30 flex items-center justify-center shadow-xl overflow-hidden p-1.5">
+                  <img src="/images/icone_new_black.png" alt="Movr" className="w-full h-full object-contain" />
                 </div>
               </div>
 
-              {/* ALUNO — bottom left */}
-              <div className="absolute bottom-0 left-0 flex flex-col items-center gap-1.5">
-                <div className="w-10 h-10 rounded-full bg-[#141830] border border-violet-500/40 flex items-center justify-center shadow-lg">
+              {/* ALUNO â€” bottom left */}
+              <div className="absolute top-[62%] left-[16%] -translate-x-1/2 flex flex-col items-center gap-1.5">
+                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-[#141830] border border-violet-500/40 flex items-center justify-center shadow-lg">
                   <Users size={16} className="text-violet-400" />
                 </div>
                 <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Aluno</span>
               </div>
 
-              {/* ACADEMIA — bottom right */}
-              <div className="absolute bottom-0 right-0 flex flex-col items-center gap-1.5">
-                <div className="w-10 h-10 rounded-full bg-[#141830] border border-indigo-500/40 flex items-center justify-center shadow-lg">
+              {/* ACADEMIA â€” bottom right */}
+              <div className="absolute top-[62%] left-[84%] -translate-x-1/2 flex flex-col items-center gap-1.5">
+                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-[#141830] border border-indigo-500/40 flex items-center justify-center shadow-lg">
                   <ShieldCheck size={16} className="text-indigo-400" />
                 </div>
                 <span className="text-[9px] font-bold text-slate-400 tracking-widest uppercase">Academia</span>
@@ -345,10 +348,10 @@ export default function LoginPage() {
       {/* Footer */}
       <div className="mt-5 flex flex-col items-center gap-2">
         <p className="text-xs text-slate-600 text-center">
-          Ao continuar, você concorda com nossos{' '}
+          Ao continuar, vocÃª concorda com nossos{' '}
           <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Termos de Uso</button>
           {' '}e{' '}
-          <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Política de Privacidade</button>
+          <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">PolÃ­tica de Privacidade</button>
           .
         </p>
         <button

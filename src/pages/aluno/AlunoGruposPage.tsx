@@ -1,53 +1,36 @@
 import { useState } from 'react';
-import { Users, UserPlus, Plus, Check, X, MessageCircle } from 'lucide-react';
+import { Users, Plus, MessageCircle, X, Check, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '../../contexts/AuthContext';
+import {
+  useMyGroups,
+  useCreateGroup,
+} from '../../hooks/useGroups';
+import {
+  useMyFriends,
+  useMyFriendRequests,
+  useRespondFriendRequest,
+} from '../../hooks/useFriends';
 
 type Tab = 'grupos' | 'amigos';
 
 export default function AlunoGruposPage() {
   const { user } = useAuth();
-  const students: never[] = [];
-  const studentGroups: never[] = [];
-  const friendRequests: never[] = [];
-  function createGroup(_data: unknown) { toast.error('Grupos ainda não disponíveis.'); }
-  function getUserGroups(_userId: string) { return []; }
-  function sendFriendRequest(_data: unknown) { toast.error('Amigos ainda não disponíveis.'); }
-  function respondFriendRequest(_data: unknown) { return; }
-  function getFriends(_userId: string) { return []; }
   const navigate = useNavigate();
+
+  const { data: myGroups = [], isLoading: groupsLoading } = useMyGroups();
+  const { data: friends = [] } = useMyFriends();
+  const { data: pendingRequests = [] } = useMyFriendRequests();
+  const createGroup = useCreateGroup();
+  const respond = useRespondFriendRequest();
 
   const [tab, setTab] = useState<Tab>('grupos');
   const [createOpen, setCreateOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
-  const [friendSearch, setFriendSearch] = useState('');
 
   if (!user) return null;
-
-  const myGroups = getUserGroups(user.id);
-  const myFriendIds = getFriends(user.id);
-  const myFriends = students.filter((s) => myFriendIds.includes(s.id));
-
-  // Pending requests received by me
-  const pendingReceived = friendRequests.filter(
-    (r) => r.toId === user.id && r.status === 'pending'
-  );
-
-  // Students I can add (not me, not already friends, no pending request)
-  const canAdd = students.filter((s) => {
-    if (s.id === user.id) return false;
-    if (myFriendIds.includes(s.id)) return false;
-    const pending = friendRequests.find(
-      (r) => r.status === 'pending' &&
-        ((r.fromId === user.id && r.toId === s.id) || (r.fromId === s.id && r.toId === user.id))
-    );
-    return !pending;
-  }).filter((s) =>
-    !friendSearch || s.name.toLowerCase().includes(friendSearch.toLowerCase()) ||
-    s.email.toLowerCase().includes(friendSearch.toLowerCase())
-  );
 
   function toggleFriendSelection(id: string) {
     setSelectedFriends((prev) =>
@@ -55,14 +38,21 @@ export default function AlunoGruposPage() {
     );
   }
 
-  function handleCreateGroup() {
+  async function handleCreateGroup() {
     if (!newGroupName.trim()) return;
-    const group = createGroup(newGroupName.trim(), user.id, [user.id, ...selectedFriends]);
-    toast.success(`Grupo "${group.name}" criado!`);
-    setCreateOpen(false);
-    setNewGroupName('');
-    setSelectedFriends([]);
-    navigate(`/aluno/grupos/${group.id}`);
+    try {
+      const groupId = await createGroup.mutateAsync({
+        name: newGroupName.trim(),
+        memberIds: selectedFriends,
+      });
+      toast.success(`Grupo "${newGroupName.trim()}" criado!`);
+      setCreateOpen(false);
+      setNewGroupName('');
+      setSelectedFriends([]);
+      navigate(`/aluno/grupos/${groupId}`);
+    } catch {
+      toast.error('NÃ£o foi possÃ­vel criar o grupo. Tente novamente.');
+    }
   }
 
   return (
@@ -86,18 +76,23 @@ export default function AlunoGruposPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 mb-6 w-fit">
+      <div className="flex gap-1 bg-slate-100 dark:bg-[#0D1025] rounded-xl p-1 mb-6 w-fit">
         {(['grupos', 'amigos'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
               tab === t
                 ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
             }`}
           >
             {t === 'grupos' ? 'Meus Grupos' : 'Amigos'}
+            {t === 'amigos' && pendingRequests.length > 0 && (
+              <span className="ml-1.5 text-[10px] bg-rose-500 text-white rounded-full px-1.5 py-0.5">
+                {pendingRequests.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -105,10 +100,17 @@ export default function AlunoGruposPage() {
       {/* GRUPOS TAB */}
       {tab === 'grupos' && (
         <div>
-          {myGroups.length === 0 ? (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-10 text-center">
+          {groupsLoading && (
+            <div className="space-y-3">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-20 rounded-2xl bg-slate-100 dark:bg-[#0D1025] animate-pulse" />
+              ))}
+            </div>
+          )}
+          {!groupsLoading && myGroups.length === 0 && (
+            <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-10 text-center">
               <Users size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-              <p className="font-semibold dark:text-white">Você ainda não está em nenhum grupo</p>
+              <p className="font-semibold dark:text-white">VocÃª ainda nÃ£o estÃ¡ em nenhum grupo</p>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Crie um grupo com seus amigos para treinar junto!
               </p>
@@ -120,35 +122,38 @@ export default function AlunoGruposPage() {
                 Criar primeiro grupo
               </button>
             </div>
-          ) : (
+          )}
+          {!groupsLoading && myGroups.length > 0 && (
             <div className="grid gap-4">
-              {myGroups.map((group) => {
-                const memberNames = group.memberIds
-                  .filter((id) => id !== user.id)
-                  .map((id) => students.find((s) => s.id === id)?.name ?? 'Aluno')
-                  .slice(0, 3);
-                return (
-                  <div
-                    key={group.id}
-                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5 flex items-center justify-between gap-4"
-                  >
+              {myGroups.map((group) => (
+                <div
+                  key={group.id}
+                  className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5 flex items-center justify-between gap-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-emerald-400">
+                        {group.name[0]?.toUpperCase()}
+                      </span>
+                    </div>
                     <div>
                       <p className="font-semibold dark:text-white">{group.name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        {group.memberIds.length} {group.memberIds.length === 1 ? 'membro' : 'membros'}
-                        {memberNames.length > 0 && ` · ${memberNames.join(', ')}${group.memberIds.length > 4 ? '…' : ''}`}
-                      </p>
+                      {group.description && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          {group.description}
+                        </p>
+                      )}
                     </div>
-                    <button
-                      onClick={() => navigate(`/aluno/grupos/${group.id}`)}
-                      className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors flex-shrink-0"
-                    >
-                      <MessageCircle size={14} />
-                      Abrir chat
-                    </button>
                   </div>
-                );
-              })}
+                  <button
+                    onClick={() => navigate(`/aluno/grupos/${group.id}`)}
+                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shrink-0"
+                  >
+                    <MessageCircle size={14} />
+                    Abrir chat
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -158,101 +163,113 @@ export default function AlunoGruposPage() {
       {tab === 'amigos' && (
         <div className="space-y-6">
           {/* Pending requests */}
-          {pendingReceived.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5">
+          {pendingRequests.length > 0 && (
+            <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5">
               <h2 className="font-semibold dark:text-white mb-3">
-                Solicitações pendentes ({pendingReceived.length})
+                SolicitaÃ§Ãµes pendentes ({pendingRequests.length})
               </h2>
               <div className="space-y-3">
-                {pendingReceived.map((req) => (
-                  <div key={req.id} className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium dark:text-white">{req.fromName}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Quer ser seu amigo</p>
+                {pendingRequests.map((req) => {
+                  const p = req.from_profile!;
+                  return (
+                    <div key={req.id} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#7c5cfc]/15 text-[#7c5cfc] font-bold text-sm flex items-center justify-center shrink-0">
+                          {p.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium dark:text-white">{p.name}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{p.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            respond.mutate({ id: req.id, status: 'accepted' });
+                            toast.success(`VocÃª e ${p.name} agora sÃ£o amigos!`);
+                          }}
+                          className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
+                        >
+                          <Check size={13} />
+                          Aceitar
+                        </button>
+                        <button
+                          onClick={() => respond.mutate({ id: req.id, status: 'rejected' })}
+                          className="flex items-center gap-1 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                        >
+                          <X size={13} />
+                          Recusar
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => { respondFriendRequest(req.id, 'accepted'); toast.success(`Você e ${req.fromName} agora são amigos!`); }}
-                        className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
-                      >
-                        <Check size={13} />
-                        Aceitar
-                      </button>
-                      <button
-                        onClick={() => respondFriendRequest(req.id, 'rejected')}
-                        className="flex items-center gap-1 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                      >
-                        <X size={13} />
-                        Recusar
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
 
           {/* My friends */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5">
+          <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5">
             <h2 className="font-semibold dark:text-white mb-3">
-              Meus amigos ({myFriends.length})
+              Meus amigos ({friends.length})
             </h2>
-            {myFriends.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Você ainda não tem amigos. Adicione abaixo!
-              </p>
+            {friends.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  VocÃª ainda nÃ£o tem amigos aqui.
+                </p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                  Adicione amigos pela pÃ¡gina{' '}
+                  <button
+                    onClick={() => navigate('/aluno/amigos')}
+                    className="text-emerald-500 underline"
+                  >
+                    Amigos
+                  </button>
+                  .
+                </p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {myFriends.map((friend) => (
-                  <div key={friend.id} className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/40 rounded-xl">
-                    <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                      {friend.name[0]}
+                {friends.map((friend) => (
+                  <div
+                    key={friend.id}
+                    className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/40 rounded-xl"
+                  >
+                    {friend.avatar_url ? (
+                      <img
+                        src={friend.avatar_url}
+                        alt={friend.name}
+                        className="w-8 h-8 rounded-full object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm font-bold shrink-0">
+                        {friend.name[0]}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium dark:text-white truncate">{friend.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{friend.email}</p>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium dark:text-white">{friend.name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{friend.email}</p>
-                    </div>
+                    <UserCheck size={14} className="text-emerald-500 shrink-0 ml-auto" />
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Find students */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5">
-            <h2 className="font-semibold dark:text-white mb-3">Encontrar alunos</h2>
-            <input
-              className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition mb-4"
-              placeholder="Buscar por nome ou e-mail..."
-              value={friendSearch}
-              onChange={(e) => setFriendSearch(e.target.value)}
-            />
-            {canAdd.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
-                {friendSearch ? 'Nenhum aluno encontrado.' : 'Todos os alunos já são seus amigos!'}
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {canAdd.map((s) => (
-                  <div key={s.id} className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-medium dark:text-white">{s.name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{s.email}</p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        sendFriendRequest(user.id, user.name, s.id, s.name);
-                        toast.success(`Solicitação enviada para ${s.name}!`);
-                      }}
-                      className="flex items-center gap-1 border border-emerald-500 text-emerald-600 dark:text-emerald-400 text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors flex-shrink-0"
-                    >
-                      <UserPlus size={13} />
-                      Adicionar
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+          {/* Info box */}
+          <div className="bg-slate-50 dark:bg-[#0D1025]/50 rounded-2xl border border-dashed border-slate-300 dark:border-white/[0.07] p-4 text-center">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Para adicionar novos amigos, acesse a pÃ¡gina{' '}
+              <button
+                onClick={() => navigate('/aluno/amigos')}
+                className="text-emerald-500 font-medium underline"
+              >
+                Amigos
+              </button>{' '}
+              e busque por e-mail.
+            </p>
           </div>
         </div>
       )}
@@ -260,10 +277,13 @@ export default function AlunoGruposPage() {
       {/* Create group modal */}
       {createOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
+          <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-lg dark:text-white">Criar grupo</h2>
-              <button onClick={() => setCreateOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <button
+                onClick={() => { setCreateOpen(false); setNewGroupName(''); setSelectedFriends([]); }}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              >
                 <X size={20} />
               </button>
             </div>
@@ -276,18 +296,18 @@ export default function AlunoGruposPage() {
                 className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
-                placeholder="Ex: Turma da Noite 🌙"
+                placeholder="Ex: Turma da Noite ðŸŒ™"
                 autoFocus
               />
             </div>
 
-            {myFriends.length > 0 && (
+            {friends.length > 0 && (
               <div className="mb-5">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   Convidar amigos
                 </label>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {myFriends.map((friend) => (
+                  {friends.map((friend) => (
                     <label key={friend.id} className="flex items-center gap-3 cursor-pointer">
                       <input
                         type="checkbox"
@@ -295,7 +315,7 @@ export default function AlunoGruposPage() {
                         onChange={() => toggleFriendSelection(friend.id)}
                         className="w-4 h-4 accent-emerald-500"
                       />
-                      <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      <div className="w-7 h-7 rounded-full bg-emerald-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                         {friend.name[0]}
                       </div>
                       <span className="text-sm dark:text-white">{friend.name}</span>
@@ -305,25 +325,25 @@ export default function AlunoGruposPage() {
               </div>
             )}
 
-            {myFriends.length === 0 && (
+            {friends.length === 0 && (
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
-                Adicione amigos na aba <strong>Amigos</strong> para poder convidá-los.
+                Adicione amigos na aba <strong>Amigos</strong> para poder convidÃ¡-los.
               </p>
             )}
 
             <div className="flex gap-3">
               <button
-                onClick={() => setCreateOpen(false)}
+                onClick={() => { setCreateOpen(false); setNewGroupName(''); setSelectedFriends([]); }}
                 className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleCreateGroup}
-                disabled={!newGroupName.trim()}
+                disabled={!newGroupName.trim() || createGroup.isPending}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold rounded-xl py-2.5 text-sm transition-colors"
               >
-                Criar
+                {createGroup.isPending ? 'Criandoâ€¦' : 'Criar'}
               </button>
             </div>
           </div>
@@ -332,3 +352,4 @@ export default function AlunoGruposPage() {
     </div>
   );
 }
+

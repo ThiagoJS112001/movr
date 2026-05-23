@@ -10,7 +10,7 @@ import {
   type FriendProfile,
 } from '../../hooks/useFriends';
 
-// ── Sub-component: Search result card ─────────────────────────────────────────
+// â”€â”€ Sub-component: Search result card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SearchResultCard({ profile }: { profile: FriendProfile }) {
   const { data: status } = useRequestStatus(profile.id);
@@ -69,7 +69,7 @@ function SearchResultCard({ profile }: { profile: FriendProfile }) {
   );
 }
 
-// ── Main page ──────────────────────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function AlunoAmigosPage() {
   const [emailInput, setEmailInput] = useState('');
@@ -86,7 +86,7 @@ export default function AlunoAmigosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] text-white">
+    <div className="min-h-screen bg-[#080B18] text-white">
       <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
 
       {/* Header */}
@@ -128,7 +128,7 @@ export default function AlunoAmigosPage() {
           ) : searchResult ? (
             <SearchResultCard profile={searchResult} />
           ) : (
-            <p className="text-sm text-slate-400">Nenhum usuário encontrado com esse e-mail.</p>
+            <p className="text-sm text-slate-400">Nenhum usuÃ¡rio encontrado com esse e-mail.</p>
           )}
         </div>
       )}
@@ -182,8 +182,8 @@ export default function AlunoAmigosPage() {
         {friends.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
             <Users size={32} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm">Você ainda não tem amigos adicionados.</p>
-            <p className="text-xs mt-1">Busque pelo e-mail de alguém acima.</p>
+            <p className="text-sm">VocÃª ainda nÃ£o tem amigos adicionados.</p>
+            <p className="text-xs mt-1">Busque pelo e-mail de alguÃ©m acima.</p>
           </div>
         ) : (
           <div className="space-y-2">

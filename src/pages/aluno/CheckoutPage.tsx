@@ -16,7 +16,7 @@ import {
   Star,
 } from 'lucide-react';
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type PayMethod = 'cartao' | 'pix' | 'boleto';
 
@@ -47,7 +47,7 @@ interface NavState {
   monthName?: string;
 }
 
-// ── Mock data ──────────────────────────────────────────────────────────────────
+// â”€â”€ Mock data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MOCK_PROFILES: Record<string, ProfileSummary> = {
   '1': {
@@ -55,14 +55,14 @@ const MOCK_PROFILES: Record<string, ProfileSummary> = {
     name: 'Rafael Costa',
     initials: 'RC',
     avatarColor: 'from-violet-500 to-indigo-600',
-    title: 'Personal Trainer · Nutricionista',
+    title: 'Personal Trainer Â· Nutricionista',
     rating: 4.9,
-    specialties: ['Musculação', 'Nutrição', 'Emagrecimento', 'Funcional', 'Hipertrofia'],
+    specialties: ['MusculaÃ§Ã£o', 'NutriÃ§Ã£o', 'Emagrecimento', 'Funcional', 'Hipertrofia'],
     modality: 'ambos',
     plans: [
-      { id: 'avulso',  name: 'Sessão avulsa',          subtitle: '1 sessão presencial ou online · Sem compromisso',                          price: 120, perLabel: 'sessão' },
-      { id: 'mensal3', name: 'Plano mensal · 3×/semana', subtitle: '12 sessões + treinos + acompanhamento nutricional',                        price: 350, perLabel: 'mês'    },
-      { id: 'mensal5', name: 'Plano mensal · 5×/semana', subtitle: '20 sessões + treinos + dieta + acesso ilimitado ao chat',                   price: 520, perLabel: 'mês'    },
+      { id: 'avulso',  name: 'SessÃ£o avulsa',          subtitle: '1 sessÃ£o presencial ou online Â· Sem compromisso',                          price: 120, perLabel: 'sessÃ£o' },
+      { id: 'mensal3', name: 'Plano mensal Â· 3Ã—/semana', subtitle: '12 sessÃµes + treinos + acompanhamento nutricional',                        price: 350, perLabel: 'mÃªs'    },
+      { id: 'mensal5', name: 'Plano mensal Â· 5Ã—/semana', subtitle: '20 sessÃµes + treinos + dieta + acesso ilimitado ao chat',                   price: 520, perLabel: 'mÃªs'    },
     ],
   },
   '2': {
@@ -75,8 +75,8 @@ const MOCK_PROFILES: Record<string, ProfileSummary> = {
     specialties: ['Emagrecimento', 'Funcional', 'Corrida', 'Pilates'],
     modality: 'presencial',
     plans: [
-      { id: 'avulso',  name: 'Sessão avulsa',           subtitle: '1 sessão presencial · Sem compromisso',              price: 90,  perLabel: 'sessão' },
-      { id: 'mensal3', name: 'Plano mensal · 3×/semana', subtitle: '12 sessões + plano de treino personalizado',          price: 280, perLabel: 'mês'    },
+      { id: 'avulso',  name: 'SessÃ£o avulsa',           subtitle: '1 sessÃ£o presencial Â· Sem compromisso',              price: 90,  perLabel: 'sessÃ£o' },
+      { id: 'mensal3', name: 'Plano mensal Â· 3Ã—/semana', subtitle: '12 sessÃµes + plano de treino personalizado',          price: 280, perLabel: 'mÃªs'    },
     ],
   },
 };
@@ -86,7 +86,7 @@ const VALID_COUPONS: Record<string, number> = {
   MOVR20: 20,
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function formatCardNumber(raw: string): string {
   return raw.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
@@ -98,7 +98,7 @@ function formatExpiry(raw: string): string {
 }
 
 function cardDisplayNumber(raw: string): string {
-  const clean = raw.replace(/\D/g, '').slice(0, 16).padEnd(16, '•');
+  const clean = raw.replace(/\D/g, '').slice(0, 16).padEnd(16, 'â€¢');
   return `${clean.slice(0, 4)}  ${clean.slice(4, 8)}  ${clean.slice(8, 12)}  ${clean.slice(12, 16)}`;
 }
 
@@ -116,9 +116,9 @@ function fmtBRLShort(n: number): string {
   return n % 1 === 0 ? String(n) : fmtBRL(n);
 }
 
-// ── Stepper ────────────────────────────────────────────────────────────────────
+// â”€â”€ Stepper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const STEPS = ['Escolha do plano', 'Agendamento', 'Pagamento', 'Confirmação'];
+const STEPS = ['Escolha do plano', 'Agendamento', 'Pagamento', 'ConfirmaÃ§Ã£o'];
 
 function Stepper({ current }: { current: number }) {
   return (
@@ -159,7 +159,7 @@ function Stepper({ current }: { current: number }) {
   );
 }
 
-// ── Section wrapper ────────────────────────────────────────────────────────────
+// â”€â”€ Section wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function SectionCard({ number, title, children }: { number: number; title: string; children: React.ReactNode }) {
   return (
@@ -177,18 +177,18 @@ function SectionCard({ number, title, children }: { number: number; title: strin
   );
 }
 
-// ── Mini info card ─────────────────────────────────────────────────────────────
+// â”€â”€ Mini info card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MiniCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[#0d0f14] rounded-xl p-3">
+    <div className="bg-[#080B18] rounded-xl p-3">
       <p className="text-[9px] text-slate-600 uppercase tracking-wide mb-1 leading-tight">{label}</p>
       <p className="text-xs font-medium text-slate-200 leading-snug">{value}</p>
     </div>
   );
 }
 
-// ── Card preview ───────────────────────────────────────────────────────────────
+// â”€â”€ Card preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CardPreview({ number, name, expiry }: { number: string; name: string; expiry: string }) {
   return (
@@ -235,7 +235,7 @@ function CardPreview({ number, name, expiry }: { number: string; name: string; e
   );
 }
 
-// ── Pix panel ─────────────────────────────────────────────────────────────────
+// â”€â”€ Pix panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PixPanel({ price }: { price: number }) {
   const [copied, setCopied] = useState(false);
@@ -256,11 +256,11 @@ function PixPanel({ price }: { price: number }) {
       </div>
 
       <p className="text-center text-xs text-slate-500">
-        Aponte a câmera do seu app bancário para o QR Code
+        Aponte a cÃ¢mera do seu app bancÃ¡rio para o QR Code
       </p>
 
       {/* Pix key */}
-      <div className="bg-[#0d0f14] border border-white/8 rounded-xl p-4">
+      <div className="bg-[#080B18] border border-white/8 rounded-xl p-4">
         <p className="text-xs text-slate-500 mb-1">Chave Pix</p>
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm text-white font-mono">{pixKey}</p>
@@ -277,8 +277,8 @@ function PixPanel({ price }: { price: number }) {
       <div className="flex items-start gap-2 bg-amber-500/5 border border-amber-500/15 rounded-xl p-3">
         <Clock size={13} className="text-amber-400 shrink-0 mt-0.5" />
         <p className="text-xs text-slate-400 leading-relaxed">
-          QR Code válido por{' '}
-          <strong className="text-amber-400">30 minutos</strong>. Após o pagamento, confirmação em até 1 minuto.
+          QR Code vÃ¡lido por{' '}
+          <strong className="text-amber-400">30 minutos</strong>. ApÃ³s o pagamento, confirmaÃ§Ã£o em atÃ© 1 minuto.
         </p>
       </div>
 
@@ -287,7 +287,7 @@ function PixPanel({ price }: { price: number }) {
   );
 }
 
-// ── Boleto panel ──────────────────────────────────────────────────────────────
+// â”€â”€ Boleto panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BOLETO_LINE = '10499.99999 99999.999999 99999.999999 1 99990000035000';
 
@@ -316,8 +316,8 @@ function BoletoPanel() {
       </div>
 
       {/* Boleto number */}
-      <div className="bg-[#0d0f14] border border-white/8 rounded-xl p-4">
-        <p className="text-xs text-slate-500 mb-1">Código de barras</p>
+      <div className="bg-[#080B18] border border-white/8 rounded-xl p-4">
+        <p className="text-xs text-slate-500 mb-1">CÃ³digo de barras</p>
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs text-slate-300 font-mono truncate">{BOLETO_LINE}</p>
           <button
@@ -332,7 +332,7 @@ function BoletoPanel() {
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-slate-500">
-          Vence em <strong className="text-slate-300">3 dias úteis</strong>
+          Vence em <strong className="text-slate-300">3 dias Ãºteis</strong>
         </p>
         <button className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors">
           <Printer size={13} />
@@ -341,13 +341,13 @@ function BoletoPanel() {
       </div>
 
       <p className="text-xs text-slate-600 text-center leading-relaxed">
-        O pagamento pode levar até 3 dias úteis para ser confirmado.
+        O pagamento pode levar atÃ© 3 dias Ãºteis para ser confirmado.
       </p>
     </div>
   );
 }
 
-// ── Main page ──────────────────────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function CheckoutPage() {
   const { id } = useParams<{ id: string }>();
@@ -392,9 +392,9 @@ export default function CheckoutPage() {
   const total          = basePrice - discountAmount;
 
   const installmentOptions = useMemo(() => {
-    const opts = [{ v: '1', label: `1× de R$ ${fmtBRL(total)} (sem juros)` }];
-    if (total >= 200) opts.push({ v: '2', label: `2× de R$ ${fmtBRL(total / 2)} (sem juros)` });
-    if (total >= 300) opts.push({ v: '3', label: `3× de R$ ${fmtBRL(total / 3)} (sem juros)` });
+    const opts = [{ v: '1', label: `1Ã— de R$ ${fmtBRL(total)} (sem juros)` }];
+    if (total >= 200) opts.push({ v: '2', label: `2Ã— de R$ ${fmtBRL(total / 2)} (sem juros)` });
+    if (total >= 300) opts.push({ v: '3', label: `3Ã— de R$ ${fmtBRL(total / 3)} (sem juros)` });
     return opts;
   }, [total]);
 
@@ -408,7 +408,7 @@ export default function CheckoutPage() {
     } else {
       setAppliedDiscount(0);
       setAppliedCode('');
-      setCouponError('Cupom inválido ou expirado.');
+      setCouponError('Cupom invÃ¡lido ou expirado.');
     }
   }
 
@@ -424,11 +424,11 @@ export default function CheckoutPage() {
     setTimeout(() => setPageStep('success'), 1800);
   }
 
-  // ── Success view ───────────────────────────────────────────────────────────
+  // â”€â”€ Success view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   if (pageStep === 'success') {
     return (
-      <div className="min-h-screen bg-[#0d0f14] text-white flex flex-col items-center justify-center px-4 py-10">
+      <div className="min-h-screen bg-[#080B18] text-white flex flex-col items-center justify-center px-4 py-10">
         <div className="w-full max-w-sm text-center space-y-6">
           <div className="mx-auto w-20 h-20 rounded-full bg-[#22c55e]/15 flex items-center justify-center">
             <CheckCircle2 size={40} className="text-[#22c55e]" />
@@ -458,7 +458,7 @@ export default function CheckoutPage() {
                 <p className="text-xs text-slate-400">{selectedPlan.name}</p>
                 {day && (
                   <p className="text-[10px] text-slate-600 mt-0.5">
-                    1ª sessão: {day} de {monthName}{hour ? ` · ${hour}` : ''}
+                    1Âª sessÃ£o: {day} de {monthName}{hour ? ` Â· ${hour}` : ''}
                   </p>
                 )}
               </div>
@@ -477,7 +477,7 @@ export default function CheckoutPage() {
               onClick={() => navigate('/aluno/dashboard')}
               className="w-full py-3 rounded-xl text-sm font-medium text-slate-500 hover:text-white transition-colors"
             >
-              Voltar para o início
+              Voltar para o inÃ­cio
             </button>
           </div>
         </div>
@@ -485,21 +485,21 @@ export default function CheckoutPage() {
     );
   }
 
-  // ── Processing view ────────────────────────────────────────────────────────
+  // â”€â”€ Processing view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   if (pageStep === 'processing') {
     return (
-      <div className="min-h-screen bg-[#0d0f14] text-white flex flex-col items-center justify-center gap-5">
+      <div className="min-h-screen bg-[#080B18] text-white flex flex-col items-center justify-center gap-5">
         <div className="w-14 h-14 border-2 border-[#7c5cfc] border-t-transparent rounded-full animate-spin" />
-        <p className="text-slate-400 text-sm">Processando pagamento…</p>
+        <p className="text-slate-400 text-sm">Processando pagamentoâ€¦</p>
       </div>
     );
   }
 
-  // ── Payment view ───────────────────────────────────────────────────────────
+  // â”€â”€ Payment view â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] text-white">
+    <div className="min-h-screen bg-[#080B18] text-white">
       <div className="max-w-lg mx-auto px-4 pt-5 pb-10 space-y-4">
 
         {/* Breadcrumb */}
@@ -517,8 +517,8 @@ export default function CheckoutPage() {
         {/* Stepper */}
         <Stepper current={3} />
 
-        {/* ── Section 1: Contract summary ─────────────────────────────────── */}
-        <SectionCard number={1} title="Resumo da contratação">
+        {/* â”€â”€ Section 1: Contract summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        <SectionCard number={1} title="Resumo da contrataÃ§Ã£o">
           {/* Personal header */}
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
@@ -544,7 +544,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Plan box */}
-          <div className="bg-[#0d0f14] border border-white/8 rounded-xl p-4">
+          <div className="bg-[#080B18] border border-white/8 rounded-xl p-4">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-sm font-semibold text-white">{selectedPlan.name}</p>
@@ -588,12 +588,12 @@ export default function CheckoutPage() {
           {/* Mini info cards */}
           <div className="grid grid-cols-3 gap-2 mt-3">
             <MiniCard
-              label="1ª sessão agendada"
+              label="1Âª sessÃ£o agendada"
               value={day ? `${day} de ${monthName}, 2026` : 'A definir'}
             />
             <MiniCard
-              label="Horário"
-              value={hour ? `${hour} · ${profile.modality === 'online' ? 'Online' : 'Presencial'}` : 'A definir'}
+              label="HorÃ¡rio"
+              value={hour ? `${hour} Â· ${profile.modality === 'online' ? 'Online' : 'Presencial'}` : 'A definir'}
             />
             <MiniCard
               label="Modalidade"
@@ -602,13 +602,13 @@ export default function CheckoutPage() {
           </div>
         </SectionCard>
 
-        {/* ── Section 2: Payment method ────────────────────────────────────── */}
+        {/* â”€â”€ Section 2: Payment method â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <SectionCard number={2} title="Forma de pagamento">
           {/* Payment tabs */}
           <div className="grid grid-cols-3 gap-2 mb-5">
             {(
               [
-                { key: 'cartao', label: 'Cartão',  Icon: CreditCard, iconClass: 'text-blue-400' },
+                { key: 'cartao', label: 'CartÃ£o',  Icon: CreditCard, iconClass: 'text-blue-400' },
                 { key: 'pix',    label: 'Pix',     Icon: Zap,        iconClass: 'text-[#22c55e]' },
                 { key: 'boleto', label: 'Boleto',  Icon: FileText,   iconClass: 'text-slate-400' },
               ] as { key: PayMethod; label: string; Icon: React.FC<{ size?: number; className?: string }>; iconClass: string }[]
@@ -630,31 +630,31 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          {/* Cartão form */}
+          {/* CartÃ£o form */}
           {payMethod === 'cartao' && (
             <div className="space-y-4">
               <CardPreview number={cardNumber} name={cardName} expiry={cardExpiry} />
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-slate-500 mb-1.5 block">Número do cartão</label>
+                  <label className="text-xs text-slate-500 mb-1.5 block">NÃºmero do cartÃ£o</label>
                   <input
                     value={cardNumber}
                     onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                     placeholder="0000 0000 0000 0000"
                     maxLength={19}
                     inputMode="numeric"
-                    className="w-full bg-[#0d0f14] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors font-mono tracking-widest"
+                    className="w-full bg-[#080B18] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors font-mono tracking-widest"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-500 mb-1.5 block">Nome no cartão</label>
+                  <label className="text-xs text-slate-500 mb-1.5 block">Nome no cartÃ£o</label>
                   <input
                     value={cardName}
                     onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                    placeholder="Como está no cartão"
-                    className="w-full bg-[#0d0f14] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors uppercase"
+                    placeholder="Como estÃ¡ no cartÃ£o"
+                    className="w-full bg-[#080B18] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors uppercase"
                   />
                 </div>
 
@@ -667,7 +667,7 @@ export default function CheckoutPage() {
                       placeholder="MM/AA"
                       maxLength={5}
                       inputMode="numeric"
-                      className="w-full bg-[#0d0f14] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors"
+                      className="w-full bg-[#080B18] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors"
                     />
                   </div>
                   <div>
@@ -675,11 +675,11 @@ export default function CheckoutPage() {
                     <input
                       value={cardCvv}
                       onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                      placeholder="• • •"
+                      placeholder="â€¢ â€¢ â€¢"
                       maxLength={4}
                       inputMode="numeric"
                       type="password"
-                      className="w-full bg-[#0d0f14] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors"
+                      className="w-full bg-[#080B18] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors"
                     />
                   </div>
                 </div>
@@ -689,7 +689,7 @@ export default function CheckoutPage() {
                   <select
                     value={installments}
                     onChange={(e) => setInstallments(e.target.value)}
-                    className="w-full bg-[#0d0f14] border border-white/8 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#7c5cfc]/40 transition-colors appearance-none cursor-pointer"
+                    className="w-full bg-[#080B18] border border-white/8 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#7c5cfc]/40 transition-colors appearance-none cursor-pointer"
                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center' }}
                   >
                     {installmentOptions.map((o) => (
@@ -708,7 +708,7 @@ export default function CheckoutPage() {
           {payMethod === 'boleto' && <BoletoPanel />}
         </SectionCard>
 
-        {/* ── Order summary ────────────────────────────────────────────────── */}
+        {/* â”€â”€ Order summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <div className="bg-[#131722] border border-white/5 rounded-2xl p-5 space-y-4">
           <h3 className="font-semibold text-white">Resumo do pedido</h3>
 
@@ -721,11 +721,11 @@ export default function CheckoutPage() {
             {appliedDiscount > 0 && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-[#22c55e]">Cupom {appliedCode} ({appliedDiscount}% off)</span>
-                <span className="text-[#22c55e]">− R$ {fmtBRL(discountAmount)}</span>
+                <span className="text-[#22c55e]">âˆ’ R$ {fmtBRL(discountAmount)}</span>
               </div>
             )}
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Taxa de serviço Movr</span>
+              <span className="text-slate-400">Taxa de serviÃ§o Movr</span>
               <span className="text-white">R$ 0,00</span>
             </div>
           </div>
@@ -734,8 +734,8 @@ export default function CheckoutPage() {
           <div className="pt-3 border-t border-white/5 flex items-end justify-between">
             <div>
               <p className="text-sm font-semibold text-white">Total hoje</p>
-              {selectedPlan.perLabel === 'mês' && (
-                <p className="text-[10px] text-slate-600 mt-0.5">Renovação automática em 30 dias</p>
+              {selectedPlan.perLabel === 'mÃªs' && (
+                <p className="text-[10px] text-slate-600 mt-0.5">RenovaÃ§Ã£o automÃ¡tica em 30 dias</p>
               )}
             </div>
             <div className="text-right">
@@ -757,13 +757,13 @@ export default function CheckoutPage() {
                     }}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleApplyCoupon(); }}
                     placeholder="Cupom de desconto"
-                    className="w-full bg-[#0d0f14] border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors"
+                    className="w-full bg-[#080B18] border border-white/8 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors"
                   />
                 </div>
                 <button
                   onClick={handleApplyCoupon}
                   disabled={!couponInput.trim()}
-                  className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#0d0f14] border border-white/8 hover:border-[#7c5cfc]/40 text-slate-300 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-[#080B18] border border-white/8 hover:border-[#7c5cfc]/40 text-slate-300 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Aplicar
                 </button>
@@ -773,7 +773,7 @@ export default function CheckoutPage() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={13} className="text-[#22c55e]" />
                   <span className="text-sm font-medium text-[#22c55e]">
-                    {appliedCode} — {appliedDiscount}% de desconto
+                    {appliedCode} â€” {appliedDiscount}% de desconto
                   </span>
                 </div>
                 <button
@@ -794,7 +794,7 @@ export default function CheckoutPage() {
             <ShieldCheck size={15} className="text-[#22c55e] shrink-0 mt-0.5" />
             <p className="text-xs text-slate-300 leading-relaxed">
               <strong className="text-[#22c55e]">Garantia de 7 dias.</strong>{' '}
-              Se não ficar satisfeito com o primeiro atendimento, devolvemos 100% do valor pago.
+              Se nÃ£o ficar satisfeito com o primeiro atendimento, devolvemos 100% do valor pago.
             </p>
           </div>
 
@@ -810,7 +810,7 @@ export default function CheckoutPage() {
           {/* Security */}
           <p className="text-center text-[11px] text-slate-600 flex items-center justify-center gap-1.5">
             <Lock size={10} />
-            Pagamento 100% seguro · SSL · PCI DSS
+            Pagamento 100% seguro Â· SSL Â· PCI DSS
           </p>
         </div>
       </div>

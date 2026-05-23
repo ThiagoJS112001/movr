@@ -14,7 +14,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type TabKey = 'sobre' | 'formacao' | 'avaliacoes' | 'agenda';
 
@@ -65,13 +65,13 @@ interface PersonalProfile {
   bioParagraphs: string[];
   education: EducationItem[];
   reviews: Review[];
-  ratingDistribution: number[]; // [5★, 4★, 3★, 2★, 1★]
+  ratingDistribution: number[]; // [5â˜…, 4â˜…, 3â˜…, 2â˜…, 1â˜…]
   plans: Plan[];
   unavailableDays: number[];
-  availableHours: Record<number, string[]>; // day of month → hours
+  availableHours: Record<number, string[]>; // day of month â†’ hours
 }
 
-// ── Mock data ──────────────────────────────────────────────────────────────────
+// â”€â”€ Mock data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MOCK_PROFILES: Record<string, PersonalProfile> = {
   '1': {
@@ -80,8 +80,8 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
     initials: 'RC',
     avatarColor: 'from-violet-500 to-indigo-600',
     verified: true,
-    title: 'Personal Trainer · Nutricionista',
-    specialties: ['Musculação', 'Nutrição', 'Emagrecimento', 'Funcional', 'Hipertrofia'],
+    title: 'Personal Trainer Â· Nutricionista',
+    specialties: ['MusculaÃ§Ã£o', 'NutriÃ§Ã£o', 'Emagrecimento', 'Funcional', 'Hipertrofia'],
     yearsExp: 8,
     city: 'Blumenau',
     state: 'SC',
@@ -91,17 +91,17 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
     distanceKm: 1.2,
     modality: 'ambos',
     bioParagraphs: [
-      'Sou personal trainer e nutricionista há 8 anos, especializado em hipertrofia, emagrecimento funcional e nutrição esportiva. Atendo tanto de forma presencial em Blumenau quanto online para todo o Brasil.',
-      'Minha metodologia combina treino periodizado com acompanhamento nutricional individualizado — sem fórmulas genéricas. Cada aluno tem um plano montado do zero, com ajustes semanais baseados em resultados reais.',
-      'Já trabalhei com atletas amadores, competidores de fisiculturismo e pessoas que simplesmente querem ter mais saúde e disposição no dia a dia.',
+      'Sou personal trainer e nutricionista hÃ¡ 8 anos, especializado em hipertrofia, emagrecimento funcional e nutriÃ§Ã£o esportiva. Atendo tanto de forma presencial em Blumenau quanto online para todo o Brasil.',
+      'Minha metodologia combina treino periodizado com acompanhamento nutricional individualizado â€” sem fÃ³rmulas genÃ©ricas. Cada aluno tem um plano montado do zero, com ajustes semanais baseados em resultados reais.',
+      'JÃ¡ trabalhei com atletas amadores, competidores de fisiculturismo e pessoas que simplesmente querem ter mais saÃºde e disposiÃ§Ã£o no dia a dia.',
     ],
     education: [
       { label: 'CREF 012345-G/SC', type: 'cref', status: 'verified' },
-      { label: 'Bacharelado em Educação Física', institution: 'FURB — Blumenau', year: '2016', type: 'grad', status: 'verified' },
-      { label: 'Pós-graduação em Nutrição Esportiva', institution: 'UNIVALI', year: '2019', type: 'grad', status: 'verified' },
+      { label: 'Bacharelado em EducaÃ§Ã£o FÃ­sica', institution: 'FURB â€” Blumenau', year: '2016', type: 'grad', status: 'verified' },
+      { label: 'PÃ³s-graduaÃ§Ã£o em NutriÃ§Ã£o Esportiva', institution: 'UNIVALI', year: '2019', type: 'grad', status: 'verified' },
       { label: 'CrossFit Level 1 Trainer', institution: 'CrossFit Inc.', year: '2020', type: 'cert', status: 'verified' },
-      { label: 'Treinamento Funcional Avançado', institution: 'NASM', year: '2021', type: 'cert', status: 'verified' },
-      { label: 'Especialização em Periodização', institution: 'NSCA Brasil', year: '2023', type: 'cert', status: 'pending' },
+      { label: 'Treinamento Funcional AvanÃ§ado', institution: 'NASM', year: '2021', type: 'cert', status: 'verified' },
+      { label: 'EspecializaÃ§Ã£o em PeriodizaÃ§Ã£o', institution: 'NSCA Brasil', year: '2023', type: 'cert', status: 'pending' },
     ],
     reviews: [
       {
@@ -112,7 +112,7 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
         rating: 5,
         date: '15 de abril de 2026',
         comment:
-          'Rafael é incrível! Em 4 meses consegui resultados que não tinha obtido em 2 anos treinando sozinho. O acompanhamento nutricional junto com os treinos fez toda a diferença.',
+          'Rafael Ã© incrÃ­vel! Em 4 meses consegui resultados que nÃ£o tinha obtido em 2 anos treinando sozinho. O acompanhamento nutricional junto com os treinos fez toda a diferenÃ§a.',
       },
       {
         id: '2',
@@ -122,7 +122,7 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
         rating: 5,
         date: '3 de abril de 2026',
         comment:
-          'Atendimento excelente, muito atencioso e dedicado. Os treinos são desafiadores mas sempre adequados ao meu nível. Super recomendo!',
+          'Atendimento excelente, muito atencioso e dedicado. Os treinos sÃ£o desafiadores mas sempre adequados ao meu nÃ­vel. Super recomendo!',
       },
       {
         id: '3',
@@ -130,37 +130,37 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
         authorInitials: 'CE',
         authorColor: 'from-orange-500 to-amber-500',
         rating: 4,
-        date: '22 de março de 2026',
+        date: '22 de marÃ§o de 2026',
         comment:
-          'Muito bom! A metodologia é diferente de tudo que já vi. O único ponto a melhorar seria a agilidade nas respostas do chat às vezes.',
+          'Muito bom! A metodologia Ã© diferente de tudo que jÃ¡ vi. O Ãºnico ponto a melhorar seria a agilidade nas respostas do chat Ã s vezes.',
       },
     ],
     ratingDistribution: [97, 19, 7, 3, 1],
     plans: [
       {
         id: 'avulso',
-        name: 'Sessão avulsa',
-        subtitle: '1 sessão presencial ou online · Sem compromisso',
+        name: 'SessÃ£o avulsa',
+        subtitle: '1 sessÃ£o presencial ou online Â· Sem compromisso',
         price: 120,
-        perLabel: 'sessão',
-        features: ['1 sessão de 60 min', 'Plano de treino do dia', 'Feedback pós-sessão'],
+        perLabel: 'sessÃ£o',
+        features: ['1 sessÃ£o de 60 min', 'Plano de treino do dia', 'Feedback pÃ³s-sessÃ£o'],
       },
       {
         id: 'mensal3',
-        name: 'Plano mensal · 3x/sem',
-        subtitle: '12 sessões + treinos + acompanhamento nutricional',
+        name: 'Plano mensal Â· 3x/sem',
+        subtitle: '12 sessÃµes + treinos + acompanhamento nutricional',
         price: 350,
-        perLabel: 'mês',
-        features: ['12 sessões/mês', 'Plano de treino completo', 'Dieta personalizada', 'Chat seg a sex'],
+        perLabel: 'mÃªs',
+        features: ['12 sessÃµes/mÃªs', 'Plano de treino completo', 'Dieta personalizada', 'Chat seg a sex'],
       },
       {
         id: 'mensal5',
-        name: 'Plano mensal · 5x/sem',
-        subtitle: '20 sessões + treinos + dieta + acesso ilimitado ao chat',
+        name: 'Plano mensal Â· 5x/sem',
+        subtitle: '20 sessÃµes + treinos + dieta + acesso ilimitado ao chat',
         price: 520,
-        perLabel: 'mês',
+        perLabel: 'mÃªs',
         highlighted: true,
-        features: ['20 sessões/mês', 'Plano de treino completo', 'Dieta + suplementação', 'Chat ilimitado', 'Relatório mensal'],
+        features: ['20 sessÃµes/mÃªs', 'Plano de treino completo', 'Dieta + suplementaÃ§Ã£o', 'Chat ilimitado', 'RelatÃ³rio mensal'],
       },
     ],
     unavailableDays: [4, 5, 11, 12, 25, 26],
@@ -208,14 +208,14 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
     distanceKm: 2.8,
     modality: 'presencial',
     bioParagraphs: [
-      'Personal trainer especializada em emagrecimento funcional e corrida de rua. Atendo de forma presencial em Blumenau com foco em resultados sustentáveis.',
-      'Acredito que cada pessoa tem um ritmo único. Meu método une treino funcional, reeducação de movimento e periodização inteligente para garantir evolução constante sem risco de lesões.',
+      'Personal trainer especializada em emagrecimento funcional e corrida de rua. Atendo de forma presencial em Blumenau com foco em resultados sustentÃ¡veis.',
+      'Acredito que cada pessoa tem um ritmo Ãºnico. Meu mÃ©todo une treino funcional, reeducaÃ§Ã£o de movimento e periodizaÃ§Ã£o inteligente para garantir evoluÃ§Ã£o constante sem risco de lesÃµes.',
     ],
     education: [
       { label: 'CREF 054321-G/SC', type: 'cref', status: 'verified' },
-      { label: 'Graduação em Educação Física', institution: 'FURB', year: '2019', type: 'grad', status: 'verified' },
+      { label: 'GraduaÃ§Ã£o em EducaÃ§Ã£o FÃ­sica', institution: 'FURB', year: '2019', type: 'grad', status: 'verified' },
       { label: 'Treinamento Funcional', institution: 'NASM', year: '2021', type: 'cert', status: 'verified' },
-      { label: 'Corrida de Rua — Nível Avançado', institution: 'CBAt', year: '2023', type: 'cert', status: 'pending' },
+      { label: 'Corrida de Rua â€” NÃ­vel AvanÃ§ado', institution: 'CBAt', year: '2023', type: 'cert', status: 'pending' },
     ],
     reviews: [
       {
@@ -225,27 +225,27 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
         authorColor: 'from-violet-500 to-purple-500',
         rating: 5,
         date: '10 de abril de 2026',
-        comment: 'Ana é incrível! Consegui correr minha primeira meia maratona graças ao trabalho dela. Muito atenciosa e profissional.',
+        comment: 'Ana Ã© incrÃ­vel! Consegui correr minha primeira meia maratona graÃ§as ao trabalho dela. Muito atenciosa e profissional.',
       },
     ],
     ratingDistribution: [71, 12, 4, 1, 1],
     plans: [
       {
         id: 'avulso',
-        name: 'Sessão avulsa',
-        subtitle: '1 sessão presencial · Sem compromisso',
+        name: 'SessÃ£o avulsa',
+        subtitle: '1 sessÃ£o presencial Â· Sem compromisso',
         price: 90,
-        perLabel: 'sessão',
-        features: ['1 sessão de 50 min', 'Avaliação física inicial', 'Plano de treino do dia'],
+        perLabel: 'sessÃ£o',
+        features: ['1 sessÃ£o de 50 min', 'AvaliaÃ§Ã£o fÃ­sica inicial', 'Plano de treino do dia'],
       },
       {
         id: 'mensal3',
-        name: 'Plano mensal · 3x/sem',
-        subtitle: '12 sessões + plano de treino personalizado',
+        name: 'Plano mensal Â· 3x/sem',
+        subtitle: '12 sessÃµes + plano de treino personalizado',
         price: 280,
-        perLabel: 'mês',
+        perLabel: 'mÃªs',
         highlighted: true,
-        features: ['12 sessões/mês', 'Treino personalizado', 'Acompanhamento semanal'],
+        features: ['12 sessÃµes/mÃªs', 'Treino personalizado', 'Acompanhamento semanal'],
       },
     ],
     unavailableDays: [3, 4, 10, 11, 17, 18, 24, 25, 31],
@@ -275,17 +275,17 @@ const MOCK_PROFILES: Record<string, PersonalProfile> = {
   },
 };
 
-// ── Constants ──────────────────────────────────────────────────────────────────
+// â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Janeiro', 'Fevereiro', 'MarÃ§o', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ];
 
 // Brazilian week: starts on Sunday
 const DAY_ABBRS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
+// â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function StarRow({ count, size = 12 }: { count: number; size?: number }) {
   return (
@@ -304,7 +304,7 @@ function StarRow({ count, size = 12 }: { count: number; size?: number }) {
 function EducationBadge({ item }: { item: EducationItem }) {
   if (item.status === 'pending') {
     return (
-      <div className="flex items-start gap-3 p-4 rounded-xl bg-slate-800/40 border border-white/5">
+      <div className="flex items-start gap-3 p-4 rounded-xl bg-[#0D1025]/40 border border-white/5">
         <div className="w-8 h-8 rounded-lg bg-slate-700/50 flex items-center justify-center shrink-0 mt-0.5">
           <Award size={15} className="text-slate-400" />
         </div>
@@ -313,13 +313,13 @@ function EducationBadge({ item }: { item: EducationItem }) {
             <span className="text-sm font-medium text-slate-300">{item.label}</span>
             <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/25">
               <AlertCircle size={9} />
-              Em análise
+              Em anÃ¡lise
             </span>
           </div>
           {item.institution && (
             <p className="text-xs text-slate-500 mt-0.5">
               {item.institution}
-              {item.year ? ` · ${item.year}` : ''}
+              {item.year ? ` Â· ${item.year}` : ''}
             </p>
           )}
         </div>
@@ -342,7 +342,7 @@ function EducationBadge({ item }: { item: EducationItem }) {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Registro obrigatório — Conselho Federal de Educação Física
+            Registro obrigatÃ³rio â€” Conselho Federal de EducaÃ§Ã£o FÃ­sica
           </p>
         </div>
       </div>
@@ -360,7 +360,7 @@ function EducationBadge({ item }: { item: EducationItem }) {
           {item.institution && (
             <p className="text-xs text-amber-400/70 mt-0.5">
               {item.institution}
-              {item.year ? ` · ${item.year}` : ''}
+              {item.year ? ` Â· ${item.year}` : ''}
             </p>
           )}
         </div>
@@ -379,7 +379,7 @@ function EducationBadge({ item }: { item: EducationItem }) {
         {item.institution && (
           <p className="text-xs text-amber-400/60 mt-0.5">
             {item.institution}
-            {item.year ? ` · ${item.year}` : ''}
+            {item.year ? ` Â· ${item.year}` : ''}
           </p>
         )}
       </div>
@@ -387,7 +387,7 @@ function EducationBadge({ item }: { item: EducationItem }) {
   );
 }
 
-// ── Calendar ──────────────────────────────────────────────────────────────────
+// â”€â”€ Calendar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface CalendarProps {
   profile: PersonalProfile;
@@ -508,7 +508,7 @@ function ScheduleCalendar({
       <div className="flex items-center gap-4 mt-3">
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-slate-700" />
-          <span className="text-[10px] text-slate-600">Indisponível</span>
+          <span className="text-[10px] text-slate-600">IndisponÃ­vel</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-[#7c5cfc]" />
@@ -523,7 +523,7 @@ function ScheduleCalendar({
   );
 }
 
-// ── Time slots ────────────────────────────────────────────────────────────────
+// â”€â”€ Time slots â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function TimeSlots({
   hours,
@@ -541,7 +541,7 @@ function TimeSlots({
   return (
     <div className="mt-4">
       <p className="text-xs font-medium text-slate-400 mb-2.5">
-        Horários disponíveis — {day} de {monthName}
+        HorÃ¡rios disponÃ­veis â€” {day} de {monthName}
       </p>
       <div className="grid grid-cols-2 gap-2">
         {hours.map((h) => (
@@ -562,7 +562,7 @@ function TimeSlots({
   );
 }
 
-// ── Plan selector ─────────────────────────────────────────────────────────────
+// â”€â”€ Plan selector â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PlanSelector({
   plans,
@@ -610,7 +610,7 @@ function PlanSelector({
   );
 }
 
-// ── Main page ──────────────────────────────────────────────────────────────────
+// â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function PersonalPerfilPage() {
   const { id } = useParams<{ id: string }>();
@@ -664,17 +664,17 @@ export default function PersonalPerfilPage() {
 
   const TABS: { key: TabKey; label: string }[] = [
     { key: 'sobre',      label: 'Sobre'      },
-    { key: 'formacao',   label: 'Formação'   },
-    { key: 'avaliacoes', label: 'Avaliações' },
+    { key: 'formacao',   label: 'FormaÃ§Ã£o'   },
+    { key: 'avaliacoes', label: 'AvaliaÃ§Ãµes' },
     { key: 'agenda',     label: 'Agenda'     },
   ];
 
-  // ── Scheduling panel (shared between right sidebar and Agenda tab) ─────────
+  // â”€â”€ Scheduling panel (shared between right sidebar and Agenda tab) â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const schedulingPanel = (
     <div className="bg-[#131722] border border-white/8 rounded-2xl p-5">
-      <p className="text-sm font-semibold text-white">Agendar sessão</p>
-      <p className="text-xs text-slate-500 mt-0.5 mb-4">Selecione data e horário</p>
+      <p className="text-sm font-semibold text-white">Agendar sessÃ£o</p>
+      <p className="text-xs text-slate-500 mt-0.5 mb-4">Selecione data e horÃ¡rio</p>
 
       <ScheduleCalendar
         profile={profile}
@@ -698,7 +698,7 @@ export default function PersonalPerfilPage() {
 
       {selectedDay !== null && currentHours.length === 0 && (
         <p className="text-xs text-slate-600 mt-4 text-center">
-          Nenhum horário disponível para este dia.
+          Nenhum horÃ¡rio disponÃ­vel para este dia.
         </p>
       )}
 
@@ -712,15 +712,15 @@ export default function PersonalPerfilPage() {
         onClick={handleContratar}
         className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold bg-[#7c5cfc] hover:bg-[#6d4ef0] text-white transition-colors"
       >
-        Contratar — R$ {selectedPlan.price}/{selectedPlan.perLabel}
+        Contratar â€” R$ {selectedPlan.price}/{selectedPlan.perLabel}
       </button>
     </div>
   );
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] text-white">
+    <div className="min-h-screen bg-[#080B18] text-white">
       <div className="max-w-5xl mx-auto px-4 pt-5 pb-10">
 
         {/* Breadcrumb */}
@@ -763,7 +763,7 @@ export default function PersonalPerfilPage() {
                 )}
               </div>
               <p className="text-sm text-slate-400 mt-0.5">
-                {profile.title} · {profile.yearsExp} anos de experiência · {profile.city}, {profile.state}
+                {profile.title} Â· {profile.yearsExp} anos de experiÃªncia Â· {profile.city}, {profile.state}
               </p>
               <div className="flex flex-wrap gap-1.5 mt-2.5">
                 {profile.specialties.map((s) => (
@@ -782,11 +782,11 @@ export default function PersonalPerfilPage() {
           <div className="grid grid-cols-4 gap-2 mt-5 pt-4 border-t border-white/5">
             <div className="text-center">
               <p className="text-lg font-bold text-amber-400">{profile.rating.toFixed(1)}</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Avaliação</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">AvaliaÃ§Ã£o</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-white">{profile.reviewCount}</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">Avaliações</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">AvaliaÃ§Ãµes</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-[#7c5cfc]">{profile.activeStudents}</p>
@@ -794,7 +794,7 @@ export default function PersonalPerfilPage() {
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-slate-300">{profile.distanceKm}km</p>
-              <p className="text-[10px] text-slate-500 mt-0.5">de distância</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">de distÃ¢ncia</p>
             </div>
           </div>
         </div>
@@ -819,7 +819,7 @@ export default function PersonalPerfilPage() {
         {/* Two-column layout: tabs left, scheduling right (desktop) */}
         <div className="flex flex-col lg:flex-row gap-5">
 
-          {/* ── Left column: tabs + content ─────────────────────────────── */}
+          {/* â”€â”€ Left column: tabs + content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="flex-1 min-w-0">
             {/* Tab nav */}
             <div className="flex border-b border-white/8 mb-5">
@@ -838,7 +838,7 @@ export default function PersonalPerfilPage() {
               ))}
             </div>
 
-            {/* ── Tab: Sobre ─────────────────────────────────────────────── */}
+            {/* â”€â”€ Tab: Sobre â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {activeTab === 'sobre' && (
               <div className="space-y-4">
                 <div className="bg-[#131722] border border-white/5 rounded-2xl p-5">
@@ -858,27 +858,27 @@ export default function PersonalPerfilPage() {
                     {(profile.modality === 'presencial' || profile.modality === 'ambos') && (
                       <span className="flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/8 px-3 py-1.5 rounded-lg">
                         <MapPin size={12} className="text-slate-500" />
-                        Presencial — {profile.city}, {profile.state}
+                        Presencial â€” {profile.city}, {profile.state}
                       </span>
                     )}
                     {(profile.modality === 'online' || profile.modality === 'ambos') && (
                       <span className="flex items-center gap-1.5 text-xs text-[#7c5cfc] bg-[#7c5cfc]/8 border border-[#7c5cfc]/20 px-3 py-1.5 rounded-lg">
                         <Wifi size={12} />
-                        Online — Todo o Brasil
+                        Online â€” Todo o Brasil
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Scheduling panel — mobile only (right col handles desktop) */}
+                {/* Scheduling panel â€” mobile only (right col handles desktop) */}
                 <div className="lg:hidden">{schedulingPanel}</div>
               </div>
             )}
 
-            {/* ── Tab: Formação ───────────────────────────────────────────── */}
+            {/* â”€â”€ Tab: FormaÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {activeTab === 'formacao' && (
               <div className="bg-[#131722] border border-white/5 rounded-2xl p-5">
-                <h3 className="text-base font-bold text-white mb-5">Formação e Certificações</h3>
+                <h3 className="text-base font-bold text-white mb-5">FormaÃ§Ã£o e CertificaÃ§Ãµes</h3>
                 <div className="space-y-3">
                   {profile.education.map((item, i) => (
                     <EducationBadge key={i} item={item} />
@@ -887,14 +887,14 @@ export default function PersonalPerfilPage() {
                 <div className="mt-5 pt-4 border-t border-white/5 flex items-start gap-2">
                   <AlertCircle size={13} className="text-slate-600 shrink-0 mt-0.5" />
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    Documentos com badge &ldquo;Em análise&rdquo; foram enviados pelo profissional e aguardam
-                    verificação pela equipe Movr. Prazo de até 48h úteis.
+                    Documentos com badge &ldquo;Em anÃ¡lise&rdquo; foram enviados pelo profissional e aguardam
+                    verificaÃ§Ã£o pela equipe Movr. Prazo de atÃ© 48h Ãºteis.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* ── Tab: Avaliações ─────────────────────────────────────────── */}
+            {/* â”€â”€ Tab: AvaliaÃ§Ãµes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {activeTab === 'avaliacoes' && (
               <div className="space-y-4">
                 {/* Rating overview + bar chart */}
@@ -904,7 +904,7 @@ export default function PersonalPerfilPage() {
                     <div className="text-center shrink-0">
                       <p className="text-4xl font-bold text-white">{profile.rating.toFixed(1)}</p>
                       <StarRow count={Math.round(profile.rating)} size={14} />
-                      <p className="text-xs text-slate-500 mt-1.5">{totalReviews} avaliações</p>
+                      <p className="text-xs text-slate-500 mt-1.5">{totalReviews} avaliaÃ§Ãµes</p>
                     </div>
 
                     {/* Horizontal bar chart */}
@@ -958,7 +958,7 @@ export default function PersonalPerfilPage() {
               </div>
             )}
 
-            {/* ── Tab: Agenda ─────────────────────────────────────────────── */}
+            {/* â”€â”€ Tab: Agenda â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {activeTab === 'agenda' && (
               <>
                 {/* Mobile: show scheduling panel */}
@@ -966,14 +966,14 @@ export default function PersonalPerfilPage() {
                 {/* Desktop: right col already has it */}
                 <div className="hidden lg:flex items-center justify-center py-12">
                   <p className="text-sm text-slate-600">
-                    Use o painel à direita para agendar sua sessão.
+                    Use o painel Ã  direita para agendar sua sessÃ£o.
                   </p>
                 </div>
               </>
             )}
           </div>
 
-          {/* ── Right column: sticky scheduling (desktop only) ───────────── */}
+          {/* â”€â”€ Right column: sticky scheduling (desktop only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           <div className="hidden lg:block w-80 shrink-0">
             <div className="sticky top-4">{schedulingPanel}</div>
           </div>

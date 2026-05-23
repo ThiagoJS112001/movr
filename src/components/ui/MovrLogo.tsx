@@ -13,7 +13,7 @@ interface Props {
 }
 
 /**
- * Movr brand logo — the stylised M with play-button left leg and red dot.
+ * Movr brand logo â€” the stylised M with play-button left leg and red dot.
  * The M uses an indigo gradient; the dot is rose/red.
  * Gradient IDs are scoped per-instance via useId() to avoid SVG conflicts.
  */
@@ -25,12 +25,12 @@ export default function MovrLogo({ size = 32, withContainer = false, className =
   /*
    * M path (viewBox 0 0 100 100):
    *   Outer boundary (clockwise):
-   *     TL-outer → BL-outer → valley-outer → BR-outer → TR-outer
+   *     TL-outer â†’ BL-outer â†’ valley-outer â†’ BR-outer â†’ TR-outer
    *   Inner boundary (counter-clockwise, creating the filled letter shape):
-   *     TR-inner → valley-inner → play-tip → TL-inner
+   *     TR-inner â†’ valley-inner â†’ play-tip â†’ TL-inner
    *
    *   The "play-tip" at (36, 35) creates the triangular notch on the
-   *   inner-right edge of the left stroke, giving the ▶ play-button effect.
+   *   inner-right edge of the left stroke, giving the â–¶ play-button effect.
    */
   const mPath = 'M 10,10 L 10,70 L 50,53 L 90,70 L 90,10 L 77,10 L 50,43 L 36,35 L 23,10 Z';
 

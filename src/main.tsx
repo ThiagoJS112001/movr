@@ -9,20 +9,25 @@ import { AuthProvider } from './contexts/AuthContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
 import { SettingsProvider } from './contexts/SettingsContext.tsx'
 import { queryClient } from './lib/queryClient.ts'
+import ErrorBoundary from './components/ErrorBoundary.tsx'
+import NotificationsBootstrap from './components/NotificationsBootstrap.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <SettingsProvider>
-          <BrowserRouter>
-            <AuthProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <SettingsProvider>
+            <BrowserRouter>
+              <AuthProvider>
+                <NotificationsBootstrap />
                 <App />
-            </AuthProvider>
-          </BrowserRouter>
-        </SettingsProvider>
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+              </AuthProvider>
+            </BrowserRouter>
+          </SettingsProvider>
+        </ThemeProvider>
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

@@ -46,7 +46,7 @@ export default function VideoModal({ url, onClose }: VideoModalProps) {
         <button
           onClick={onClose}
           className="absolute -top-10 right-0 text-white hover:text-slate-300 transition-colors"
-          aria-label="Fechar vídeo"
+          aria-label="Fechar vÃ­deo"
         >
           <X size={24} />
         </button>
@@ -58,12 +58,12 @@ export default function VideoModal({ url, onClose }: VideoModalProps) {
               className="absolute inset-0 w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              title="Vídeo demonstrativo"
+              title="VÃ­deo demonstrativo"
             />
           </div>
         ) : (
-          <div className="bg-slate-800 rounded-xl p-6 text-center">
-            <p className="text-white mb-4">Não foi possível incorporar este vídeo.</p>
+          <div className="bg-[#0D1025] rounded-xl p-6 text-center">
+            <p className="text-white mb-4">NÃ£o foi possÃ­vel incorporar este vÃ­deo.</p>
             <a
               href={url}
               target="_blank"

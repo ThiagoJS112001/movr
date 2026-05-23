@@ -8,7 +8,7 @@ interface EmptyStateProps {
 }
 
 /**
- * Standardized empty state — centered icon + message + optional description + optional CTA.
+ * Standardized empty state â€” centered icon + message + optional description + optional CTA.
  * Matches the pattern used in PersonalDashboard and throughout the app.
  */
 export default function EmptyState({ icon: Icon, message, description, action }: EmptyStateProps) {

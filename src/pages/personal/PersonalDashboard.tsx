@@ -1,290 +1,442 @@
 import { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents } from '../../hooks/useStudents';
-import { useExercises } from '../../hooks/useExercises';
-import { usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
-import { useTotalUnread } from '../../hooks/useMessages';
+import { useWorkouts, usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
+import { useTotalUnread, useMessages } from '../../hooks/useMessages';
 import {
-  Users, Dumbbell, ClipboardList, MessageCircle,
-  CalendarDays, ChevronRight, Zap, Activity, UserPlus,
+  Users,
+  ClipboardList,
+  MessageCircle,
+  ChevronRight,
+  CheckCircle2,
+  TrendingUp,
+  DollarSign,
+  Activity,
+  CalendarCheck,
+  Bell,
+  User,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { ElementType } from 'react';
-
-// ── Sparkline SVG ─────────────────────────────────────────────────────────────
-function Sparkline({ color, points }: { color: string; points: string }) {
-  return (
-    <svg viewBox="0 0 80 30" className="w-20 h-8" preserveAspectRatio="none">
-      <polyline
-        points={points}
-        fill="none"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.85"
-      />
-    </svg>
-  );
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const TIPS = [
-  'Mantenha a consistência e celebre cada pequena conquista!',
-  'Um treino bem planejado vale mais que dez improvisados.',
-  'A recuperação faz parte do progresso. Respeite o descanso dos alunos.',
-  'Pequenas melhorias diárias geram grandes resultados a longo prazo.',
-];
 
 function formatDateLabel(date: Date): string {
   const s = date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-type ActivityItem = {
-  id: string;
-  Icon: ElementType;
-  iconBg: string;
-  iconColor: string;
-  title: string;
-  subtitle: string;
-  time: string;
-};
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 60) return `${mins} min atrás`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} h atrás`;
+  return `${Math.floor(hrs / 24)} dia${Math.floor(hrs / 24) !== 1 ? 's' : ''} atrás`;
+}
 
-// ── Component ─────────────────────────────────────────────────────────────────
+function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
+  const s = size === 'sm' ? 'w-7 h-7 text-xs' : 'w-9 h-9 text-sm';
+  return (
+    <div className={`${s} rounded-full bg-indigo-600/20 flex items-center justify-center shrink-0`}>
+      <span className="text-indigo-400 font-bold">{name.charAt(0).toUpperCase()}</span>
+    </div>
+  );
+}
+
 export default function PersonalDashboard() {
   const { user } = useAuth();
   const { data: students = [] } = useStudents();
-  const { data: exercises = [] } = useExercises();
+  const { data: workouts = [] } = useWorkouts();
   const { data: allLogs = [] } = usePersonalWorkoutLogs();
+  const { data: allMessages = [] } = useMessages();
   const navigate = useNavigate();
 
   const unread = useTotalUnread();
-  const today  = new Date();
-  const tip    = TIPS[today.getDate() % TIPS.length];
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
 
-  const stats = [
-    {
-      label: 'Alunos',
-      value: students.length,
-      Icon: Users,
-      iconBg: 'bg-violet-500/20 dark:bg-violet-500/20',
-      iconColor: 'text-violet-500 dark:text-violet-400',
-      sparkColor: '#a78bfa',
-      sparkPoints: '0,20 10,18 20,22 30,14 40,16 50,10 60,12 70,8 80,14',
-      action: () => navigate('/personal/alunos'),
-    },
-    {
-      label: 'Exercícios',
-      value: exercises.length,
-      Icon: Dumbbell,
-      iconBg: 'bg-blue-500/20 dark:bg-blue-500/20',
-      iconColor: 'text-blue-500 dark:text-blue-400',
-      sparkColor: '#60a5fa',
-      sparkPoints: '0,24 10,20 20,18 30,22 40,16 50,14 60,18 70,12 80,10',
-      action: () => navigate('/personal/exercicios'),
-    },
-    {
-      label: 'Mensagens não lidas',
-      value: unread,
-      Icon: MessageCircle,
-      iconBg: 'bg-rose-500/20 dark:bg-rose-500/20',
-      iconColor: 'text-rose-500 dark:text-rose-400',
-      sparkColor: '#f87171',
-      sparkPoints: '0,20 10,22 20,18 30,24 40,20 50,16 60,18 70,14 80,16',
-      action: () => navigate('/personal/chat'),
-    },
-  ];
+  const trainedTodayCount = useMemo(
+    () => new Set(allLogs.filter((l) => l.completedAt.startsWith(todayStr)).map((l) => l.studentId)).size,
+    [allLogs, todayStr],
+  );
 
-  const recentActivities = useMemo((): ActivityItem[] => {
-    const items: ActivityItem[] = [];
+  const profilePct = useMemo(() => (user?.avatarUrl ? 100 : 60), [user?.avatarUrl]);
+  const profileIncomplete = profilePct < 100;
 
-    // Recent workout logs
-    const recentLogs = [...allLogs]
-      .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
-      .slice(0, 2);
-    for (const log of recentLogs) {
-      const student = students.find((st) => st.id === log.studentId);
-      items.push({
-        id: `log-${log.id}`,
-        Icon: ClipboardList,
-        iconBg: 'bg-emerald-500/15 dark:bg-emerald-500/15',
-        iconColor: 'text-emerald-500 dark:text-emerald-400',
-        title: 'Treino realizado',
-        subtitle: `${student?.name ?? 'Aluno'} · ${log.workoutName}`,
-        time: new Date(log.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
-      });
+  // Agenda do dia ââ‚¬â€ today's logs as "Confirmado", remaining as no-show
+  const agendaItems = useMemo(() => {
+    const todayLogs = allLogs
+      .filter((l) => l.completedAt.startsWith(todayStr))
+      .sort((a, b) => b.completedAt.localeCompare(a.completedAt));
+    return todayLogs.map((log) => {
+      const student = students.find((s) => s.id === log.studentId);
+      return {
+        id: log.id,
+        studentName: student?.name ?? 'Aluno',
+        workoutName: log.workoutName,
+        status: 'confirmado' as const,
+        time: new Date(log.completedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      };
+    });
+  }, [allLogs, students, todayStr]);
+
+  // Atividades recentes
+  const recentActivities = useMemo(
+    () =>
+      [...allLogs]
+        .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
+        .slice(0, 6)
+        .map((log) => {
+          const student = students.find((s) => s.id === log.studentId);
+          return {
+            id: log.id,
+            label: `Treino concluído por ${student?.name ?? 'Aluno'}`,
+            detail: log.workoutName,
+            when: log.completedAt,
+            type: 'workout' as const,
+          };
+        }),
+    [allLogs, students],
+  );
+
+  // Alunos recentes (last 5)
+  const recentStudents = useMemo(() => {
+    const lastLog = new Map<string, string>();
+    for (const l of allLogs) {
+      const existing = lastLog.get(l.studentId);
+      if (!existing || l.completedAt > existing) lastLog.set(l.studentId, l.completedAt);
     }
+    return students
+      .slice()
+      .sort((a, b) => {
+        const la = lastLog.get(a.id) ?? '';
+        const lb = lastLog.get(b.id) ?? '';
+        return lb.localeCompare(la);
+      })
+      .slice(0, 5)
+      .map((s) => ({
+        id: s.id,
+        name: s.name,
+        lastActivity: lastLog.get(s.id),
+        plan: 'Plano Ativo',
+      }));
+  }, [students, allLogs]);
 
-    // Last 2 exercises added
-    const recentExs = exercises.slice(-2).reverse();
-    for (const ex of recentExs) {
-      items.push({
-        id: `ex-${ex.id}`,
-        Icon: Dumbbell,
-        iconBg: 'bg-blue-500/15 dark:bg-blue-500/15',
-        iconColor: 'text-blue-500 dark:text-blue-400',
-        title: 'Novo exercício adicionado',
-        subtitle: ex.name,
-        time: 'Recente',
-      });
-    }
-
-    // Last 2 students
-    const recentStudents = students.slice(-2).reverse();
-    for (const s of recentStudents) {
-      items.push({
-        id: `student-${s.id}`,
-        Icon: UserPlus,
-        iconBg: 'bg-violet-500/15 dark:bg-violet-500/15',
-        iconColor: 'text-violet-500 dark:text-violet-400',
-        title: 'Novo aluno cadastrado',
-        subtitle: s.name,
-        time: 'Recente',
-      });
-    }
-
-    return items.slice(0, 5);
-  }, [allLogs, exercises, students]);
+  // Mensagens não lidas
+  const unreadMessages = useMemo(
+    () =>
+      allMessages
+        .filter((m) => m.toId === user?.id && !m.read)
+        .sort((a, b) => b.sentAt.localeCompare(a.sentAt))
+        .slice(0, 4),
+    [allMessages, user?.id],
+  );
 
   return (
-    <div className="p-5 max-w-6xl mx-auto">
+    <div className="p-5 max-w-screen-xl mx-auto flex flex-col gap-4">
 
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
-            Olá, {user?.name?.split(' ')[0]} 👋
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
-            Aqui está um resumo da sua academia.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2 text-sm text-slate-600 dark:text-slate-300 shadow-sm">
-          <CalendarDays size={14} className="text-indigo-500" />
-          <span>{formatDateLabel(today)}</span>
-        </div>
-      </div>
-
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5">
-        {stats.map(({ label, value, Icon, iconBg, iconColor, sparkColor, sparkPoints, action }) => (
-          <button
-            key={label}
-            onClick={action}
-            className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col gap-2 text-left hover:shadow-md hover:border-indigo-200 dark:hover:border-indigo-700 transition-all"
-          >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${iconBg}`}>
-              <Icon size={20} className={iconColor} />
-            </div>
-            <div className="text-2xl font-bold text-slate-800 dark:text-white">{value}</div>
-            <div className="flex items-end justify-between">
-              <span className="text-xs text-slate-500 dark:text-slate-400 leading-tight">{label}</span>
-              <Sparkline color={sparkColor} points={sparkPoints} />
-            </div>
-          </button>
-        ))}
-      </div>
-
-      {/* Two-column section */}
-      <div className="grid md:grid-cols-2 gap-4 mb-4">
-
-        {/* Recent workout sessions */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5 flex flex-col">
-          <div className="flex items-center gap-2 mb-4">
-            <CalendarDays size={15} className="text-indigo-500" />
-            <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm">Treinos recentes dos alunos</h2>
-          </div>
-          {allLogs.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-8 gap-3 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
-                <ClipboardList size={28} className="text-indigo-400" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhum treino registrado ainda.</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Os treinos dos seus alunos aparecerão aqui.</p>
-              </div>
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {[...allLogs]
-                .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
-                .slice(0, 5)
-                .map((log) => {
-                  const student = students.find((s) => s.id === log.studentId);
-                  return (
-                    <li key={log.id} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center shrink-0">
-                        <span className="text-indigo-500 font-bold text-xs">
-                          {student?.name?.charAt(0).toUpperCase() ?? '?'}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
-                          {student?.name ?? 'Aluno'}
-                        </p>
-                        <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{log.workoutName}</p>
-                      </div>
-                      <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
-                        {new Date(log.completedAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                        {log.durationMinutes ? ` · ${log.durationMinutes}min` : ''}
-                      </span>
-                    </li>
-                  );
-                })}
-            </ul>
-          )}
-        </div>
-
-        {/* Recent activities */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5 flex flex-col">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity size={15} className="text-indigo-500" />
-            <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm">Atividades recentes</h2>
-          </div>
-          {recentActivities.length === 0 ? (
-            <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center flex-1">
-              Nenhuma atividade recente.
-            </p>
-          ) : (
-            <ul className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/50 flex-1">
-              {recentActivities.map(({ id, Icon, iconBg, iconColor, title, subtitle, time }) => (
-                <li key={id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}>
-                    <Icon size={14} className={iconColor} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-slate-700 dark:text-slate-200">{title}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 truncate">{subtitle}</p>
-                  </div>
-                  <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">{time}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <button
-            onClick={() => navigate('/personal/alunos')}
-            className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300 mt-4 transition-colors self-start"
-          >
-            Ver todas as atividades <ChevronRight size={13} />
-          </button>
-        </div>
-      </div>
-
-      {/* Tip of the day */}
-      <div className="relative bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-5 overflow-hidden">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
-            <Zap size={22} className="text-yellow-300" />
-          </div>
+      {/* ââ€â‚¬ââ€â‚¬ Profile completion banner ââ€â‚¬ââ€â‚¬ */}
+      {profileIncomplete && (
+        <button
+          onClick={() => navigate('/completar-perfil')}
+          className="w-full flex items-center gap-4 bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl px-5 py-3 text-left hover:border-indigo-500/40 transition group"
+        >
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-white">Dica do dia</p>
-            <p className="text-indigo-100 text-sm mt-0.5">{tip}</p>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                Perfil profissional{' '}
+                <span className="text-indigo-400 font-semibold">{profilePct}% completo</span>
+                {' '}ââ‚¬â€ aumente sua visibilidade e conquiste mais alunos
+              </span>
+            </div>
+            <div className="w-full bg-slate-200 dark:bg-white/10 rounded-full h-1.5">
+              <div
+                className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500"
+                style={{ width: `${profilePct}%` }}
+              />
+            </div>
           </div>
-          <Dumbbell size={72} className="text-white/10 shrink-0 hidden md:block rotate-12" />
-        </div>
+          <span className="shrink-0 text-xs font-semibold text-indigo-400 group-hover:text-indigo-300 transition flex items-center gap-1">
+            Completar perfil <ChevronRight size={13} />
+          </span>
+        </button>
+      )}
+
+      {/* ââ€â‚¬ââ€â‚¬ Date + Greeting ââ€â‚¬ââ€â‚¬ */}
+      <div>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{formatDateLabel(today)}</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">
+          Olá, {user?.name?.split(' ')[0]}! ??
+        </h1>
       </div>
 
+      {/* ââ€â‚¬ââ€â‚¬ Stat cards ââ€â‚¬ââ€â‚¬ */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Alunos ativos */}
+        <button
+          onClick={() => navigate('/personal/alunos')}
+          className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5 text-left hover:border-indigo-500/40 transition group flex flex-col gap-3"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center">
+              <Users size={17} className="text-violet-400" />
+            </div>
+            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <TrendingUp size={10} /> +{trainedTodayCount > 0 ? trainedTodayCount : 0} hoje
+            </span>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">{students.length}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Alunos ativos</p>
+          </div>
+        </button>
+
+        {/* Treinos hoje */}
+        <button
+          onClick={() => navigate('/personal/treinos')}
+          className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5 text-left hover:border-indigo-500/40 transition group flex flex-col gap-3"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center">
+              <CalendarCheck size={17} className="text-blue-400" />
+            </div>
+            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              ao vivo
+            </span>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">{trainedTodayCount}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Treinos hoje
+              {workouts.length > 0 && (
+                <span className="ml-1 text-slate-400 dark:text-slate-500">Â· {workouts.length} fichas</span>
+              )}
+            </p>
+          </div>
+        </button>
+
+        {/* Mensagens */}
+        <button
+          onClick={() => navigate('/personal/chat')}
+          className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5 text-left hover:border-indigo-500/40 transition group flex flex-col gap-3"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 rounded-xl bg-rose-500/15 flex items-center justify-center">
+              <MessageCircle size={17} className="text-rose-400" />
+            </div>
+            {unread > 0 && (
+              <span className="text-[11px] font-semibold text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-full">
+                {unread} nova{unread !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">{unread}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Mensagens não lidas</p>
+          </div>
+        </button>
+      </div>
+
+      {/* ââ€â‚¬ââ€â‚¬ Main grid ââ€â‚¬ââ€â‚¬ */}
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4">
+
+        {/* Left column */}
+        <div className="flex flex-col gap-4">
+
+          {/* Agenda do dia */}
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <CalendarCheck size={15} className="text-indigo-400" />
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Agenda do dia</h2>
+              </div>
+              <button
+                onClick={() => navigate('/personal/alunos')}
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-0.5"
+              >
+                Ver agenda completa <ChevronRight size={12} />
+              </button>
+            </div>
+
+            {agendaItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                  <CalendarCheck size={20} className="text-indigo-400" />
+                </div>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhum treino hoje</p>
+                <p className="text-xs text-slate-400">Os treinos concluídos hoje aparecerão aqui.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/40">
+                {agendaItems.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <span className="text-xs font-mono text-slate-400 dark:text-slate-500 w-10 shrink-0">
+                      {item.time}
+                    </span>
+                    <Avatar name={item.studentName} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 dark:text-white truncate">{item.studentName}</p>
+                      <p className="text-xs text-slate-400 truncate">{item.workoutName}</p>
+                    </div>
+                    <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-400/10 text-emerald-400">
+                      Confirmado
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Atividades recentes */}
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Activity size={15} className="text-indigo-400" />
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Atividades recentes</h2>
+            </div>
+
+            {recentActivities.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                  <ClipboardList size={20} className="text-blue-400" />
+                </div>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhuma atividade recente</p>
+                <p className="text-xs text-slate-400">Os registros dos alunos aparecerão aqui.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/40">
+                {recentActivities.map((a) => (
+                  <div key={a.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <div className="w-7 h-7 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                      <CheckCircle2 size={13} className="text-emerald-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-slate-800 dark:text-slate-200 truncate">{a.label}</p>
+                      <p className="text-[11px] text-slate-400 truncate">{a.detail}</p>
+                    </div>
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500 shrink-0">{timeAgo(a.when)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="flex flex-col gap-4">
+
+          {/* Alunos recentes */}
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Users size={15} className="text-indigo-400" />
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Alunos recentes</h2>
+              </div>
+              <button
+                onClick={() => navigate('/personal/alunos')}
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-0.5"
+              >
+                Ver todos <ChevronRight size={12} />
+              </button>
+            </div>
+
+            {recentStudents.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 gap-2 text-center">
+                <div className="w-11 h-11 rounded-2xl bg-violet-500/10 flex items-center justify-center">
+                  <Users size={18} className="text-violet-400" />
+                </div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Nenhum aluno cadastrado</p>
+              </div>
+            ) : (
+              <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/40">
+                {recentStudents.map((s) => (
+                  <div key={s.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <Avatar name={s.name} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800 dark:text-white truncate">{s.name}</p>
+                      <p className="text-[11px] text-slate-400 truncate">{s.plan}</p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      <span className="text-[11px] text-emerald-400">Ativo</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Mensagens não lidas */}
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <MessageCircle size={15} className="text-indigo-400" />
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Mensagens não lidas</h2>
+              </div>
+              <button
+                onClick={() => navigate('/personal/chat')}
+                className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-0.5"
+              >
+                Abrir chat <ChevronRight size={12} />
+              </button>
+            </div>
+
+            {unreadMessages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 gap-2 text-center">
+                <div className="w-11 h-11 rounded-2xl bg-rose-500/10 flex items-center justify-center">
+                  <MessageCircle size={18} className="text-rose-400" />
+                </div>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Nenhuma mensagem nova</p>
+              </div>
+            ) : (
+              <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/40">
+                {unreadMessages.map((m) => (
+                  <div key={m.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
+                    <Avatar name={m.fromName} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-slate-800 dark:text-white truncate">{m.fromName}</p>
+                      <p className="text-[11px] text-slate-400 truncate">{m.content}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[11px] text-slate-400">{timeAgo(m.sentAt)}</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Resumo financeiro */}
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <DollarSign size={15} className="text-indigo-400" />
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Resumo financeiro</h2>
+              </div>
+              <button className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-0.5">
+                Ver relatório <ChevronRight size={12} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Faturamento (mês)', value: 'R$ —', color: 'text-slate-900 dark:text-white' },
+                { label: 'A receber', value: 'R$ —', color: 'text-emerald-400' },
+                { label: 'Próximo receb.', value: '—', color: 'text-slate-900 dark:text-white' },
+              ].map((item) => (
+                <div key={item.label} className="flex flex-col gap-0.5">
+                  <p className="text-[10px] text-slate-400 leading-tight">{item.label}</p>
+                  <p className={`text-sm font-bold ${item.color}`}>{item.value}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 border-t border-slate-100 dark:border-white/[0.07]/40 pt-3">
+              <p className="text-[11px] text-slate-400 text-center">
+                Módulo financeiro em breve
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   );
 }

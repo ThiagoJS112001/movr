@@ -29,6 +29,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   personal_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   -- For alunos: whether they are blocked by their personal
   is_blocked  BOOLEAN NOT NULL DEFAULT FALSE,
+  -- Invite flow: 'pending' = personal added aluno, aluno hasn't confirmed yet
+  --              'confirmed' = aluno confirmed the link
+  --              NULL = created via old flow (treat as confirmed)
+  connection_status TEXT CHECK (connection_status IN ('pending', 'confirmed')),
   -- Aluno profile fields
   birth_date  DATE,
   -- Academia-specific fields
@@ -47,15 +51,33 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 -- ─── 2. EXERCISES ────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.exercises (
-  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name         TEXT NOT NULL,
-  muscle_group TEXT NOT NULL,
-  description  TEXT,
-  image_url    TEXT,
-  video_url    TEXT,
-  personal_id  UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name              TEXT NOT NULL,
+  muscle_group      TEXT NOT NULL,
+  description       TEXT,
+  equipment         TEXT,
+  level             TEXT,
+  exercise_type     TEXT,
+  image_url         TEXT,
+  video_url         TEXT,
+  tips              TEXT[] DEFAULT '{}',
+  suggested_rest    INTEGER,
+  suggested_sets    INTEGER,
+  suggested_reps    TEXT,
+  primary_muscles   TEXT[] DEFAULT '{}',
+  secondary_muscles TEXT[] DEFAULT '{}',
+  personal_id       UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migration for existing databases (run once):
+-- ALTER TABLE public.exercises
+--   ADD COLUMN IF NOT EXISTS tips              TEXT[] DEFAULT '{}',
+--   ADD COLUMN IF NOT EXISTS suggested_rest    INTEGER,
+--   ADD COLUMN IF NOT EXISTS suggested_sets    INTEGER,
+--   ADD COLUMN IF NOT EXISTS suggested_reps    TEXT,
+--   ADD COLUMN IF NOT EXISTS primary_muscles   TEXT[] DEFAULT '{}',
+--   ADD COLUMN IF NOT EXISTS secondary_muscles TEXT[] DEFAULT '{}';
 
 -- ─── 3. WORKOUTS ─────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.workouts (
@@ -122,8 +144,17 @@ CREATE TABLE IF NOT EXISTS public.diets (
   target_protein   NUMERIC(6,1),
   target_carbs     NUMERIC(6,1),
   target_fat       NUMERIC(6,1),
+  duration_days    INTEGER,
+  restriction_level TEXT,
+  preferences      TEXT[] NOT NULL DEFAULT '{}',
+  favorite_foods   JSONB NOT NULL DEFAULT '[]',
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+-- Migration (run on existing DB):
+-- ALTER TABLE public.diets ADD COLUMN IF NOT EXISTS duration_days INTEGER;
+-- ALTER TABLE public.diets ADD COLUMN IF NOT EXISTS restriction_level TEXT;
+-- ALTER TABLE public.diets ADD COLUMN IF NOT EXISTS preferences TEXT[] NOT NULL DEFAULT '{}';
+-- ALTER TABLE public.diets ADD COLUMN IF NOT EXISTS favorite_foods JSONB NOT NULL DEFAULT '[]';
 
 -- ─── 8. MEALS ────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.meals (
@@ -132,8 +163,11 @@ CREATE TABLE IF NOT EXISTS public.meals (
   name        TEXT NOT NULL,
   time        TEXT NOT NULL,
   notes       TEXT,
+  target_calories INTEGER,
   order_index INTEGER NOT NULL DEFAULT 0
 );
+-- Migration (run on existing DB):
+-- ALTER TABLE public.meals ADD COLUMN IF NOT EXISTS target_calories INTEGER;
 
 -- ─── 9. FOOD ITEMS ───────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.food_items (
@@ -305,3 +339,37 @@ CREATE INDEX IF NOT EXISTS idx_gym_ratings_gym             ON public.gym_ratings
 --     END
 --   ) STORED;
 -- CREATE INDEX IF NOT EXISTS idx_profiles_role_prefix ON public.profiles(role_prefix);
+
+-- MIGRATION — connection_status column (run once):
+-- ALTER TABLE public.profiles
+--   ADD COLUMN IF NOT EXISTS connection_status TEXT
+--     CHECK (connection_status IN ('pending', 'confirmed'));
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- RPC: find_aluno_by_email
+-- Used by personals to search for an existing aluno to invite.
+-- Returns minimal safe fields — does NOT expose email to caller.
+-- SECURITY DEFINER so it can bypass RLS (caller identity still validated inside).
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.find_aluno_by_email(search_email TEXT)
+RETURNS TABLE(
+  id            UUID,
+  name          TEXT,
+  avatar_url    TEXT,
+  already_linked BOOLEAN
+)
+LANGUAGE SQL STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT
+    p.id,
+    p.name,
+    p.avatar_url,
+    (p.personal_id IS NOT NULL) AS already_linked
+  FROM public.profiles p
+  WHERE LOWER(p.email) = LOWER(search_email)
+    AND p.role = 'aluno'
+  LIMIT 1;
+$$;
+REVOKE EXECUTE ON FUNCTION public.find_aluno_by_email(TEXT) FROM PUBLIC, anon;
+GRANT  EXECUTE ON FUNCTION public.find_aluno_by_email(TEXT) TO authenticated;

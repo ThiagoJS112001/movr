@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
     // Ensure personal_id is set (trigger may not fire with admin.createUser metadata)
     await supabaseAdmin
       .from('profiles')
-      .update({ personal_id: personalId, role: 'aluno' })
+      .update({ personal_id: personalId, role: 'aluno', connection_status: 'pending' })
       .eq('id', authData.user.id);
 
     const { data: profile, error: profileError } = await supabaseAdmin

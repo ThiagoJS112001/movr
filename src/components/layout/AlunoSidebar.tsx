@@ -1,47 +1,58 @@
-﻿import { NavLink, useNavigate } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  MessageCircle,
-  ClipboardList,
-  LogOut,
-  Salad,
-  TrendingUp,
-  Settings,
-  Building2,
-  UserPlus,
-  Dumbbell,
-  Search,
-  User,
-} from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Settings, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTotalUnread } from '../../hooks/useMessages';
 import { useSettings } from '../../contexts/SettingsContext';
-import { APP_NAME } from '../../lib/constants';
 import SettingsModal from '../SettingsModal';
-import AlunoPerfilModal from '../AlunoPerfilModal';
-import MovrLogo from '../ui/MovrLogo';
 
-// Full nav items for desktop sidebar
-const ALL_NAV_ITEMS = [
-  { to: '/aluno/dashboard', label: 'Home',             icon: LayoutDashboard },
-  { to: '/aluno/treino',    label: 'Meus Treinos',     icon: Dumbbell        },
-  { to: '/aluno/dieta',     label: 'Minha Dieta',      icon: Salad           },
-  { to: '/aluno/historico', label: 'Histórico',        icon: ClipboardList   },
-  { to: '/aluno/progresso', label: 'Progresso',        icon: TrendingUp      },
-  { to: '/aluno/academias', label: 'Buscar',           icon: Building2       },
-  { to: '/aluno/amigos',    label: 'Adicionar Amigos', icon: UserPlus        },
-  { to: '/aluno/chat',      label: 'Chat',             icon: MessageCircle   },
+// -- Sidebar sections & items --------------------------------------------------
+
+const NAV_SECTIONS = [
+  {
+    label: 'MEU ESPAÇO',
+    items: [
+      { to: '/aluno/dashboard', label: 'Dashboard'       },
+      { to: '/aluno/treino',    label: 'Meus Treinos'    },
+      { to: '/aluno/dieta',     label: 'Minha Dieta'     },
+      { to: '/aluno/progresso', label: 'Progresso'       },
+      { to: '/aluno/historico', label: 'Histórico'       },
+    ],
+  },
+  {
+    label: 'DESCOBRIR',
+    items: [
+      { to: '/aluno/personais', label: 'Personais'       },
+      { to: '/aluno/academias', label: 'Academias'       },
+    ],
+  },
+  {
+    label: 'SOCIAL',
+    items: [
+      { to: '/aluno/chat',   label: 'Chat',             badge: true },
+      { to: '/aluno/grupos', label: 'Grupos'                        },
+      { to: '/aluno/amigos', label: 'Adicionar amigos'              },
+    ],
+  },
+  {
+    label: 'AGENDA',
+    items: [
+      { to: '/aluno/agenda',     label: 'Minha agenda'  },
+      { to: '/aluno/assinatura', label: 'Assinatura'    },
+    ],
+  },
 ];
 
-// 5-item bottom navigation (mobile)
+// Bottom nav items (mobile)
 const BOTTOM_NAV = [
-  { to: '/aluno/dashboard', label: 'Home',   icon: LayoutDashboard },
-  { to: '/aluno/treino',    label: 'Treinos', icon: Dumbbell        },
-  { to: '/aluno/academias', label: 'Buscar',  icon: Search          },
-  { to: '/aluno/dieta',     label: 'Dieta',   icon: Salad           },
-  { to: '/aluno/progresso', label: 'Perfil',  icon: User            },
+  { to: '/aluno/dashboard', label: 'Home'    },
+  { to: '/aluno/treino',    label: 'Treinos' },
+  { to: '/aluno/personais', label: 'Buscar'  },
+  { to: '/aluno/dieta',     label: 'Dieta'   },
+  { to: '/aluno/chat',      label: 'Chat'    },
 ];
+
+// -- Component -----------------------------------------------------------------
 
 export default function AlunoSidebar() {
   const { user, logout } = useAuth();
@@ -49,111 +60,114 @@ export default function AlunoSidebar() {
   const { isNavVisible } = useSettings();
   const navigate = useNavigate();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [perfilOpen, setPerfilOpen] = useState(false);
-
-  const navItems = ALL_NAV_ITEMS.filter((item) => isNavVisible(item.to));
 
   function handleLogout() {
     logout();
     navigate('/login');
   }
 
-  // Desktop sidebar links
-  const desktopLinks = (
-    <nav className="flex flex-col gap-0.5 mt-4">
-      {navItems.map(({ to, label, icon: Icon }) => (
-        <NavLink
-          key={to}
-          to={to}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-[#7c5cfc]/15 text-[#7c5cfc]'
-                : 'text-slate-400 hover:bg-white/5 hover:text-white'
-            }`
-          }
-        >
-          <Icon size={17} />
-          <span>{label}</span>
-          {label === 'Chat' && unread > 0 && (
-            <span className="ml-auto bg-[#7c5cfc] text-white text-[10px] rounded-full w-4.5 h-4.5 flex items-center justify-center leading-none px-1">
-              {unread}
-            </span>
-          )}
-        </NavLink>
-      ))}
-    </nav>
-  );
+  const initials = user?.name
+    ? user.name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+    : '?';
 
   return (
     <>
-      {/* ── Mobile bottom navigation ──────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d0f14] border-t border-white/5 flex safe-area-inset-bottom">
-        {BOTTOM_NAV.map(({ to, label, icon: Icon }) => (
+      {/* -- Mobile bottom navigation ---------------------------------------- */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#080B18] border-t border-white/5 flex safe-area-inset-bottom">
+        {BOTTOM_NAV.map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-[10px] font-medium transition-colors ${
+              `flex-1 flex flex-col items-center justify-center py-3 text-[11px] font-medium transition-colors ${
                 isActive ? 'text-[#7c5cfc]' : 'text-slate-500 hover:text-slate-300'
               }`
             }
           >
-            {({ isActive }) => (
-              <>
-                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
-                <span>{label}</span>
-              </>
-            )}
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
 
-      {/* ── Desktop sidebar ───────────────────────────────────────── */}
-      <aside className="hidden md:flex flex-col w-[220px] bg-[#0d0f14] border-r border-white/5 min-h-screen py-5 px-3 fixed top-0 left-0 h-full">
-        <div className="flex items-center gap-2 font-bold text-[#7c5cfc] px-3 mb-2 text-lg">
-          <MovrLogo size={22} />
-          <span className="font-['Syne']">{APP_NAME}</span>
+      {/* -- Desktop sidebar ------------------------------------------------- */}
+      <aside className="hidden md:flex flex-col w-[220px] bg-[#080B18] border-r border-white/[0.06] min-h-screen py-5 px-3 fixed top-0 left-0 h-full overflow-y-auto">
+
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 px-2 mb-5">
+          <div className="w-8 h-8 rounded-lg bg-[#7c5cfc] flex items-center justify-center shrink-0">
+            <span className="text-white text-xs font-black">M</span>
+          </div>
+          <span className="text-white font-bold text-base tracking-tight">movr.</span>
         </div>
-        <div className="flex-1 overflow-y-auto">{desktopLinks}</div>
-        <div className="mt-auto">
-          {/* Profile button */}
+
+        {/* Nav sections */}
+        <div className="flex-1 flex flex-col gap-4">
+          {NAV_SECTIONS.map(({ label, items }) => {
+            const visibleItems = items.filter((item) => isNavVisible(item.to));
+            if (visibleItems.length === 0) return null;
+            return (
+              <div key={label}>
+                <p className="text-[10px] font-semibold text-slate-500 tracking-[0.12em] px-2 mb-1">
+                  {label}
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {visibleItems.map(({ to, label: itemLabel, badge }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-sm font-medium transition-all relative ${
+                          isActive
+                            ? 'bg-[#7c5cfc]/10 text-white border-l-2 border-[#7c5cfc]'
+                            : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200 border-l-2 border-transparent'
+                        }`
+                      }
+                    >
+                      <span className="flex-1">{itemLabel}</span>
+                      {badge && unread > 0 && (
+                        <span className="ml-auto bg-[#7c5cfc] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0">
+                          {unread > 9 ? '9+' : unread}
+                        </span>
+                      )}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom: profile + settings + logout */}
+        <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-col gap-0.5">
+          {/* Profile */}
           <button
-            onClick={() => setPerfilOpen(true)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors group mb-0.5"
+            onClick={() => navigate('/completar-perfil')}
+            className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-white/[0.04] transition-colors group"
           >
-            <div className="w-8 h-8 rounded-full bg-[#7c5cfc]/20 border border-[#7c5cfc]/40 flex items-center justify-center text-[#7c5cfc] text-xs font-bold shrink-0 select-none">
-              {user?.name
-                ? user.name
-                    .split(' ')
-                    .slice(0, 2)
-                    .map((w) => w[0])
-                    .join('')
-                    .toUpperCase()
-                : '?'}
+            <div className="w-9 h-9 rounded-full bg-[#7c5cfc]/25 border border-[#7c5cfc]/50 flex items-center justify-center text-[#7c5cfc] text-xs font-bold shrink-0 select-none">
+              {initials}
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-xs font-medium text-slate-300 group-hover:text-white truncate transition-colors leading-tight">
+              <p className="text-xs font-semibold text-slate-200 group-hover:text-white truncate leading-tight">
                 {user?.name}
               </p>
-              <p className="text-[10px] text-slate-600 group-hover:text-slate-400 transition-colors leading-tight">
+              <p className="text-[10px] text-slate-500 group-hover:text-slate-400 leading-tight">
                 Ver perfil
               </p>
             </div>
+            <Settings
+              size={14}
+              className="text-slate-600 group-hover:text-slate-400 transition-colors shrink-0"
+              onClick={(e) => { e.stopPropagation(); setSettingsOpen(true); }}
+            />
           </button>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm text-slate-500 hover:bg-white/5 hover:text-white transition-colors"
-          >
-            <Settings size={16} />
-            Configurações
-          </button>
+
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 w-full rounded-xl text-sm text-slate-500 hover:bg-white/5 hover:text-red-400 transition-colors"
+            className="flex items-center gap-2.5 px-2 py-2 w-full rounded-lg text-sm text-slate-500 hover:bg-white/[0.04] hover:text-red-400 transition-colors"
           >
-            <LogOut size={16} />
-            Sair
+            <LogOut size={15} />
+            <span>Sair</span>
           </button>
         </div>
       </aside>
@@ -161,13 +175,10 @@ export default function AlunoSidebar() {
       <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        navItems={ALL_NAV_ITEMS}
+        navItems={NAV_SECTIONS.flatMap((s) => s.items.map((i) => ({ to: i.to, label: i.label, icon: (() => null) as any })))}
         accent="emerald"
       />
-      <AlunoPerfilModal
-        open={perfilOpen}
-        onClose={() => setPerfilOpen(false)}
-      />
+
     </>
   );
 }

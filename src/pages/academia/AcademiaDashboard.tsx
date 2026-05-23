@@ -12,8 +12,8 @@ export default function AcademiaDashboard() {
   const studentGroups: unknown[] = [];
 
   const stats = [
-    { label: 'Avaliação média', value: avgRating > 0 ? avgRating.toFixed(1) : '—', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' },
-    { label: 'Avaliações recebidas', value: myRatings.length, icon: TrendingUp, color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/30' },
+    { label: 'AvaliaÃ§Ã£o mÃ©dia', value: avgRating > 0 ? avgRating.toFixed(1) : 'â€”', icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/30' },
+    { label: 'AvaliaÃ§Ãµes recebidas', value: myRatings.length, icon: TrendingUp, color: 'text-violet-400', bg: 'bg-violet-500/10 border-violet-500/30' },
     { label: 'Grupos no app', value: studentGroups.length, icon: Users, color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' },
     { label: 'Ofertas enviadas', value: myOffers.length, icon: Send, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/30' },
   ];
@@ -50,9 +50,9 @@ export default function AcademiaDashboard() {
 
       {/* Star rating display */}
       {avgRating > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5 mb-6">
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5 mb-6">
           <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
-            Avaliação dos alunos
+            AvaliaÃ§Ã£o dos alunos
           </h2>
           <div className="flex items-center gap-3">
             <span className="text-4xl font-bold dark:text-white">{avgRating.toFixed(1)}</span>
@@ -67,7 +67,7 @@ export default function AcademiaDashboard() {
                 ))}
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                {myRatings.length} {myRatings.length === 1 ? 'avaliação' : 'avaliações'}
+                {myRatings.length} {myRatings.length === 1 ? 'avaliaÃ§Ã£o' : 'avaliaÃ§Ãµes'}
               </p>
             </div>
           </div>
@@ -76,9 +76,9 @@ export default function AcademiaDashboard() {
 
       {/* Recent offers */}
       {myOffers.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5">
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5">
           <h2 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
-            Últimas ofertas enviadas
+            Ãšltimas ofertas enviadas
           </h2>
           <div className="space-y-3">
             {myOffers.slice(-5).reverse().map((msg) => (
@@ -98,11 +98,11 @@ export default function AcademiaDashboard() {
 
       {/* Empty state when no offers */}
       {myOffers.length === 0 && (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-8 text-center">
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-8 text-center">
           <Send size={32} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
           <p className="font-semibold dark:text-white mb-1">Nenhuma oferta enviada ainda</p>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Acesse <strong>Grupos & Ofertas</strong> para enviar promoções aos grupos de alunos.
+            Acesse <strong>Grupos & Ofertas</strong> para enviar promoÃ§Ãµes aos grupos de alunos.
           </p>
         </div>
       )}

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import {
   Search,
   MapPin,
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// -- Types ----------------------------------------------------------------------
 
 type Modality = 'online' | 'presencial' | 'ambos';
 
@@ -49,7 +49,7 @@ interface Personal {
 type FilterKey = 'todos' | 'perto' | 'avaliados' | 'online' | 'presencial';
 type SpecialtyFilter = string | null;
 
-// ── Mock data ──────────────────────────────────────────────────────────────────
+// -- Mock data ------------------------------------------------------------------
 
 const SPECIALTIES_LIST = [
   'Musculação', 'Hipertrofia', 'Emagrecimento', 'Funcional',
@@ -172,7 +172,7 @@ const DISTANCE_OPTIONS = [
   { label: 'Qualquer',  max: Infinity },
 ];
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
+// -- Sub-components -------------------------------------------------------------
 
 function CertBadge({ cert }: { cert: Certification }) {
   if (cert.type === 'cref') {
@@ -349,7 +349,7 @@ function PersonalCard({
   );
 }
 
-// ── Main page ──────────────────────────────────────────────────────────────────
+// -- Main page ------------------------------------------------------------------
 
 export default function AlunoAcademiasPage() {
   const navigate = useNavigate();
@@ -411,7 +411,7 @@ export default function AlunoAcademiasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] text-white">
+    <div className="min-h-screen bg-[#080B18] text-white">
       <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
 
         {/* Header */}

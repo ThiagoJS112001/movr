@@ -32,7 +32,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const AVATAR_COLORS = [
   'bg-violet-600', 'bg-blue-600', 'bg-rose-500',
   'bg-amber-500',  'bg-teal-500', 'bg-indigo-600',
@@ -77,7 +77,7 @@ function muscleBadge(g: string) {
 
 type Tab = 'treinos' | 'dieta' | 'historico' | 'evolucao';
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AlunoDetalhe() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -141,9 +141,31 @@ export default function AlunoDetalhe() {
     });
   }
 
-  // ── Student data ──────────────────────────────────────────────────────────
+  // â”€â”€ Student data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const student = students.find((s) => s.id === id);
-  if (studentsLoading) return <div className="p-5 text-slate-400">Carregando...</div>;
+  if (studentsLoading) return (
+    <div className="p-6 max-w-6xl mx-auto space-y-5 animate-pulse">
+      <div className="h-5 w-32 bg-slate-700/60 rounded-lg" />
+      <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5 space-y-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-slate-700/60 shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="h-5 w-48 bg-slate-700/60 rounded-lg" />
+            <div className="h-3 w-64 bg-slate-700/40 rounded-lg" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-20 bg-slate-700/40 rounded-xl" />
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-2">
+        {[0, 1, 2, 3].map((i) => <div key={i} className="h-9 w-28 bg-slate-700/60 rounded-xl" />)}
+      </div>
+      <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl h-64" />
+    </div>
+  );
   if (!student) {
     return (
       <div className="p-6 text-center text-slate-400 dark:text-slate-500 py-20">
@@ -211,7 +233,7 @@ export default function AlunoDetalhe() {
   const assignedDietIds = studentDietAssignments.map((a) => a.dietId);
   const unassignedDiets = myDiets.filter((d) => !assignedDietIds.includes(d.id));
 
-  // ── Header metrics ────────────────────────────────────────────────────────
+  // â”€â”€ Header metrics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const lastLog = studentLogs[0] ?? null;
   const lastLogRelative = lastLog ? (() => {
     const days = Math.floor((Date.now() - new Date(lastLog.completedAt).getTime()) / 86_400_000);
@@ -307,7 +329,7 @@ export default function AlunoDetalhe() {
     if (a) { removeDietAssignmentMutation.mutate(a.id); toast.success('Dieta removida.'); }
   }
 
-  // ── Tabs config ───────────────────────────────────────────────────────────
+  // â”€â”€ Tabs config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const TABS: { key: Tab; label: string; Icon: typeof Dumbbell }[] = [
     { key: 'treinos',   label: 'Treinos',             Icon: Dumbbell },
     { key: 'dieta',     label: 'Dieta',               Icon: Salad },
@@ -336,7 +358,7 @@ export default function AlunoDetalhe() {
       )}
 
       {/* Student header card */}
-      <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl mb-4 overflow-hidden">
+      <div className="bg-white dark:bg-[#0D1025] border border-slate-100 dark:border-white/[0.07] rounded-2xl mb-4 overflow-hidden">
         {/* Top row */}
         <div className="flex items-center gap-4 px-5 pt-5 pb-4">
           <div className={`w-14 h-14 shrink-0 rounded-full flex items-center justify-center font-bold text-xl text-white ${avatarColor}`}>
@@ -373,7 +395,7 @@ export default function AlunoDetalhe() {
             >
               <MessageSquare size={16} />
             </button>
-            {/* ⋯ secondary menu */}
+            {/* â‹¯ secondary menu */}
             <div className="relative">
               <button
                 onClick={() => setHeaderMenuOpen((o) => !o)}
@@ -383,7 +405,7 @@ export default function AlunoDetalhe() {
                 <MoreVertical size={16} />
               </button>
               {headerMenuOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1.5">
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-[#0D1025] rounded-xl shadow-lg border border-slate-200 dark:border-white/[0.07] z-20 py-1.5">
                   <button
                     onClick={() => { blockStudentMutation.mutate({ id: student.id, blocked: !blocked }); setHeaderMenuOpen(false); }}
                     className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
@@ -402,14 +424,14 @@ export default function AlunoDetalhe() {
         </div>
 
         {/* Metrics strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-slate-100 dark:divide-slate-700/50 border-t border-slate-100 dark:border-slate-700/50">
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-slate-100 dark:divide-slate-700/50 border-t border-slate-100 dark:border-white/[0.07]">
           {/* Last session */}
           <div className="flex items-center gap-3 px-5 py-3">
             <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
               <Clock size={14} className="text-indigo-500" />
             </div>
             <div>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-medium">Última sessão</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide font-medium">Ãšltima sessão</p>
               <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{lastLogRelative ?? '—'}</p>
             </div>
           </div>
@@ -462,12 +484,12 @@ export default function AlunoDetalhe() {
 
         {/* Progress trend banner (only if data exists) */}
         {studentLogs.length > 0 && (
-          <div className={`flex items-center gap-2 px-5 py-2.5 border-t border-slate-100 dark:border-slate-700/50 ${
+          <div className={`flex items-center gap-2 px-5 py-2.5 border-t border-slate-100 dark:border-white/[0.07] ${
             progressTrend === 'up'
               ? 'bg-emerald-50/60 dark:bg-emerald-900/10'
               : progressTrend === 'down'
               ? 'bg-amber-50/60 dark:bg-amber-900/10'
-              : 'bg-slate-50/60 dark:bg-slate-800/20'
+              : 'bg-slate-50/60 dark:bg-[#0D1025]/20'
           }`}>
             <TrendingUp
               size={13}
@@ -489,7 +511,7 @@ export default function AlunoDetalhe() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700/60 mb-5">
+      <div className="flex gap-1 border-b border-slate-200 dark:border-white/[0.07] mb-5">
         {TABS.map(({ key, label, Icon }) => (
           <button
             key={key}
@@ -506,12 +528,12 @@ export default function AlunoDetalhe() {
         ))}
       </div>
 
-      {/* ── Tab: Treinos ──────────────────────────────────────────────────── */}
+      {/* â”€â”€ Tab: Treinos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeTab === 'treinos' && (
         <div className="flex flex-col gap-4">
           {/* Treinos section */}
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-100 dark:border-white/[0.07] rounded-2xl overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/[0.07]">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
                   <Dumbbell size={15} className="text-indigo-400" />
@@ -548,7 +570,7 @@ export default function AlunoDetalhe() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-100 dark:border-slate-700/50">
+                      <tr className="border-b border-slate-100 dark:border-white/[0.07]">
                         <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Nome do treino</th>
                         <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Grupos musculares</th>
                         <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Duração</th>
@@ -607,7 +629,7 @@ export default function AlunoDetalhe() {
                                 >
                                   <Pencil size={14} />
                                 </button>
-                                {/* ⋯ row menu */}
+                                {/* â‹¯ row menu */}
                                 <div className="relative">
                                   <button
                                     onClick={() => setWorkoutMenuOpenId(workoutMenuOpenId === workout.id ? null : workout.id)}
@@ -616,7 +638,7 @@ export default function AlunoDetalhe() {
                                     <MoreHorizontal size={14} />
                                   </button>
                                   {workoutMenuOpenId === workout.id && (
-                                    <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-20 py-1.5">
+                                    <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-[#0D1025] rounded-xl shadow-lg border border-slate-200 dark:border-white/[0.07] z-20 py-1.5">
                                       <button
                                         onClick={() => { setViewingWorkout(workout); setWorkoutMenuOpenId(null); }}
                                         className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
@@ -628,7 +650,7 @@ export default function AlunoDetalhe() {
                                       >
                                         <Copy size={13} className="text-slate-400" /> Duplicar
                                       </button>
-                                      <div className="my-1 border-t border-slate-100 dark:border-slate-700/60" />
+                                      <div className="my-1 border-t border-slate-100 dark:border-white/[0.07]" />
                                       <button
                                         onClick={() => { handleRemoveWorkout(workout.id); setWorkoutMenuOpenId(null); }}
                                         className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
@@ -646,7 +668,7 @@ export default function AlunoDetalhe() {
                     </tbody>
                   </table>
                 </div>
-                <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
+                <div className="px-6 py-3 border-t border-slate-100 dark:border-white/[0.07]">
                   <p className="text-xs text-slate-400">
                     Mostrando 1 a {assignedWorkouts.length} de {assignedWorkouts.length} treino{assignedWorkouts.length !== 1 ? 's' : ''}
                   </p>
@@ -657,7 +679,7 @@ export default function AlunoDetalhe() {
         </div>
       )}
 
-      {/* ── Tab: Dieta ────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Tab: Dieta â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeTab === 'dieta' && (() => {
         const panelDietId = selectedDietId || assignedDiets[0]?.id || null;
         const panelDiet = assignedDiets.find((d) => d.id === panelDietId) ?? assignedDiets[0] ?? null;
@@ -672,26 +694,26 @@ export default function AlunoDetalhe() {
         const pctFat   = panelMacroTotal > 0 ? Math.round((panelTotalFat   / panelMacroTotal) * 100) : 0;
 
         const MEAL_ICONS: Record<string, string> = {
-          'café': '☀️', 'cafe': '☀️', 'manhã': '☀️', 'manha': '☀️',
-          'almoço': '🍽️', 'almoco': '🍽️',
-          'tarde': '🧃', 'lanche': '🥙',
-          'pré': '⚡', 'pre': '⚡', 'treino': '⚡',
-          'pós': '🌙', 'pos': '🌙', 'jantar': '🌙', 'ceia': '🌙',
+          'café': 'â˜€ï¸', 'cafe': 'â˜€ï¸', 'manhã': 'â˜€ï¸', 'manha': 'â˜€ï¸',
+          'almoço': 'ðŸ½ï¸', 'almoco': 'ðŸ½ï¸',
+          'tarde': 'ðŸ§ƒ', 'lanche': 'ðŸ¥™',
+          'pré': 'âš¡', 'pre': 'âš¡', 'treino': 'âš¡',
+          'pós': 'ðŸŒ™', 'pos': 'ðŸŒ™', 'jantar': 'ðŸŒ™', 'ceia': 'ðŸŒ™',
         };
         function getMealIcon(name: string): string {
           const n = name.toLowerCase();
           for (const [key, icon] of Object.entries(MEAL_ICONS)) {
             if (n.includes(key)) return icon;
           }
-          return '🍴';
+          return 'ðŸ´';
         }
 
         return (
           <div className="grid grid-cols-[300px_1fr] gap-4 items-start">
 
             {/* Left panel: diet list */}
-            <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-700/50">
+            <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.07]">
                 <div>
                   <p className="text-sm font-semibold text-white">Dietas</p>
                   <p className="text-xs text-slate-500 mt-0.5">Crie, edite e gerencie as dietas do aluno.</p>
@@ -734,14 +756,14 @@ export default function AlunoDetalhe() {
                                 <span className="shrink-0 text-[10px] font-semibold text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded-full">Ativa</span>
                               )}
                             </div>
-                            <p className="text-xs text-slate-400">{diet.meals.length} refeições • {cals > 0 ? `${cals} kcal` : '—'}</p>
+                            <p className="text-xs text-slate-400">{diet.meals.length} refeições â€¢ {cals > 0 ? `${cals} kcal` : '—'}</p>
                           </div>
                           <ChevronDown size={14} className={`shrink-0 mt-0.5 -rotate-90 ${isSelected ? 'text-emerald-400' : 'text-slate-600'}`} />
                         </button>
                       );
                     })}
                   </div>
-                  <div className="px-4 py-3 border-t border-slate-700/40">
+                  <div className="px-4 py-3 border-t border-white/[0.07]/40">
                     <p className="text-xs text-slate-500">Mostrando 1 a {assignedDiets.length} de {assignedDiets.length} dieta{assignedDiets.length !== 1 ? 's' : ''}</p>
                   </div>
                 </>
@@ -750,10 +772,10 @@ export default function AlunoDetalhe() {
 
             {/* Right panel: diet detail */}
             {panelDiet ? (
-              <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl overflow-hidden">
+              <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl overflow-hidden">
 
                 {/* Diet header */}
-                <div className="flex items-start justify-between px-5 py-4 border-b border-slate-700/50">
+                <div className="flex items-start justify-between px-5 py-4 border-b border-white/[0.07]">
                   <div>
                     <div className="flex items-center gap-2 mb-0.5">
                       <p className="text-base font-bold text-white">{panelDiet.name}</p>
@@ -768,7 +790,7 @@ export default function AlunoDetalhe() {
                       )}
                     </div>
                     <p className="text-xs text-slate-400">
-                      {panelDiet.goal ? `Objetivo: ${panelDiet.goal} • ` : ''}{panelDiet.meals.length} refeições por dia
+                      {panelDiet.goal ? `Objetivo: ${panelDiet.goal} â€¢ ` : ''}{panelDiet.meals.length} refeições por dia
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -792,7 +814,7 @@ export default function AlunoDetalhe() {
                         <MoreVertical size={15} />
                       </button>
                       {dietMenuOpenId === panelDiet.id && (
-                        <div className="absolute right-0 top-full mt-1 w-44 bg-slate-800 rounded-xl shadow-lg border border-slate-700 z-20 py-1.5">
+                        <div className="absolute right-0 top-full mt-1 w-44 bg-[#0D1025] rounded-xl shadow-lg border border-white/[0.07] z-20 py-1.5">
                           <button
                             onClick={() => { navigate(`/personal/dietas/${panelDiet.id}`); setDietMenuOpenId(null); }}
                             className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700/60 transition-colors"
@@ -802,7 +824,7 @@ export default function AlunoDetalhe() {
                           <button className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-200 hover:bg-slate-700/60 transition-colors">
                             <Copy size={13} className="text-slate-400" /> Duplicar
                           </button>
-                          <div className="my-1 border-t border-slate-700/60" />
+                          <div className="my-1 border-t border-white/[0.07]" />
                           <button
                             onClick={() => { handleRemoveDiet(panelDiet.id); setDietMenuOpenId(null); setSelectedDietId(''); }}
                             className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-400 hover:bg-red-900/20 transition-colors"
@@ -816,7 +838,7 @@ export default function AlunoDetalhe() {
                 </div>
 
                 {/* Macro cards */}
-                <div className="grid grid-cols-4 divide-x divide-slate-700/50 border-b border-slate-700/50">
+                <div className="grid grid-cols-4 divide-x divide-slate-700/50 border-b border-white/[0.07]">
                   {[
                     { label: 'Calorias',     value: panelTotalCals,  unit: 'kcal', pct: null,     color: 'bg-emerald-500' },
                     { label: 'Proteínas',    value: panelTotalProt,  unit: 'g',    pct: pctProt,  color: 'bg-violet-500'  },
@@ -875,14 +897,14 @@ export default function AlunoDetalhe() {
                 </div>
 
                 {/* Daily summary footer */}
-                <div className="px-5 py-3 border-t border-slate-700/50 flex items-center justify-between">
+                <div className="px-5 py-3 border-t border-white/[0.07] flex items-center justify-between">
                   <div>
                     <p className="text-xs font-semibold text-slate-300 mb-0.5">Resumo diário</p>
                     <p className="text-xs text-slate-500">
                       {panelTotalCals > 0 ? `${Math.round(panelTotalCals)} kcal` : '—'}
-                      {panelTotalProt  > 0 && ` • ${Math.round(panelTotalProt)}g proteínas`}
-                      {panelTotalCarbs > 0 && ` • ${Math.round(panelTotalCarbs)}g carboidratos`}
-                      {panelTotalFat   > 0 && ` • ${Math.round(panelTotalFat)}g gorduras`}
+                      {panelTotalProt  > 0 && ` â€¢ ${Math.round(panelTotalProt)}g proteínas`}
+                      {panelTotalCarbs > 0 && ` â€¢ ${Math.round(panelTotalCarbs)}g carboidratos`}
+                      {panelTotalFat   > 0 && ` â€¢ ${Math.round(panelTotalFat)}g gorduras`}
                     </p>
                   </div>
                   <button
@@ -894,7 +916,7 @@ export default function AlunoDetalhe() {
                 </div>
               </div>
             ) : (
-              <div className="bg-slate-800/80 border border-slate-700/50 rounded-2xl py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
+              <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
                 <Salad size={32} className="opacity-30" />
                 <p className="text-sm">Nenhuma dieta atribuída ainda.</p>
                 <button onClick={() => setNewDietOpen(true)} className="text-xs text-emerald-400 hover:underline">
@@ -906,12 +928,12 @@ export default function AlunoDetalhe() {
         );
       })()}
 
-      {/* ── Tab: Histórico ────────────────────────────────────────────────── */}
+      {/* â”€â”€ Tab: Histórico â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeTab === 'historico' && (
         <div className="flex flex-col gap-4">
           {/* Plan Archives section */}
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-100 dark:border-white/[0.07] rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/[0.07] flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
                 <Archive size={15} className="text-amber-500" />
               </div>
@@ -980,7 +1002,7 @@ export default function AlunoDetalhe() {
                       </div>
 
                       {expanded && (
-                        <div className="border-t border-slate-100 dark:border-slate-700 px-6 py-4 bg-slate-50/50 dark:bg-slate-800/40">
+                        <div className="border-t border-slate-100 dark:border-white/[0.07] px-6 py-4 bg-slate-50/50 dark:bg-[#0D1025]/40">
                           {DAYS_ORDER.map((day) => {
                             const dayData = archive.days.find((d) => d.dayOfWeek === day);
                             const hasContent = dayData && (dayData.label.trim() || dayData.exerciseIds.length > 0);
@@ -1002,7 +1024,7 @@ export default function AlunoDetalhe() {
                                     {dayData.exerciseIds.map((exId) => {
                                       const ex = catalogExercises.find((e) => e.id === exId);
                                       return (
-                                        <div key={exId} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-white dark:bg-slate-700/50 border border-slate-100 dark:border-slate-700">
+                                        <div key={exId} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-white dark:bg-slate-700/50 border border-slate-100 dark:border-white/[0.07]">
                                           <span className="text-sm text-slate-700 dark:text-slate-200">
                                             {ex?.name ?? exId}
                                           </span>
@@ -1033,8 +1055,8 @@ export default function AlunoDetalhe() {
           </div>
 
           {/* Workout logs section */}
-          <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center gap-3">
+          <div className="bg-white dark:bg-[#0D1025] border border-slate-100 dark:border-white/[0.07] rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-white/[0.07] flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center">
                 <History size={15} className="text-violet-400" />
               </div>
@@ -1053,7 +1075,7 @@ export default function AlunoDetalhe() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-700/50">
+                    <tr className="border-b border-slate-100 dark:border-white/[0.07]">
                       <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-6 py-3 uppercase tracking-wide">Treino</th>
                       <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Exercícios</th>
                       <th className="text-left text-xs font-medium text-slate-400 dark:text-slate-500 px-4 py-3 uppercase tracking-wide">Duração</th>
@@ -1082,7 +1104,7 @@ export default function AlunoDetalhe() {
                     ))}
                   </tbody>
                 </table>
-                <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-700/50">
+                <div className="px-6 py-3 border-t border-slate-100 dark:border-white/[0.07]">
                   <p className="text-xs text-slate-400">
                     {studentLogs.length} sessão{studentLogs.length !== 1 ? 'ões' : ''} no total
                   </p>
@@ -1093,7 +1115,7 @@ export default function AlunoDetalhe() {
         </div>
       )}
 
-      {/* ── Tab: Evolução ─────────────────────────────────────────────────── */}
+      {/* â”€â”€ Tab: Evolução â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {activeTab === 'evolucao' && (() => {
         const allAssessments: StudentAssessment[] = allAssessmentsData;
 
@@ -1127,9 +1149,9 @@ export default function AlunoDetalhe() {
           }));
 
         const PERIOD_OPTIONS = [
-          { label: 'Últimos 30 dias', value: 30 },
-          { label: 'Últimos 60 dias', value: 60 },
-          { label: 'Últimos 90 dias', value: 90 },
+          { label: 'Ãšltimos 30 dias', value: 30 },
+          { label: 'Ãšltimos 60 dias', value: 60 },
+          { label: 'Ãšltimos 90 dias', value: 90 },
           { label: 'Tudo',            value: 0  },
         ];
 
@@ -1140,9 +1162,9 @@ export default function AlunoDetalhe() {
         return (
           <div className="grid grid-cols-[300px_1fr] gap-4 items-start">
 
-            {/* ── Left: Assessment list ─────────────────────────────── */}
-            <div className="bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 rounded-2xl overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-700/50">
+            {/* â”€â”€ Left: Assessment list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            <div className="bg-white dark:bg-[#0D1025] border border-slate-100 dark:border-white/[0.07] rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.07]">
                 <p className="text-sm font-semibold text-white">Avaliações</p>
                 <button
                   onClick={() => setNewAssessmentOpen(true)}
@@ -1204,7 +1226,7 @@ export default function AlunoDetalhe() {
                   {allAssessments.length > VISIBLE_LIMIT && (
                     <button
                       onClick={() => setShowAllAssessments((p) => !p)}
-                      className="w-full flex items-center justify-center gap-1.5 py-3 text-xs text-violet-400 hover:text-violet-300 border-t border-slate-700/40 transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 py-3 text-xs text-violet-400 hover:text-violet-300 border-t border-white/[0.07]/40 transition-colors"
                     >
                       {showAllAssessments
                         ? <><ChevronUp size={13} /> Mostrar menos</>
@@ -1216,13 +1238,13 @@ export default function AlunoDetalhe() {
               )}
             </div>
 
-            {/* ── Right: Detail panel ──────────────────────────────── */}
+            {/* â”€â”€ Right: Detail panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {selected ? (
               <div className="flex flex-col gap-4">
 
                 {/* Metric cards row */}
                 <div className="grid grid-cols-4 gap-3">
-                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                  <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl px-4 py-4">
                     <p className="text-xs text-slate-400 mb-1.5">Peso atual</p>
                     <p className="text-2xl font-bold text-white">{latest?.weight != null ? `${latest.weight} kg` : '—'}</p>
                     {weightDiff30 != null && (
@@ -1233,7 +1255,7 @@ export default function AlunoDetalhe() {
                     )}
                   </div>
 
-                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                  <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl px-4 py-4">
                     <p className="text-xs text-slate-400 mb-1.5">Méd. 30 dias</p>
                     <p className="text-2xl font-bold text-white">
                       {weeklyAvg != null ? `${weeklyAvg > 0 ? '+' : ''}${weeklyAvg.toFixed(1)}` : '—'}
@@ -1246,7 +1268,7 @@ export default function AlunoDetalhe() {
                     )}
                   </div>
 
-                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                  <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl px-4 py-4">
                     <p className="text-xs text-slate-400 mb-1.5">Gordura atual</p>
                     <p className="text-2xl font-bold text-white">{latest?.bodyFat != null ? `${latest.bodyFat} %` : '—'}</p>
                     {bfDiff30 != null && (
@@ -1257,7 +1279,7 @@ export default function AlunoDetalhe() {
                     )}
                   </div>
 
-                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-4">
+                  <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl px-4 py-4">
                     <p className="text-xs text-slate-400 mb-1.5">Massa muscular</p>
                     <p className="text-2xl font-bold text-white">{latest?.muscleMass != null ? `${latest.muscleMass} kg` : '—'}</p>
                     {latest?.muscleMass != null && allAssessments[1]?.muscleMass != null && (() => {
@@ -1273,7 +1295,7 @@ export default function AlunoDetalhe() {
                 </div>
 
                 {/* Chart */}
-                <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl p-5">
+                <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-sm font-semibold text-white">Evolução do peso (kg)</p>
                     <div className="relative">
@@ -1312,7 +1334,7 @@ export default function AlunoDetalhe() {
                 </div>
 
                 {/* Outras medidas */}
-                <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl p-5">
+                <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
                   <p className="text-sm font-semibold text-white mb-4">Outras medidas</p>
                   {[selected.leanMass, selected.waist, selected.hip, selected.arm, selected.thigh, selected.chest, selected.calf, selected.abdomen].every((v) => v == null) ? (
                     <p className="text-xs text-slate-500 italic">Nenhuma medida registrada.</p>
@@ -1328,7 +1350,7 @@ export default function AlunoDetalhe() {
                         { label: 'Panturrilha',  value: selected.calf       != null ? `${selected.calf} cm`       : null },
                         { label: 'Abdômen',      value: selected.abdomen    != null ? `${selected.abdomen} cm`    : null },
                       ].filter((m) => m.value != null).map(({ label, value }) => (
-                        <div key={label} className="flex items-center justify-between py-1.5 border-b border-slate-700/30 last:border-0">
+                        <div key={label} className="flex items-center justify-between py-1.5 border-b border-white/[0.07]/30 last:border-0">
                           <p className="text-xs text-slate-400">{label}</p>
                           <p className="text-xs font-semibold text-slate-200">{value}</p>
                         </div>
@@ -1338,14 +1360,14 @@ export default function AlunoDetalhe() {
                 </div>
 
                 {selected.notes && (
-                  <div className="bg-white dark:bg-slate-800/80 border border-slate-700/50 rounded-2xl px-5 py-4">
+                  <div className="bg-white dark:bg-[#0D1025] border border-white/[0.07] rounded-2xl px-5 py-4">
                     <p className="text-sm font-semibold text-white mb-2">Observações da avaliação</p>
                     <p className="text-sm text-slate-300">{selected.notes}</p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="bg-slate-800/80 border border-slate-700/50 rounded-2xl py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
+              <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl py-16 flex flex-col items-center justify-center text-slate-400 gap-3">
                 <Activity size={32} className="opacity-30" />
                 <p className="text-sm">Nenhuma avaliação registrada ainda.</p>
                 <button
@@ -1360,7 +1382,7 @@ export default function AlunoDetalhe() {
         );
       })()}
 
-      {/* ── Modal: New Assessment ─────────────────────────────────────────── */}
+      {/* â”€â”€ Modal: New Assessment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {newAssessmentOpen && (
         <NewAssessmentModal
           studentId={student.id}
@@ -1369,7 +1391,7 @@ export default function AlunoDetalhe() {
         />
       )}
 
-      {/* ── Modal: New Diet ─────────────────────────────────────────────── */}
+      {/* â”€â”€ Modal: New Diet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {newDietOpen && (
         <NewDietModal
           studentId={student.id}
@@ -1378,7 +1400,7 @@ export default function AlunoDetalhe() {
         />
       )}
 
-      {/* ── Modal: New Workout ────────────────────────────────────────────── */}
+      {/* â”€â”€ Modal: New Workout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {weeklyPlanOpen && (
         <NewWorkoutModal
           studentId={student.id}
@@ -1387,7 +1409,7 @@ export default function AlunoDetalhe() {
         />
       )}
 
-      {/* ── Modal: Assign Workout ─────────────────────────────────────────── */}
+      {/* â”€â”€ Modal: Assign Workout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {assignWorkoutOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-6">
@@ -1399,7 +1421,7 @@ export default function AlunoDetalhe() {
               <select
                 value={selectedWorkoutId}
                 onChange={(e) => setSelectedWorkoutId(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full border border-slate-200 dark:border-white/[0.07] dark:bg-[#0D1025] dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 <option value="">Selecione um treino</option>
                 {unassignedWorkouts.map((w) => (
@@ -1408,7 +1430,7 @@ export default function AlunoDetalhe() {
               </select>
             )}
             <div className="flex gap-3">
-              <button onClick={() => setAssignWorkoutOpen(false)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={() => setAssignWorkoutOpen(false)} className="flex-1 border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-[#0D1025] transition-colors">
                 Cancelar
               </button>
               <button
@@ -1423,7 +1445,7 @@ export default function AlunoDetalhe() {
         </div>
       )}
 
-      {/* ── Modal: Assign Diet ────────────────────────────────────────────── */}
+      {/* â”€â”€ Modal: Assign Diet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {assignDietOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-6">
@@ -1435,7 +1457,7 @@ export default function AlunoDetalhe() {
               <select
                 value={selectedDietId}
                 onChange={(e) => setSelectedDietId(e.target.value)}
-                className="w-full border border-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full border border-slate-200 dark:border-white/[0.07] dark:bg-[#0D1025] dark:text-slate-100 rounded-xl px-3 py-2.5 text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="">Selecione uma dieta</option>
                 {unassignedDiets.map((d) => (
@@ -1444,7 +1466,7 @@ export default function AlunoDetalhe() {
               </select>
             )}
             <div className="flex gap-3">
-              <button onClick={() => setAssignDietOpen(false)} className="flex-1 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+              <button onClick={() => setAssignDietOpen(false)} className="flex-1 border border-slate-200 dark:border-white/[0.07] text-slate-700 dark:text-slate-300 rounded-xl py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-[#0D1025] transition-colors">
                 Cancelar
               </button>
               <button

@@ -76,11 +76,11 @@ export default function PersonalRelatoriosPage() {
     return weekLabels.map((semana) => ({ semana, treinos: map[semana] }));
   }, [logs, weekLabels]);
 
-  // Distribuição por nome do treino (para Pie)
+  // DistribuiÃ§Ã£o por nome do treino (para Pie)
   const byWorkout = useMemo(() => {
     const map: Record<string, number> = {};
     logs.forEach((l) => {
-      const name = l.workoutName.split('–')[0].trim();
+      const name = l.workoutName.split('â€“')[0].trim();
       map[name] = (map[name] ?? 0) + 1;
     });
     return Object.entries(map).map(([name, value]) => ({ name, value }));
@@ -104,9 +104,9 @@ export default function PersonalRelatoriosPage() {
 
   return (
     <div className="p-5 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Relatórios</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">RelatÃ³rios</h1>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-        Visão geral da atividade dos seus alunos.
+        VisÃ£o geral da atividade dos seus alunos.
       </p>
 
       {/* Stat cards */}
@@ -133,7 +133,7 @@ export default function PersonalRelatoriosPage() {
         ].map(({ Icon, label, value, color }) => (
           <div
             key={label}
-            className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 p-4 shadow-sm flex items-center gap-3"
+            className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] p-4 shadow-sm flex items-center gap-3"
           >
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${color}`}
@@ -151,7 +151,7 @@ export default function PersonalRelatoriosPage() {
       {/* Top row: bar by student + pie by workout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
         {/* Treinos por aluno */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5">
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07] p-5">
           <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-4">
             Treinos por aluno
           </h2>
@@ -181,7 +181,7 @@ export default function PersonalRelatoriosPage() {
         </div>
 
         {/* Treinos mais realizados (Pie) */}
-        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5">
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07] p-5">
           <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-4">
             Treinos mais realizados
           </h2>
@@ -214,8 +214,8 @@ export default function PersonalRelatoriosPage() {
         </div>
       </div>
 
-      {/* Line chart — atividade semanal */}
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 p-5">
+      {/* Line chart â€” atividade semanal */}
+      <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07] p-5">
         <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm mb-4">
           Atividade semanal (todos os alunos)
         </h2>
@@ -255,7 +255,7 @@ export default function PersonalRelatoriosPage() {
   );
 }
 
-function EmptyChart({ message = 'Nenhum dado disponível.' }: { message?: string }) {
+function EmptyChart({ message = 'Nenhum dado disponÃ­vel.' }: { message?: string }) {
   return (
     <div className="h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm text-center px-8">
       {message}

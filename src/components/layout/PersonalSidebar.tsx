@@ -1,145 +1,165 @@
-﻿import { NavLink, useNavigate } from 'react-router-dom';
-import {
-  Dumbbell,
-  Users,
-  LayoutDashboard,
-  MessageCircle,
-  LogOut,
-  Menu,
-  X,
-  Salad,
-  BarChart2,
-  Settings,
-} from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Settings, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTotalUnread } from '../../hooks/useMessages';
 import { useSettings } from '../../contexts/SettingsContext';
-import { APP_NAME } from '../../lib/constants';
 import SettingsModal from '../SettingsModal';
-import MovrLogo from '../ui/MovrLogo';
 
-const ALL_NAV_ITEMS = [
-  { to: '/personal/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/personal/alunos', label: 'Alunos', icon: Users },
-  { to: '/personal/exercicios', label: 'Exercícios', icon: Dumbbell },
-  { to: '/personal/dietas', label: 'Dietas', icon: Salad },
-  { to: '/personal/relatorios', label: 'Relatórios', icon: BarChart2 },
-  { to: '/personal/chat', label: 'Chat', icon: MessageCircle },
+// -- Sidebar sections & items --------------------------------------------------
+
+const NAV_SECTIONS = [
+  {
+    label: 'GESTÃO',
+    items: [
+      { to: '/personal/dashboard', label: 'Dashboard' },
+      { to: '/personal/alunos',    label: 'Alunos'    },
+    ],
+  },
+  {
+    label: 'CONTEÚDO',
+    items: [
+      { to: '/personal/exercicios', label: 'Exercícios' },
+      { to: '/personal/dietas',     label: 'Dietas'     },
+    ],
+  },
+  {
+    label: 'ANÁLISE',
+    items: [
+      { to: '/personal/relatorios', label: 'Relatórios' },
+    ],
+  },
+  {
+    label: 'COMUNICAÇÃO',
+    items: [
+      { to: '/personal/chat', label: 'Chat', badge: true },
+    ],
+  },
 ];
+
+const BOTTOM_NAV = [
+  { to: '/personal/dashboard',  label: 'Home'    },
+  { to: '/personal/alunos',     label: 'Alunos'  },
+  { to: '/personal/exercicios', label: 'Exerc.'  },
+  { to: '/personal/dietas',     label: 'Dietas'  },
+  { to: '/personal/chat',       label: 'Chat'    },
+];
+
+// -- Component -----------------------------------------------------------------
 
 export default function PersonalSidebar() {
   const { user, logout } = useAuth();
   const unread = useTotalUnread();
   const { isNavVisible } = useSettings();
   const navigate = useNavigate();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const navItems = ALL_NAV_ITEMS.filter((item) => isNavVisible(item.to));
 
   function handleLogout() {
     logout();
     navigate('/login');
   }
 
-  const links = (
-    <nav className="flex flex-col gap-1 mt-4">
-      {navItems.map(({ to, label, icon: Icon }) => (
-        <NavLink
-          key={to}
-          to={to}
-          onClick={() => setMobileOpen(false)}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-indigo-600 text-white'
-                : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-            }`
-          }
-        >
-          <Icon size={18} />
-          <span>{label}</span>
-          {label === 'Chat' && unread > 0 && (
-            <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {unread}
-            </span>
-          )}
-        </NavLink>
-      ))}
-    </nav>
-  );
+  const initials = user?.name
+    ? user.name.split(' ').slice(0, 2).map((w) => w[0]).join('').toUpperCase()
+    : '?';
 
   return (
     <>
-      {/* Mobile top bar */}
-      <div className="md:hidden flex items-center justify-between bg-slate-900 text-white px-4 py-3 fixed top-0 left-0 right-0 z-40">
-        <div className="flex items-center gap-2 font-bold text-indigo-400">
-          <MovrLogo size={22} />
-          <span>{APP_NAME}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setSettingsOpen(true)} className="p-1 text-slate-400 hover:text-white transition-colors">
-            <Settings size={18} />
-          </button>
-          <button onClick={() => setMobileOpen((v) => !v)} className="p-1">
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-      </div>
+      {/* -- Mobile bottom navigation ---------------------------------------- */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#080B18] border-t border-white/5 flex safe-area-inset-bottom">
+        {BOTTOM_NAV.map(({ to, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center py-3 text-[11px] font-medium transition-colors ${
+                isActive ? 'text-[#7c5cfc]' : 'text-slate-500 hover:text-slate-300'
+              }`
+            }
+          >
+            <span>{label}</span>
+          </NavLink>
+        ))}
+      </nav>
 
-      {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/50 z-30"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      {/* -- Desktop sidebar ------------------------------------------------- */}
+      <aside className="hidden md:flex flex-col w-[220px] bg-[#080B18] border-r border-white/[0.06] min-h-screen py-5 px-3 fixed top-0 left-0 h-full overflow-y-auto">
 
-      {/* Mobile drawer */}
-      <aside
-        className={`md:hidden fixed top-0 left-0 h-full w-64 bg-slate-900 z-40 transform transition-transform duration-300 ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        } flex flex-col`}
-      >
-        <div className="flex items-center gap-2 font-bold text-indigo-400 px-4 pt-5 pb-2 text-lg">
-          <MovrLogo size={22} />
-          {APP_NAME}
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 px-2 mb-5">
+          <div className="w-8 h-8 rounded-lg bg-[#7c5cfc] flex items-center justify-center shrink-0">
+            <span className="text-white text-xs font-black">M</span>
+          </div>
+          <span className="text-white font-bold text-base tracking-tight">movr.</span>
         </div>
-        <div className="px-3 flex-1 overflow-y-auto">{links}</div>
-        <div className="px-3 pb-5 mt-auto">
-          <div className="text-xs text-slate-500 px-4 mb-2">{user?.name}</div>
+
+        {/* Nav sections */}
+        <div className="flex-1 flex flex-col gap-4">
+          {NAV_SECTIONS.map(({ label, items }) => {
+            const visibleItems = items.filter((item) => isNavVisible(item.to));
+            if (visibleItems.length === 0) return null;
+            return (
+              <div key={label}>
+                <p className="text-[10px] font-semibold text-slate-500 tracking-[0.12em] px-2 mb-1">
+                  {label}
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {visibleItems.map(({ to, label: itemLabel, badge }) => (
+                    <NavLink
+                      key={to}
+                      to={to}
+                      className={({ isActive }) =>
+                        `flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-sm font-medium transition-all relative ${
+                          isActive
+                            ? 'bg-[#7c5cfc]/10 text-white border-l-2 border-[#7c5cfc]'
+                            : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200 border-l-2 border-transparent'
+                        }`
+                      }
+                    >
+                      <span className="flex-1">{itemLabel}</span>
+                      {badge && unread > 0 && (
+                        <span className="ml-auto bg-[#7c5cfc] text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 shrink-0">
+                          {unread > 9 ? '9+' : unread}
+                        </span>
+                      )}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom: profile + settings + logout */}
+        <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-col gap-0.5">
+          <button
+            onClick={() => navigate('/completar-perfil')}
+            className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-white/[0.04] transition-colors group"
+          >
+            <div className="w-9 h-9 rounded-full bg-[#7c5cfc]/25 border border-[#7c5cfc]/50 flex items-center justify-center text-[#7c5cfc] text-xs font-bold shrink-0 select-none">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-xs font-semibold text-slate-200 group-hover:text-white truncate leading-tight">
+                {user?.name}
+              </p>
+              <p className="text-[10px] text-slate-500 group-hover:text-slate-400 leading-tight">
+                Ver perfil
+              </p>
+            </div>
+            <Settings
+              size={14}
+              className="text-slate-600 group-hover:text-slate-400 transition-colors shrink-0"
+              onClick={(e) => { e.stopPropagation(); setSettingsOpen(true); }}
+            />
+          </button>
+
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
+            className="flex items-center gap-2.5 px-2 py-2 w-full rounded-lg text-sm text-slate-500 hover:bg-white/[0.04] hover:text-red-400 transition-colors"
           >
-            <LogOut size={18} />
-            Sair
-          </button>
-        </div>
-      </aside>
-
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-56 bg-slate-900 min-h-screen py-5 px-3 fixed top-0 left-0 h-full">
-        <div className="flex items-center gap-2 font-bold text-indigo-400 px-4 mb-2 text-lg">
-          <MovrLogo size={22} />
-          {APP_NAME}
-        </div>
-        <div className="flex-1 overflow-y-auto">{links}</div>
-        <div className="mt-auto">
-          <div className="text-xs text-slate-500 px-4 mb-1">{user?.name}</div>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="flex items-center gap-3 px-4 py-2 w-full rounded-xl text-sm text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
-          >
-            <Settings size={16} />
-            Configurações
-          </button>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm text-slate-300 hover:bg-slate-700 hover:text-white transition-colors"
-          >
-            <LogOut size={18} />
-            Sair
+            <LogOut size={15} />
+            <span>Sair</span>
           </button>
         </div>
       </aside>
@@ -147,7 +167,7 @@ export default function PersonalSidebar() {
       <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        navItems={ALL_NAV_ITEMS}
+        navItems={NAV_SECTIONS.flatMap((s) => s.items.map((i) => ({ to: i.to, label: i.label, icon: (() => null) as any })))}
         accent="indigo"
       />
     </>

@@ -12,7 +12,7 @@ import {
 import NewAssessmentModal from '../../components/NewAssessmentModal';
 import type { WorkoutLog, StudentAssessment } from '../../types';
 
-// ── Types & helpers ────────────────────────────────────────────────────────────
+// â”€â”€ Types & helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type Period = '1sem' | '1mes' | '3meses' | 'tudo';
 
@@ -81,13 +81,13 @@ function totalVolume(logs: WorkoutLog[]): number {
   }, 0);
 }
 
-// ── Delta chip ─────────────────────────────────────────────────────────────────
+// â”€â”€ Delta chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function Delta({ value, unit = '', invert = false }: { value: number; unit?: string; invert?: boolean }) {
   const positive = invert ? value < 0 : value > 0;
   const color = value === 0 ? 'text-slate-400' : positive ? 'text-emerald-400' : 'text-red-400';
   const Icon = value > 0 ? ArrowUp : ArrowDown;
-  if (value === 0) return <span className="text-xs text-slate-500">—</span>;
+  if (value === 0) return <span className="text-xs text-slate-500">â€”</span>;
   return (
     <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${color}`}>
       <Icon size={10} />
@@ -96,7 +96,7 @@ function Delta({ value, unit = '', invert = false }: { value: number; unit?: str
   );
 }
 
-// ── Load bar for exercise ─────────────────────────────────────────────────────
+// â”€â”€ Load bar for exercise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function LoadBar({ name, initial, current, pr }: { name: string; initial: number; current: number; pr: number }) {
   const initPct = pr > 0 ? Math.min((initial / pr) * 100, 100) : 0;
@@ -114,14 +114,14 @@ function LoadBar({ name, initial, current, pr }: { name: string; initial: number
         <div className="absolute h-full rounded-full bg-violet-500 transition-all" style={{ width: `${curPct}%` }} />
       </div>
       <div className="flex justify-between text-[10px] text-slate-500 mt-1">
-        <span>Início: {initial}kg</span>
+        <span>InÃ­cio: {initial}kg</span>
         <span>Atual: {current}kg</span>
       </div>
     </div>
   );
 }
 
-// ── Weight line chart ─────────────────────────────────────────────────────────
+// â”€â”€ Weight line chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function WeightChart({
   data,
@@ -134,7 +134,7 @@ function WeightChart({
   tickColor: string;
   tooltipStyle: React.CSSProperties;
 }) {
-  if (data.length < 2) return <EmptyChart message="Registre pelo menos 2 pesos para ver a evolução." />;
+  if (data.length < 2) return <EmptyChart message="Registre pelo menos 2 pesos para ver a evoluÃ§Ã£o." />;
   return (
     <ResponsiveContainer width="100%" height={160}>
       <LineChart data={data}>
@@ -152,7 +152,7 @@ function WeightChart({
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────────────────
+// â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function AlunoProgressoPage() {
   const { user } = useAuth();
@@ -181,7 +181,7 @@ export default function AlunoProgressoPage() {
 
   const filteredLogs = useMemo(() => filterByPeriod(myLogs, period), [myLogs, period]);
 
-  // ── Weekly frequency ────────────────────────────────────────────────────────
+  // â”€â”€ Weekly frequency â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const weeklyData = useMemo(() => {
     const weeks = getLastNWeeks(10);
     const counts: number[] = new Array(10).fill(0);
@@ -202,10 +202,10 @@ export default function AlunoProgressoPage() {
   const goalPerWeek = 3;
   const bestWeek = Math.max(...weeklyData.map((d) => d.treinos));
 
-  // ── Streak ──────────────────────────────────────────────────────────────────
+  // â”€â”€ Streak â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const streak = useMemo(() => computeStreak(myLogs), [myLogs]);
 
-  // ── Stats ───────────────────────────────────────────────────────────────────
+  // â”€â”€ Stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const totalLogs = filteredLogs.length;
   const prevPeriodLogs = useMemo(() => {
     const c = cutoffDate(period);
@@ -226,7 +226,7 @@ export default function AlunoProgressoPage() {
   }, [myLogs, period]);
   const volDeltaPct = prevVol > 0 ? Math.round(((volNow - prevVol) / prevVol) * 100) : 0;
 
-  // ── Weight evolution ────────────────────────────────────────────────────────
+  // â”€â”€ Weight evolution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const sortedAssessments: StudentAssessment[] = useMemo(
     () => [...assessments].sort((a, b) => a.date.localeCompare(b.date)),
     [assessments],
@@ -250,7 +250,7 @@ export default function AlunoProgressoPage() {
   const latestAssessment = sortedAssessments[sortedAssessments.length - 1];
   const prevAssessment = sortedAssessments[sortedAssessments.length - 2];
 
-  // ── Load evolution ──────────────────────────────────────────────────────────
+  // â”€â”€ Load evolution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const loadEvolution = useMemo(() => {
     const map = new Map<string, { name: string; values: number[] }>();
     const nameMap = new Map<string, string>();
@@ -275,13 +275,13 @@ export default function AlunoProgressoPage() {
 
   const PERIODS: { key: Period; label: string }[] = [
     { key: '1sem', label: '1 sem' },
-    { key: '1mes', label: '1 mês' },
+    { key: '1mes', label: '1 mÃªs' },
     { key: '3meses', label: '3 meses' },
     { key: 'tudo', label: 'Tudo' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0d0f14] text-white">
+    <div className="min-h-screen bg-[#080B18] text-white">
       <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
 
       {/* Header */}
@@ -289,7 +289,7 @@ export default function AlunoProgressoPage() {
         <div>
           <h1 className="text-xl font-bold text-white leading-none mb-0.5">Progresso</h1>
           <p className="text-slate-500 text-xs">
-            Acompanhe sua evolução desde o início
+            Acompanhe sua evoluÃ§Ã£o desde o inÃ­cio
           </p>
         </div>
         <div className="flex gap-1 bg-white/[0.05] rounded-xl p-1">
@@ -315,7 +315,7 @@ export default function AlunoProgressoPage() {
         <div className="bg-[#131722] rounded-2xl p-4 border border-white/5 col-span-1">
           <p className="text-xs text-slate-400 mb-1">Treinos realizados</p>
           <p className="text-3xl font-extrabold text-white">{totalLogs}</p>
-          <Delta value={logsDelta} invert={false} /> <span className="text-[10px] text-slate-500">vs mês anterior</span>
+          <Delta value={logsDelta} invert={false} /> <span className="text-[10px] text-slate-500">vs mÃªs anterior</span>
         </div>
         {/* Peso atual */}
         <div className="bg-[#131722] rounded-2xl p-4 border border-white/5">
@@ -324,13 +324,13 @@ export default function AlunoProgressoPage() {
             <>
               <p className="text-3xl font-extrabold text-emerald-400">{lastWeight}<span className="text-base">kg</span></p>
               {weightDelta != null && <Delta value={weightDelta} unit="kg" invert={true} />}
-              <span className="text-[10px] text-slate-500"> desde o início</span>
+              <span className="text-[10px] text-slate-500"> desde o inÃ­cio</span>
             </>
           ) : <p className="text-slate-500 text-sm mt-1">Sem dados</p>}
         </div>
-        {/* Sequência */}
+        {/* SequÃªncia */}
         <div className="bg-[#131722] rounded-2xl p-4 border border-white/5">
-          <p className="text-xs text-slate-400 mb-1">Sequência atual</p>
+          <p className="text-xs text-slate-400 mb-1">SequÃªncia atual</p>
           <p className="text-3xl font-extrabold text-orange-400">{streak.current}<span className="text-base">d</span></p>
           {streak.current >= streak.max && streak.max > 0 && (
             <span className="text-xs text-orange-400 font-semibold flex items-center gap-1"><Trophy size={10} /> Recorde pessoal!</span>
@@ -340,14 +340,14 @@ export default function AlunoProgressoPage() {
         <div className="bg-[#131722] rounded-2xl p-4 border border-white/5">
           <p className="text-xs text-slate-400 mb-1">Volume total</p>
           <p className="text-3xl font-extrabold text-white">{volNow >= 1000 ? `${(volNow / 1000).toFixed(0)}k` : volNow}<span className="text-base">kg</span></p>
-          {prevVol > 0 && <><Delta value={volDeltaPct} unit="%" invert={false} /><span className="text-[10px] text-slate-500"> vs mês anterior</span></>}
+          {prevVol > 0 && <><Delta value={volDeltaPct} unit="%" invert={false} /><span className="text-[10px] text-slate-500"> vs mÃªs anterior</span></>}
         </div>
       </div>
 
       {/* Frequency chart */}
       <div className="bg-[#131722] border border-white/5 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-300 text-sm">Frequência de treinos</h2>
+          <h2 className="font-semibold text-slate-300 text-sm">FrequÃªncia de treinos</h2>
           <button className="text-xs text-violet-500 flex items-center gap-1 hover:underline">
             <Download size={12} /> Exportar
           </button>
@@ -368,8 +368,8 @@ export default function AlunoProgressoPage() {
           </ResponsiveContainer>
         )}
         <div className="flex items-center gap-4 mt-3 text-xs text-slate-500 flex-wrap">
-          <span>Média: <strong className="text-slate-300">{avgPerWeek} treinos/sem</strong></span>
-          <span className="text-emerald-500 flex items-center gap-1">Meta: {goalPerWeek} treinos/sem ✓</span>
+          <span>MÃ©dia: <strong className="text-slate-300">{avgPerWeek} treinos/sem</strong></span>
+          <span className="text-emerald-500 flex items-center gap-1">Meta: {goalPerWeek} treinos/sem âœ“</span>
           {bestWeek > 0 && <span>Melhor semana: <strong className="text-violet-500">{bestWeek} treinos</strong></span>}
         </div>
       </div>
@@ -377,7 +377,7 @@ export default function AlunoProgressoPage() {
       {/* Weight evolution */}
       <div className="bg-[#131722] border border-white/5 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-300 text-sm">Evolução do peso</h2>
+          <h2 className="font-semibold text-slate-300 text-sm">EvoluÃ§Ã£o do peso</h2>
           <button
             onClick={() => setShowAssessmentModal(true)}
             className="text-xs text-violet-500 flex items-center gap-1 hover:underline"
@@ -389,9 +389,9 @@ export default function AlunoProgressoPage() {
         {weightData.length >= 2 && (
           <div className="grid grid-cols-4 gap-3 mt-4 text-center">
             {[
-              { label: 'Início', value: firstWeight != null ? `${firstWeight} kg` : '—', color: 'text-slate-300' },
-              { label: 'Atual', value: lastWeight != null ? `${lastWeight} kg` : '—', color: 'text-violet-500 font-bold' },
-              { label: 'Variação', value: weightDelta != null ? `${weightDelta > 0 ? '+' : ''}${weightDelta} kg` : '—', color: weightDelta != null && weightDelta < 0 ? 'text-emerald-400' : 'text-red-400' },
+              { label: 'InÃ­cio', value: firstWeight != null ? `${firstWeight} kg` : 'â€”', color: 'text-slate-300' },
+              { label: 'Atual', value: lastWeight != null ? `${lastWeight} kg` : 'â€”', color: 'text-violet-500 font-bold' },
+              { label: 'VariaÃ§Ã£o', value: weightDelta != null ? `${weightDelta > 0 ? '+' : ''}${weightDelta} kg` : 'â€”', color: weightDelta != null && weightDelta < 0 ? 'text-emerald-400' : 'text-red-400' },
               { label: 'Meta', value: `${weightGoal} kg`, color: 'text-slate-500' },
             ].map(({ label, value, color }) => (
               <div key={label}>
@@ -406,13 +406,13 @@ export default function AlunoProgressoPage() {
       {/* Load evolution */}
       <div className="bg-[#131722] border border-white/5 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-300 text-sm">Evolução de cargas</h2>
+          <h2 className="font-semibold text-slate-300 text-sm">EvoluÃ§Ã£o de cargas</h2>
           <button className="text-xs text-violet-500 flex items-center gap-1 hover:underline">
             Ver todos <ChevronRight size={12} />
           </button>
         </div>
         {loadEvolution.length === 0 ? (
-          <EmptyChart message="Registre pesos nos treinos para acompanhar a evolução de cargas." />
+          <EmptyChart message="Registre pesos nos treinos para acompanhar a evoluÃ§Ã£o de cargas." />
         ) : (
           loadEvolution.map((ex) => (
             <LoadBar key={ex.id} name={ex.name} initial={ex.initial} current={ex.current} pr={ex.pr} />
@@ -441,8 +441,8 @@ export default function AlunoProgressoPage() {
                 { label: 'Massa muscular', value: latestAssessment.muscleMass, prev: prevAssessment?.muscleMass, unit: 'kg', invert: false },
                 { label: 'Cintura', value: latestAssessment.waist, prev: prevAssessment?.waist, unit: 'cm', invert: true },
                 { label: 'Quadril', value: latestAssessment.hip, prev: prevAssessment?.hip, unit: 'cm' },
-                { label: 'Tórax', value: latestAssessment.thigh, prev: prevAssessment?.thigh, unit: 'cm' },
-                { label: 'Braço', value: latestAssessment.arm, prev: prevAssessment?.arm, unit: 'cm', invert: false },
+                { label: 'TÃ³rax', value: latestAssessment.thigh, prev: prevAssessment?.thigh, unit: 'cm' },
+                { label: 'BraÃ§o', value: latestAssessment.arm, prev: prevAssessment?.arm, unit: 'cm', invert: false },
               ].map(({ label, value, prev, unit, invert, fixed }) => (
                 <div key={label} className="bg-white/[0.04] rounded-xl p-3">
                   <p className="text-[10px] text-slate-400 mb-0.5">{label}</p>
@@ -454,20 +454,20 @@ export default function AlunoProgressoPage() {
                       {prev != null && <Delta value={+(value - prev).toFixed(1)} unit={unit} invert={invert} />}
                     </>
                   ) : (
-                    <p className="text-sm text-slate-500">—</p>
+                    <p className="text-sm text-slate-500">â€”</p>
                   )}
                 </div>
               ))}
             </div>
             {latestAssessment.date && (
               <p className="text-[10px] text-slate-400 mt-3">
-                Última atualização: {new Date(latestAssessment.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
-                {latestAssessment.notes ? ` · ${latestAssessment.notes}` : ''}
+                Ãšltima atualizaÃ§Ã£o: {new Date(latestAssessment.date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
+                {latestAssessment.notes ? ` Â· ${latestAssessment.notes}` : ''}
               </p>
             )}
           </>
         ) : (
-          <EmptyChart message="Nenhuma avaliação ainda. Registre suas medidas para acompanhar o progresso." />
+          <EmptyChart message="Nenhuma avaliaÃ§Ã£o ainda. Registre suas medidas para acompanhar o progresso." />
         )}
       </div>
 
@@ -495,7 +495,7 @@ export default function AlunoProgressoPage() {
             </button>
           </div>
         </div>
-        <p className="text-[10px] text-slate-400 mt-3">Fotos ficam visíveis apenas para você e seu personal</p>
+        <p className="text-[10px] text-slate-400 mt-3">Fotos ficam visÃ­veis apenas para vocÃª e seu personal</p>
       </div>
 
       {/* Assessment modal */}

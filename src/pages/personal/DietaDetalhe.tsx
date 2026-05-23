@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -59,7 +59,7 @@ function MealEmoji({ name }: { name: string }) {
   }</span>;
 }
 
-const INPUT_CLS = 'w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors';
+const INPUT_CLS = 'w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors';
 const blankFood = (): Omit<FoodItem, 'id'> => ({ name: '', quantity: '', calories: undefined, protein: undefined, carbs: undefined, fat: undefined });
 
 export default function DietaDetalhe() {
@@ -214,7 +214,7 @@ export default function DietaDetalhe() {
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
 
       {/* Top bar */}
-      <div className="bg-slate-800/80 border-b border-slate-700/60 px-6 py-4 shrink-0">
+      <div className="bg-[#0D1025] border-b border-white/[0.07] px-6 py-4 shrink-0">
         <div className="flex items-center gap-2 text-sm text-slate-400 mb-3">
           <button onClick={() => navigate(-1)} className="hover:text-white transition-colors flex items-center gap-1"><ArrowLeft size={15} /> Editar dieta</button>
           <span className="text-slate-600">/</span>
@@ -235,7 +235,7 @@ export default function DietaDetalhe() {
             </div>
 
             {diet.goal && (
-              <div className="border-l border-slate-700 pl-5 ml-2">
+              <div className="border-l border-white/[0.07] pl-5 ml-2">
                 <p className="text-xs text-slate-500 mb-0.5">Objetivo</p>
                 <p className="text-sm font-semibold text-indigo-400">{diet.goal}</p>
                 {diet.description && <p className="text-xs text-slate-400 mt-0.5 max-w-xs">{diet.description}</p>}
@@ -243,7 +243,7 @@ export default function DietaDetalhe() {
             )}
 
             {assignment && (
-              <div className="border-l border-slate-700 pl-5 ml-2">
+              <div className="border-l border-white/[0.07] pl-5 ml-2">
                 <p className="text-xs text-slate-500 mb-0.5">Aplicada ao aluno</p>
                 <div className="flex items-center gap-1.5 text-sm font-semibold text-white">
                   <Check size={13} className="text-emerald-400" /> Sim
@@ -271,7 +271,7 @@ export default function DietaDetalhe() {
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
 
           {/* Informacoes gerais */}
-          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5">
+          <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-2xl p-5">
             <p className="text-sm font-bold text-white mb-4">Informacoes gerais</p>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
@@ -280,16 +280,16 @@ export default function DietaDetalhe() {
               </div>
               <div className="relative">
                 <label className="block text-xs text-slate-400 mb-1.5">Objetivo</label>
-                <button type="button" onClick={() => setGoalOpen((p) => !p)} className="w-full flex items-center justify-between bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm hover:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors">
+                <button type="button" onClick={() => setGoalOpen((p) => !p)} className="w-full flex items-center justify-between bg-[#0D1025] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm hover:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors">
                   <span className={goalVal ? 'text-white' : 'text-slate-500'}>{goalVal || 'Selecione...'}</span>
                   <ChevronDown size={14} className="text-slate-400 shrink-0" />
                 </button>
                 {goalOpen && (
-                  <div className="absolute top-full mt-1 left-0 right-0 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-20 py-1.5">
+                  <div className="absolute top-full mt-1 left-0 right-0 bg-[#0D1025] border border-white/[0.07] rounded-xl shadow-xl z-20 py-1.5">
                     {GOALS.map((g) => (
                       <button key={g} type="button" onClick={() => { setGoalVal(g); setGoalOpen(false); }} className={`w-full text-left px-4 py-2 text-sm transition-colors ${g === goalVal ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-200 hover:bg-slate-700'}`}>{g}</button>
                     ))}
-                    <button onClick={() => { setGoalVal(''); setGoalOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-slate-500 hover:bg-slate-700 border-t border-slate-700 mt-1 transition-colors">Limpar</button>
+                    <button onClick={() => { setGoalVal(''); setGoalOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-slate-500 hover:bg-slate-700 border-t border-white/[0.07] mt-1 transition-colors">Limpar</button>
                   </div>
                 )}
               </div>
@@ -297,14 +297,14 @@ export default function DietaDetalhe() {
             <div>
               <label className="block text-xs text-slate-400 mb-1.5">Descricao (opcional)</label>
               <div className="relative">
-                <textarea value={descVal} onChange={(e) => setDescVal(e.target.value.slice(0, 200))} rows={3} maxLength={200} placeholder="Descricao da dieta..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none transition-colors" />
+                <textarea value={descVal} onChange={(e) => setDescVal(e.target.value.slice(0, 200))} rows={3} maxLength={200} placeholder="Descricao da dieta..." className="w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none transition-colors" />
                 <span className="absolute right-3 bottom-2.5 text-xs text-slate-500 pointer-events-none">{descVal.length}/200</span>
               </div>
             </div>
           </div>
 
           {/* Metas diarias */}
-          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5">
+          <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-2xl p-5">
             <div className="flex items-center gap-2 mb-3">
               <p className="text-sm font-bold text-white">Metas diarias</p>
               <p className="text-xs text-slate-500">(ajuste os macros e calorias)</p>
@@ -316,13 +316,13 @@ export default function DietaDetalhe() {
                 { label: 'Carboidratos (g)',val: carbVal, set: setCarbVal, unit: 'g',    color: 'text-amber-400',   pct: pctCarb, bar: 'bg-amber-500'  },
                 { label: 'Gorduras (g)',    val: fatVal,  set: setFatVal,  unit: 'g',    color: 'text-rose-400',    pct: pctFat,  bar: 'bg-rose-500'   },
               ].map(({ label, val, set, unit, color, pct, bar }) => (
-                <div key={label} className="bg-slate-900/60 border border-slate-700/50 rounded-xl px-4 py-3">
+                <div key={label} className="bg-slate-900/60 border border-white/[0.07] rounded-xl px-4 py-3">
                   <div className="flex items-center gap-1 mb-2 flex-wrap">
                     <span className={`text-xs font-semibold ${color}`}>{label.split(' ')[0]}</span>
                     <span className="text-xs text-slate-500">{label.split(' ').slice(1).join(' ')}</span>
                   </div>
                   <div className="flex items-baseline gap-1.5 mb-2">
-                    <input type="number" min={0} value={val} onChange={(e) => set(e.target.value)} className="w-20 bg-transparent text-xl font-bold text-white focus:outline-none border-b border-slate-700 focus:border-emerald-500 transition-colors" placeholder="0" />
+                    <input type="number" min={0} value={val} onChange={(e) => set(e.target.value)} className="w-20 bg-transparent text-xl font-bold text-white focus:outline-none border-b border-white/[0.07] focus:border-emerald-500 transition-colors" placeholder="0" />
                     <span className="text-sm text-slate-400">{unit}</span>
                     {pct != null && pct > 0 && <span className="text-xs text-slate-500 ml-auto">{pct}%</span>}
                   </div>
@@ -337,7 +337,7 @@ export default function DietaDetalhe() {
           </div>
 
           {/* Refeicoes do dia */}
-          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5">
+          <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm font-bold text-white">Refeicoes do dia</p>
               <button type="button" onClick={() => setAddMealOpen((p) => !p)} className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
@@ -349,14 +349,14 @@ export default function DietaDetalhe() {
             {addMealOpen && (
               <div className="flex gap-2 mb-4 bg-slate-900/60 border border-emerald-500/30 rounded-xl px-3 py-3">
                 <input value={addMealName} onChange={(e) => setAddMealName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMeal(); } }} placeholder="Nome da refeicao..." className="flex-1 bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none" autoFocus />
-                <input type="time" value={addMealTime} onChange={(e) => setAddMealTime(e.target.value)} className="w-24 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500" />
+                <input type="time" value={addMealTime} onChange={(e) => setAddMealTime(e.target.value)} className="w-24 bg-[#0D1025] border border-white/[0.07] rounded-lg px-2 py-1 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500" />
                 <button onClick={addMeal} disabled={!addMealName.trim()} className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs disabled:opacity-40 transition-colors">Adicionar</button>
                 <button onClick={() => setAddMealOpen(false)} className="p-1 text-slate-400 hover:text-white"><X size={14} /></button>
               </div>
             )}
 
             {sortedMeals.length === 0 && !addMealOpen ? (
-              <div className="border border-dashed border-slate-700 rounded-xl py-8 text-center">
+              <div className="border border-dashed border-white/[0.07] rounded-xl py-8 text-center">
                 <p className="text-sm text-slate-500">Nenhuma refeicao adicionada.</p>
               </div>
             ) : (
@@ -371,8 +371,8 @@ export default function DietaDetalhe() {
                         <div className="flex gap-2 items-center">
                           <GripVertical size={14} className="text-slate-600 shrink-0" />
                           <span className="text-xl w-8 text-center shrink-0">{mealEmoji(meal.name)}</span>
-                          <input value={editMealName} onChange={(e) => setEditMealName(e.target.value)} className="flex-1 bg-slate-800 border border-emerald-500/60 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-                          <input type="time" value={editMealTime} onChange={(e) => setEditMealTime(e.target.value)} className="w-24 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          <input value={editMealName} onChange={(e) => setEditMealName(e.target.value)} className="flex-1 bg-[#0D1025] border border-emerald-500/60 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                          <input type="time" value={editMealTime} onChange={(e) => setEditMealTime(e.target.value)} className="w-24 bg-[#0D1025] border border-white/[0.07] rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                           <button onClick={saveEditMeal} className="p-1.5 rounded-lg bg-emerald-600 text-white"><Check size={13} /></button>
                           <button onClick={() => setEditMealId(null)} className="p-1.5 rounded-lg bg-slate-700 text-slate-300"><X size={13} /></button>
                         </div>
@@ -407,10 +407,10 @@ export default function DietaDetalhe() {
         </div>
 
         {/* Right sidebar */}
-        <div className="w-[310px] shrink-0 border-l border-slate-700/60 px-4 py-6 space-y-4 overflow-y-auto">
+        <div className="w-[310px] shrink-0 border-l border-white/[0.07] px-4 py-6 space-y-4 overflow-y-auto">
 
           {/* Resumo nutricional */}
-          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5">
+          <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-2xl p-5">
             <p className="text-sm font-bold text-white mb-4">Resumo nutricional</p>
             <div className="flex items-center gap-3 mb-4">
               {/* donut */}
@@ -453,13 +453,13 @@ export default function DietaDetalhe() {
                 ))}
               </div>
             </div>
-            <button className="w-full text-xs text-slate-400 hover:text-white border border-slate-700 hover:border-slate-500 rounded-xl py-2 px-3 transition-colors flex items-center justify-between">
+            <button className="w-full text-xs text-slate-400 hover:text-white border border-white/[0.07] hover:border-slate-500 rounded-xl py-2 px-3 transition-colors flex items-center justify-between">
               Ver distribuicao detalhada <ChevronDown size={12} className="-rotate-90" />
             </button>
           </div>
 
           {/* Outras informacoes */}
-          <div className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5">
+          <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-2xl p-5">
             <p className="text-sm font-bold text-white mb-3">Outras informacoes</p>
             <div className="space-y-2.5">
               <div className="flex justify-between text-xs"><span className="text-slate-400">Frequencia de refeicoes</span><span className="text-white font-semibold">{diet.meals.length} refeicoes</span></div>
@@ -501,7 +501,7 @@ export default function DietaDetalhe() {
       </div>
 
       {/* Bottom bar */}
-      <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur border-t border-slate-700/60 px-6 py-4 shrink-0">
+      <div className="sticky bottom-0 bg-slate-900/95 backdrop-blur border-t border-white/[0.07] px-6 py-4 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5 text-xs text-slate-500">
             <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" />Ativa — Dieta em uso pelo aluno</span>
@@ -526,7 +526,7 @@ export default function DietaDetalhe() {
       {/* Add Food Modal */}
       {addFoodMealId && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={(e) => { if (e.target === e.currentTarget) setAddFoodMealId(null); }}>
-          <div className="bg-slate-900 border border-slate-700/60 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+          <div className="bg-slate-900 border border-white/[0.07] rounded-2xl w-full max-w-md p-6 shadow-2xl">
             <h2 className="text-base font-bold text-white mb-4">Adicionar alimento</h2>
             <form onSubmit={handleAddFood} className="flex flex-col gap-3">
               <div>
@@ -566,7 +566,7 @@ function FoodRow({ food, onDelete, onSave }: FoodRowProps) {
 
   if (editing) {
     return (
-      <div className="flex items-center gap-2 bg-slate-800 rounded-xl px-3 py-2">
+      <div className="flex items-center gap-2 bg-[#0D1025] rounded-xl px-3 py-2">
         <input value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} className="flex-1 bg-transparent text-xs text-white focus:outline-none border-b border-slate-600 focus:border-emerald-500" placeholder="Nome" />
         <input value={form.quantity} onChange={(e) => setForm((p) => ({ ...p, quantity: e.target.value }))} className="w-16 bg-transparent text-xs text-white focus:outline-none border-b border-slate-600 focus:border-emerald-500" placeholder="Qtd" />
         {(['calories', 'protein', 'carbs', 'fat'] as const).map((key) => (

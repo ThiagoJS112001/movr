@@ -7,7 +7,7 @@ interface PageHeaderProps {
 }
 
 /**
- * Standardized page header — title + optional subtitle + optional action slot.
+ * Standardized page header â€” title + optional subtitle + optional action slot.
  * Matches the pattern used in PersonalDashboard and AlunosPage.
  */
 export default function PageHeader({ title, subtitle, action }: PageHeaderProps) {

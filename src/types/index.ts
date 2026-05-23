@@ -9,6 +9,10 @@ export interface User {
   rolePrefix: RolePrefix;
   avatarUrl?: string;
   isBlocked?: boolean;
+  /** For alunos: 'pending' = personal added them, not yet confirmed; 'confirmed' = accepted; undefined = legacy */
+  connectionStatus?: 'pending' | 'confirmed';
+  /** For alunos with connectionStatus === 'pending': personal trainer's name */
+  personalName?: string;
 }
 
 export interface Exercise {
@@ -16,8 +20,17 @@ export interface Exercise {
   name: string;
   muscleGroup: string;
   description?: string;
+  equipment?: string;
+  level?: string;
+  exerciseType?: string;
   imageUrl?: string;
   videoUrl?: string;
+  tips?: string[];
+  suggestedRest?: number;
+  suggestedSets?: number;
+  suggestedReps?: string;
+  primaryMuscles?: string[];
+  secondaryMuscles?: string[];
 }
 
 export interface WorkoutExercise {
@@ -96,6 +109,7 @@ export interface Meal {
   time: string;       // e.g. "07:00"
   foods: FoodItem[];
   notes?: string;
+  targetCalories?: number;
 }
 
 export interface Diet {
@@ -111,6 +125,10 @@ export interface Diet {
   targetProtein?: number;
   targetCarbs?: number;
   targetFat?: number;
+  durationDays?: number;
+  restrictionLevel?: string;
+  preferences?: string[];
+  favoriteFoods?: string[];
 }
 
 export interface DietAssignment {

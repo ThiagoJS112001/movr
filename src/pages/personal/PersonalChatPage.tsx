@@ -11,7 +11,7 @@ import {
 import { Send, Search, Clock, MoreHorizontal, Paperclip, Dumbbell, Target } from 'lucide-react';
 import type { User } from '../../types';
 
-// ── Static mock data per student ─────────────────────────────────────────────
+// â”€â”€ Static mock data per student â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const WEIGHT_GOALS: Record<string, { from: number; to: number; current: number }> = {
   'aluno-1': { from: 68, to: 62, current: 64.8 },
   'aluno-2': { from: 90, to: 80, current: 83 },
@@ -42,10 +42,10 @@ const MUSCLE_BADGE_COLORS: Record<string, string> = {
   Costas: 'bg-cyan-500/20 text-cyan-400',
   Pernas: 'bg-violet-500/20 text-violet-400',
   Ombros: 'bg-amber-500/20 text-amber-400',
-  'Glúteos': 'bg-pink-500/20 text-pink-400',
-  'Bíceps': 'bg-rose-500/20 text-rose-400',
-  'Tríceps': 'bg-orange-500/20 text-orange-400',
-  'Abdômen': 'bg-green-500/20 text-green-400',
+  'GlÃºteos': 'bg-pink-500/20 text-pink-400',
+  'BÃ­ceps': 'bg-rose-500/20 text-rose-400',
+  'TrÃ­ceps': 'bg-orange-500/20 text-orange-400',
+  'AbdÃ´men': 'bg-green-500/20 text-green-400',
 };
 
 const QUICK_REPLIES = [
@@ -54,7 +54,7 @@ const QUICK_REPLIES = [
   'Qual equipamento tem em casa?',
 ];
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getAvatarColor(id: string) {
   return AVATAR_COLORS[id] ?? 'bg-indigo-500';
 }
@@ -65,7 +65,7 @@ function formatContactTime(dateStr: string) {
   const diffDays = Math.floor((now.getTime() - date.getTime()) / 86_400_000);
   if (diffDays === 0) return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   if (diffDays === 1) return 'Ontem';
-  if (diffDays < 7) return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][date.getDay()];
+  if (diffDays < 7) return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b'][date.getDay()];
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
@@ -87,14 +87,14 @@ function getDayLabel(dateStr: string) {
 }
 
 function parseWorkoutLabel(name: string) {
-  const match = name.match(/^(Treino [A-Z])\s*[-–]\s*(.+)/);
+  const match = name.match(/^(Treino [A-Z])\s*[-â€“]\s*(.+)/);
   if (match) {
     return { label: match[1], muscle: match[2].split(/\s+e\s+/)[0] };
   }
   return { label: name, muscle: '' };
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function PersonalChatPage() {
   const { user } = useAuth();
   const { data: studentsRaw = [] } = useStudents();
@@ -213,7 +213,7 @@ export default function PersonalChatPage() {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] md:h-screen overflow-hidden bg-slate-950 text-slate-100">
 
-      {/* ── Left: Contacts list ─────────────────────────────────────── */}
+      {/* â”€â”€ Left: Contacts list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="w-72 shrink-0 flex flex-col bg-slate-900 border-r border-slate-800">
         {/* Header */}
         <div className="px-4 pt-5 pb-3 shrink-0">
@@ -224,7 +224,7 @@ export default function PersonalChatPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar aluno..."
-              className="w-full bg-slate-800 text-slate-200 placeholder-slate-500 text-sm rounded-lg pl-8 pr-3 py-2 outline-none focus:ring-1 focus:ring-indigo-500 border border-transparent focus:border-indigo-500/50"
+              className="w-full bg-[#0D1025] text-slate-200 placeholder-slate-500 text-sm rounded-lg pl-8 pr-3 py-2 outline-none focus:ring-1 focus:ring-indigo-500 border border-transparent focus:border-indigo-500/50"
             />
           </div>
         </div>
@@ -242,7 +242,7 @@ export default function PersonalChatPage() {
                 className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left ${
                   isSelected
                     ? 'bg-indigo-600/20 border-r-2 border-indigo-500'
-                    : 'hover:bg-slate-800/60 border-r-2 border-transparent'
+                    : 'hover:bg-[#0D1025]/60 border-r-2 border-transparent'
                 }`}
               >
                 <div className={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-white font-semibold text-sm ${getAvatarColor(s.id)}`}>
@@ -274,7 +274,7 @@ export default function PersonalChatPage() {
         </div>
       </div>
 
-      {/* ── Center: Chat ─────────────────────────────────────────────── */}
+      {/* â”€â”€ Center: Chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex-1 flex flex-col min-w-0 bg-slate-950">
         {selectedStudent ? (
           <>
@@ -293,10 +293,10 @@ export default function PersonalChatPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                <button className="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-200 transition-colors">
+                <button className="p-2 rounded-lg hover:bg-[#0D1025] text-slate-500 hover:text-slate-200 transition-colors">
                   <Clock size={16} />
                 </button>
-                <button className="p-2 rounded-lg hover:bg-slate-800 text-slate-500 hover:text-slate-200 transition-colors">
+                <button className="p-2 rounded-lg hover:bg-[#0D1025] text-slate-500 hover:text-slate-200 transition-colors">
                   <MoreHorizontal size={16} />
                 </button>
               </div>
@@ -310,12 +310,12 @@ export default function PersonalChatPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] text-slate-500 mb-0.5">
-                    Próximo treino de {selectedStudent.name.split(' ')[0]}:
+                    PrÃ³ximo treino de {selectedStudent.name.split(' ')[0]}:
                   </p>
                   <p className="text-xs font-semibold text-slate-200 truncate">{nextAssignment.workoutName}</p>
                 </div>
                 <span className="text-[10px] text-indigo-400 bg-indigo-500/15 rounded-full px-2.5 py-1 shrink-0 font-medium">
-                  amanhã
+                  amanhÃ£
                 </span>
               </div>
             )}
@@ -323,15 +323,15 @@ export default function PersonalChatPage() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col">
               {conversation.length === 0 && (
-                <p className="text-center text-slate-600 text-sm mt-12">Nenhuma mensagem ainda. Diga olá! 👋</p>
+                <p className="text-center text-slate-600 text-sm mt-12">Nenhuma mensagem ainda. Diga olÃ¡! ðŸ‘‹</p>
               )}
               {groupedMessages.map(({ date, msgs }) => (
                 <div key={date}>
                   {/* Date separator */}
                   <div className="flex items-center gap-3 my-4">
-                    <div className="flex-1 h-px bg-slate-800" />
+                    <div className="flex-1 h-px bg-[#0D1025]" />
                     <span className="text-[10px] text-slate-600 shrink-0">{getDayLabel(msgs[0].sentAt)}</span>
-                    <div className="flex-1 h-px bg-slate-800" />
+                    <div className="flex-1 h-px bg-[#0D1025]" />
                   </div>
                   <div className="flex flex-col gap-2">
                     {msgs.map((msg) => {
@@ -348,7 +348,7 @@ export default function PersonalChatPage() {
                               className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                                 isMe
                                   ? 'bg-indigo-600 text-white rounded-br-sm'
-                                  : 'bg-slate-800 text-slate-200 rounded-bl-sm'
+                                  : 'bg-[#0D1025] text-slate-200 rounded-bl-sm'
                               }`}
                             >
                               {msg.content}
@@ -372,7 +372,7 @@ export default function PersonalChatPage() {
                 <button
                   key={reply}
                   onClick={() => handleQuickReply(reply)}
-                  className="text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-full px-3 py-1.5 transition-colors border border-slate-700/60"
+                  className="text-xs bg-[#0D1025] hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-full px-3 py-1.5 transition-colors border border-white/[0.07]"
                 >
                   {reply}
                 </button>
@@ -383,7 +383,7 @@ export default function PersonalChatPage() {
             <form onSubmit={handleSend} className="flex items-center gap-2 px-4 pb-4 pt-1 shrink-0">
               <button
                 type="button"
-                className="p-2 rounded-lg hover:bg-slate-800 text-slate-600 hover:text-slate-400 transition-colors shrink-0"
+                className="p-2 rounded-lg hover:bg-[#0D1025] text-slate-600 hover:text-slate-400 transition-colors shrink-0"
               >
                 <Paperclip size={18} />
               </button>
@@ -391,7 +391,7 @@ export default function PersonalChatPage() {
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Digite uma mensagem..."
-                className="flex-1 bg-slate-800 text-slate-200 placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-indigo-500 border border-slate-700/60"
+                className="flex-1 bg-[#0D1025] text-slate-200 placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-1 focus:ring-indigo-500 border border-white/[0.07]"
               />
               <button
                 type="submit"
@@ -404,7 +404,7 @@ export default function PersonalChatPage() {
           </>
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 text-slate-700">
-            <div className="w-16 h-16 rounded-2xl bg-slate-800/60 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-2xl bg-[#0D1025]/60 flex items-center justify-center">
               <Dumbbell size={28} className="text-slate-600" />
             </div>
             <p className="text-sm text-slate-500">Selecione um aluno para conversar</p>
@@ -412,7 +412,7 @@ export default function PersonalChatPage() {
         )}
       </div>
 
-      {/* ── Right: Student info ──────────────────────────────────────── */}
+      {/* â”€â”€ Right: Student info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {selectedStudent && (
         <div className="w-64 shrink-0 flex flex-col bg-slate-900 border-l border-slate-800 overflow-y-auto">
 
@@ -427,7 +427,7 @@ export default function PersonalChatPage() {
                 <p className="text-sm font-semibold text-slate-100">{selectedStudent.name}</p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                  <span className="text-xs text-slate-500">desde {SINCE_DATES[selectedStudent.id] ?? '—'}</span>
+                  <span className="text-xs text-slate-500">desde {SINCE_DATES[selectedStudent.id] ?? 'â€”'}</span>
                 </div>
               </div>
             </div>
@@ -435,13 +435,13 @@ export default function PersonalChatPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-2 p-4 border-b border-slate-800">
-            <div className="bg-slate-800/50 rounded-xl p-3">
+            <div className="bg-[#0D1025]/50 rounded-xl p-3">
               <p className="text-[10px] text-slate-500 mb-1">Treinos</p>
               <p className="text-xl font-bold text-slate-100">{studentLogs.length || 47}</p>
-              <p className="text-[10px] text-emerald-400 mt-0.5">+{logsThisMonth.length || 3} este mês</p>
+              <p className="text-[10px] text-emerald-400 mt-0.5">+{logsThisMonth.length || 3} este mÃªs</p>
             </div>
-            <div className="bg-slate-800/50 rounded-xl p-3">
-              <p className="text-[10px] text-slate-500 mb-1">Frequência</p>
+            <div className="bg-[#0D1025]/50 rounded-xl p-3">
+              <p className="text-[10px] text-slate-500 mb-1">FrequÃªncia</p>
               <p className="text-xl font-bold text-slate-100">{frequencyPct}%</p>
               <p className="text-[10px] text-indigo-400 mt-0.5">{frequencyLabel}</p>
             </div>
@@ -457,16 +457,16 @@ export default function PersonalChatPage() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs text-slate-400">Progresso</span>
                 <span className="text-xs text-slate-500">
-                  {weightGoal.from} → {weightGoal.to} kg
+                  {weightGoal.from} â†’ {weightGoal.to} kg
                 </span>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-1.5 mb-1.5">
+              <div className="w-full bg-[#0D1025] rounded-full h-1.5 mb-1.5">
                 <div
                   className="bg-indigo-500 h-1.5 rounded-full transition-all"
                   style={{ width: `${Math.min(100, Math.max(0, weightProgress))}%` }}
                 />
               </div>
-              <p className="text-[10px] text-slate-600">{weightProgress}% concluído</p>
+              <p className="text-[10px] text-slate-600">{weightProgress}% concluÃ­do</p>
             </div>
           )}
 
@@ -482,7 +482,7 @@ export default function PersonalChatPage() {
                   const { label, muscle } = parseWorkoutLabel(a.workoutName);
                   const badgeColor = MUSCLE_BADGE_COLORS[muscle] ?? 'bg-slate-700/50 text-slate-500';
                   return (
-                    <div key={a.id} className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2">
+                    <div key={a.id} className="flex items-center justify-between bg-[#0D1025]/50 rounded-lg px-3 py-2">
                       <span className="text-xs text-slate-300 font-medium">{label}</span>
                       {muscle && (
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>

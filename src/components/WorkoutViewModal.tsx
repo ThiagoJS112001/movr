@@ -12,11 +12,11 @@ const MUSCLE_BADGE: Record<string, string> = {
   'Peito':       'bg-purple-500/20 text-purple-300 border-purple-500/30',
   'Costas':      'bg-teal-500/20 text-teal-300 border-teal-500/30',
   'Pernas':      'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  'Glúteos':     'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  'GlÃºteos':     'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   'Ombros':      'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  'Bíceps':      'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-  'Tríceps':     'bg-pink-500/20 text-pink-300 border-pink-500/30',
-  'Abdômen':     'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  'BÃ­ceps':      'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  'TrÃ­ceps':     'bg-pink-500/20 text-pink-300 border-pink-500/30',
+  'AbdÃ´men':     'bg-amber-500/20 text-amber-300 border-amber-500/30',
   'Panturrilha': 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
 };
 
@@ -25,9 +25,9 @@ function muscleBadge(g: string) {
 }
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: 'visao-geral', label: 'Visão geral' },
-  { key: 'exercicios',  label: 'Exercícios' },
-  { key: 'observacoes', label: 'Observações' },
+  { key: 'visao-geral', label: 'VisÃ£o geral' },
+  { key: 'exercicios',  label: 'ExercÃ­cios' },
+  { key: 'observacoes', label: 'ObservaÃ§Ãµes' },
 ];
 
 interface Props {
@@ -65,8 +65,8 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             Voltar para treinos
           </button>
 
-          {/* ── Header card ────────────────────────────────────────────────── */}
-          <div className="bg-slate-800 border border-slate-700/60 rounded-2xl px-6 py-5 mb-4 flex items-start justify-between gap-4">
+          {/* â”€â”€ Header card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl px-6 py-5 mb-4 flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap mb-1">
                 <h1 className="text-xl font-bold text-white">{workout.name}</h1>
@@ -96,8 +96,8 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             </button>
           </div>
 
-          {/* ── Tabs ───────────────────────────────────────────────────────── */}
-          <div className="flex gap-1 border-b border-slate-700/60 mb-5">
+          {/* â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          <div className="flex gap-1 border-b border-white/[0.07] mb-5">
             {TABS.map(({ key, label }) => (
               <button
                 key={key}
@@ -113,7 +113,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             ))}
           </div>
 
-          {/* ── Tab: Visão geral ─────────────────────────────────────────── */}
+          {/* â”€â”€ Tab: VisÃ£o geral â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {activeTab === 'visao-geral' && (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_288px] gap-4">
 
@@ -121,34 +121,34 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
               <div className="flex flex-col gap-4">
 
                 {/* Stats strip */}
-                <div className="bg-slate-800 border border-slate-700/60 rounded-2xl p-5">
-                  <p className="font-semibold text-white mb-0.5">Visão geral do treino</p>
-                  <p className="text-xs text-slate-400 mb-4">Resumo das principais informações do treino.</p>
+                <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
+                  <p className="font-semibold text-white mb-0.5">VisÃ£o geral do treino</p>
+                  <p className="text-xs text-slate-400 mb-4">Resumo das principais informaÃ§Ãµes do treino.</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
                       {
                         Icon: Dumbbell,
                         color: 'bg-purple-500/15 text-purple-400',
                         label: 'Grupo muscular principal',
-                        value: muscleGroups[0] ?? '—',
+                        value: muscleGroups[0] ?? 'â€”',
                       },
                       {
                         Icon: Clock,
                         color: 'bg-blue-500/15 text-blue-400',
-                        label: 'Duração média',
-                        value: workout.durationMinutes ? `${workout.durationMinutes} min` : '—',
+                        label: 'DuraÃ§Ã£o mÃ©dia',
+                        value: workout.durationMinutes ? `${workout.durationMinutes} min` : 'â€”',
                       },
                       {
                         Icon: Activity,
                         color: 'bg-emerald-500/15 text-emerald-400',
                         label: 'Grupos musculares',
-                        value: muscleGroups.length > 0 ? `${muscleGroups.length}` : '—',
+                        value: muscleGroups.length > 0 ? `${muscleGroups.length}` : 'â€”',
                       },
                       {
                         Icon: ListChecks,
                         color: 'bg-indigo-500/15 text-indigo-400',
-                        label: 'Exercícios',
-                        value: `${workout.exercises.length} exercício${workout.exercises.length !== 1 ? 's' : ''}`,
+                        label: 'ExercÃ­cios',
+                        value: `${workout.exercises.length} exercÃ­cio${workout.exercises.length !== 1 ? 's' : ''}`,
                       },
                     ].map(({ Icon, color, label, value }) => (
                       <div key={label} className="bg-slate-700/40 rounded-xl p-3 flex flex-col gap-2">
@@ -165,15 +165,15 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                 </div>
 
                 {/* Exercise list */}
-                <div className="bg-slate-800 border border-slate-700/60 rounded-2xl overflow-hidden">
-                  <div className="px-5 py-4 border-b border-slate-700/60">
-                    <p className="font-semibold text-white text-sm">Exercícios do treino</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Lista de exercícios na ordem definida.</p>
+                <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl overflow-hidden">
+                  <div className="px-5 py-4 border-b border-white/[0.07]">
+                    <p className="font-semibold text-white text-sm">ExercÃ­cios do treino</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Lista de exercÃ­cios na ordem definida.</p>
                   </div>
                   {workout.exercises.length === 0 ? (
                     <div className="py-14 text-center">
                       <Dumbbell size={28} className="mx-auto mb-2 text-slate-600" />
-                      <p className="text-sm text-slate-500">Nenhum exercício adicionado.</p>
+                      <p className="text-sm text-slate-500">Nenhum exercÃ­cio adicionado.</p>
                     </div>
                   ) : (
                     <div className="divide-y divide-slate-700/40">
@@ -202,16 +202,16 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                             )}
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-white">{ex.exerciseName}</p>
-                              <p className="text-xs text-slate-400">{exData?.muscleGroup ?? '—'}</p>
+                              <p className="text-xs text-slate-400">{exData?.muscleGroup ?? 'â€”'}</p>
                             </div>
                             <div className="flex items-center gap-6 text-right shrink-0">
                               <div>
-                                <p className="text-xs font-medium text-slate-200">{ex.sets} séries</p>
+                                <p className="text-xs font-medium text-slate-200">{ex.sets} sÃ©ries</p>
                                 <p className="text-xs text-slate-400">{ex.reps} reps</p>
                               </div>
                               <div>
                                 <p className="text-xs text-slate-400">Carga</p>
-                                <p className="text-xs text-slate-200">{ex.weight ?? '—'}</p>
+                                <p className="text-xs text-slate-200">{ex.weight ?? 'â€”'}</p>
                               </div>
                               <div>
                                 <p className="text-xs text-slate-400">Descanso</p>
@@ -221,7 +221,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                                 <button
                                   onClick={() => setVideoOpen(videoUrl)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                                  title="Ver vídeo"
+                                  title="Ver vÃ­deo"
                                 >
                                   <Video size={14} />
                                 </button>
@@ -239,8 +239,8 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
               <div className="flex flex-col gap-4">
 
                 {/* Info card */}
-                <div className="bg-slate-800 border border-slate-700/60 rounded-2xl p-5">
-                  <p className="font-semibold text-white text-sm mb-4">Informações do treino</p>
+                <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
+                  <p className="font-semibold text-white text-sm mb-4">InformaÃ§Ãµes do treino</p>
                   <div className="space-y-3.5">
                     <div>
                       <p className="text-xs text-slate-400 mb-1">Nome do treino</p>
@@ -261,13 +261,13 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                         </div>
                       </div>
                     )}
-                    <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
-                      <p className="text-xs text-slate-400">Duração média</p>
+                    <div className="flex justify-between items-center py-2 border-b border-white/[0.07]">
+                      <p className="text-xs text-slate-400">DuraÃ§Ã£o mÃ©dia</p>
                       <p className="text-xs font-medium text-white">
-                        {workout.durationMinutes ? `${workout.durationMinutes} minutos` : '—'}
+                        {workout.durationMinutes ? `${workout.durationMinutes} minutos` : 'â€”'}
                       </p>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                    <div className="flex justify-between items-center py-2 border-b border-white/[0.07]">
                       <p className="text-xs text-slate-400">Status</p>
                       <span
                         className={`flex items-center gap-1 text-xs font-medium ${
@@ -278,14 +278,14 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                         {isRascunho ? 'Rascunho' : 'Ativo'}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-slate-700/50">
+                    <div className="flex justify-between items-center py-2 border-b border-white/[0.07]">
                       <p className="text-xs text-slate-400">Criado em</p>
                       <p className="text-xs text-white">
                         {new Date(workout.createdAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <p className="text-xs text-slate-400">Exercícios</p>
+                      <p className="text-xs text-slate-400">ExercÃ­cios</p>
                       <p className="text-xs text-white">{workout.exercises.length}</p>
                     </div>
                   </div>
@@ -293,15 +293,15 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
 
                 {/* Notes card */}
                 {workout.description && (
-                  <div className="bg-slate-800 border border-slate-700/60 rounded-2xl p-5">
-                    <p className="font-semibold text-white text-sm mb-2">Observações do treino</p>
+                  <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
+                    <p className="font-semibold text-white text-sm mb-2">ObservaÃ§Ãµes do treino</p>
                     <p className="text-sm text-slate-300 leading-relaxed">{workout.description}</p>
                   </div>
                 )}
 
                 {/* Muscle groups card */}
                 {muscleGroups.length > 0 && (
-                  <div className="bg-slate-800 border border-slate-700/60 rounded-2xl p-5">
+                  <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
                     <p className="font-semibold text-white text-sm mb-3">Grupos musculares trabalhados</p>
                     <div className="flex flex-wrap gap-2">
                       {muscleGroups.map((g) => (
@@ -326,32 +326,32 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             </div>
           )}
 
-          {/* ── Tab: Exercícios ──────────────────────────────────────────── */}
+          {/* â”€â”€ Tab: ExercÃ­cios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {activeTab === 'exercicios' && (
-            <div className="bg-slate-800 border border-slate-700/60 rounded-2xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-700/60">
-                <p className="font-semibold text-white text-sm">Lista de exercícios</p>
+            <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/[0.07]">
+                <p className="font-semibold text-white text-sm">Lista de exercÃ­cios</p>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {workout.exercises.length} exercício{workout.exercises.length !== 1 ? 's' : ''} neste treino
+                  {workout.exercises.length} exercÃ­cio{workout.exercises.length !== 1 ? 's' : ''} neste treino
                 </p>
               </div>
               {workout.exercises.length === 0 ? (
                 <div className="py-16 text-center">
                   <Dumbbell size={32} className="mx-auto mb-3 text-slate-600" />
-                  <p className="text-sm text-slate-500">Nenhum exercício adicionado.</p>
+                  <p className="text-sm text-slate-500">Nenhum exercÃ­cio adicionado.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-700/60">
+                      <tr className="border-b border-white/[0.07]">
                         <th className="text-left text-xs font-medium text-slate-400 px-5 py-3 uppercase tracking-wide">#</th>
-                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Exercício</th>
-                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Séries</th>
+                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">ExercÃ­cio</th>
+                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">SÃ©ries</th>
                         <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Reps</th>
                         <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Carga</th>
                         <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Descanso</th>
-                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Vídeo</th>
+                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">VÃ­deo</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700/40">
@@ -376,25 +376,25 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                                 )}
                                 <div>
                                   <p className="font-medium text-white">{ex.exerciseName}</p>
-                                  <p className="text-xs text-slate-400">{exData?.muscleGroup ?? '—'}</p>
+                                  <p className="text-xs text-slate-400">{exData?.muscleGroup ?? 'â€”'}</p>
                                 </div>
                               </div>
                             </td>
                             <td className="px-4 py-3.5 text-slate-200">{ex.sets}</td>
                             <td className="px-4 py-3.5 text-slate-200">{ex.reps}</td>
-                            <td className="px-4 py-3.5 text-slate-400">{ex.weight ?? '—'}</td>
+                            <td className="px-4 py-3.5 text-slate-400">{ex.weight ?? 'â€”'}</td>
                             <td className="px-4 py-3.5 text-slate-200">{ex.restSeconds}s</td>
                             <td className="px-4 py-3.5">
                               {videoUrl ? (
                                 <button
                                   onClick={() => setVideoOpen(videoUrl)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                                  title="Ver vídeo"
+                                  title="Ver vÃ­deo"
                                 >
                                   <Video size={14} />
                                 </button>
                               ) : (
-                                <span className="text-slate-600 text-xs">—</span>
+                                <span className="text-slate-600 text-xs">â€”</span>
                               )}
                             </td>
                           </tr>
@@ -407,14 +407,14 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             </div>
           )}
 
-          {/* ── Tab: Observações ─────────────────────────────────────────── */}
+          {/* â”€â”€ Tab: ObservaÃ§Ãµes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {activeTab === 'observacoes' && (
-            <div className="bg-slate-800 border border-slate-700/60 rounded-2xl p-6">
-              <p className="font-semibold text-white mb-3">Observações</p>
+            <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-6">
+              <p className="font-semibold text-white mb-3">ObservaÃ§Ãµes</p>
               {workout.description ? (
                 <p className="text-sm text-slate-300 leading-relaxed">{workout.description}</p>
               ) : (
-                <p className="text-sm text-slate-500">Nenhuma observação registrada para este treino.</p>
+                <p className="text-sm text-slate-500">Nenhuma observaÃ§Ã£o registrada para este treino.</p>
               )}
             </div>
           )}

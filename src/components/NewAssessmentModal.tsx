@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { X, CalendarDays, Check, Plus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCreateAssessment } from '../hooks/useAssessments';
@@ -14,7 +14,7 @@ interface Props {
 }
 
 const INPUT_CLS =
-  'w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors';
+  'w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors';
 
 export default function NewAssessmentModal({ studentId, studentName, onClose }: Props) {
   const { user } = useAuth();
@@ -77,10 +77,10 @@ export default function NewAssessmentModal({ studentId, studentName, onClose }: 
       className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-slate-900 border border-slate-700/60 rounded-2xl w-full max-w-2xl flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+      <div className="bg-slate-900 border border-white/[0.07] rounded-2xl w-full max-w-2xl flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/60 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07] shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
               <CalendarDays size={20} className="text-violet-400" />
@@ -107,13 +107,13 @@ export default function NewAssessmentModal({ studentId, studentName, onClose }: 
             <button
               type="button"
               onClick={() => setPickerOpen((p) => !p)}
-              className="flex items-center justify-between gap-2 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white hover:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors min-w-[180px]"
+              className="flex items-center justify-between gap-2 bg-[#0D1025] border border-white/[0.07] rounded-xl px-4 py-2.5 text-sm text-white hover:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition-colors min-w-[180px]"
             >
               <span>{format(selectedDate, 'dd/MM/yyyy')}</span>
               <CalendarDays size={16} className="text-slate-400 shrink-0" />
             </button>
             {pickerOpen && (
-              <div className="mt-2 inline-block rounded-2xl border border-slate-700 bg-slate-900 overflow-hidden shadow-xl z-10 relative">
+              <div className="mt-2 inline-block rounded-2xl border border-white/[0.07] bg-slate-900 overflow-hidden shadow-xl z-10 relative">
                 <DayPicker
                   mode="single"
                   selected={selectedDate}
@@ -232,13 +232,13 @@ export default function NewAssessmentModal({ studentId, studentName, onClose }: 
               rows={4}
               maxLength={600}
               placeholder="Adicione observacoes sobre essa avaliacao..."
-              className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none transition-colors"
+              className="w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none transition-colors"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-700/60 shrink-0">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.07] shrink-0">
           <button
             onClick={onClose}
             className="px-6 py-2.5 rounded-xl border border-slate-600 text-slate-300 text-sm hover:bg-slate-700 transition-colors"

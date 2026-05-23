@@ -15,6 +15,8 @@ export interface Database {
           avatar_url: string | null;
           personal_id: string | null;
           is_blocked: boolean;
+          connection_status: 'pending' | 'confirmed' | null;
+          birth_date: string | null;
           bio: string | null;
           address: string | null;
           city: string | null;

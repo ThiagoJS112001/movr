@@ -53,14 +53,14 @@ export default function AcademiaGruposPage() {
       </div>
 
       <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm">
-        Envie promoções e ofertas diretamente para os grupos de alunos do aplicativo.
+        Envie promoÃ§Ãµes e ofertas diretamente para os grupos de alunos do aplicativo.
       </p>
 
       {/* Search */}
       <div className="relative mb-6">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         <input
-          className="w-full border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+          className="w-full border border-slate-300 dark:border-slate-600 dark:bg-[#0D1025] dark:text-white rounded-xl pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
           placeholder="Buscar grupos..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -68,11 +68,11 @@ export default function AcademiaGruposPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-10 text-center">
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-10 text-center">
           <Users size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
           <p className="font-semibold dark:text-white">Nenhum grupo encontrado</p>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {search ? 'Tente outro termo de busca.' : 'Ainda não há grupos de alunos no app.'}
+            {search ? 'Tente outro termo de busca.' : 'Ainda nÃ£o hÃ¡ grupos de alunos no app.'}
           </p>
         </div>
       ) : (
@@ -80,12 +80,12 @@ export default function AcademiaGruposPage() {
           {filtered.map((group) => (
             <div
               key={group.id}
-              className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm p-5 flex items-center justify-between gap-4"
+              className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5 flex items-center justify-between gap-4"
             >
               <div>
                 <p className="font-semibold dark:text-white">{group.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {group.memberIds.length} {group.memberIds.length === 1 ? 'membro' : 'membros'} · {getMemberNames(group.memberIds)}
+                  {group.memberIds.length} {group.memberIds.length === 1 ? 'membro' : 'membros'} Â· {getMemberNames(group.memberIds)}
                 </p>
               </div>
               <button
@@ -103,7 +103,7 @@ export default function AcademiaGruposPage() {
       {/* Offer modal */}
       {offerModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6">
+          <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-lg dark:text-white">Enviar oferta</h2>
               <button onClick={() => setOfferModal(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
@@ -124,7 +124,7 @@ export default function AcademiaGruposPage() {
                 rows={4}
                 value={offerText}
                 onChange={(e) => setOfferText(e.target.value)}
-                placeholder="Ex: Matrícula com 30% de desconto neste mês! Venha conhecer nossa academia..."
+                placeholder="Ex: MatrÃ­cula com 30% de desconto neste mÃªs! Venha conhecer nossa academia..."
                 autoFocus
               />
             </div>
@@ -142,7 +142,7 @@ export default function AcademiaGruposPage() {
                 className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white font-semibold rounded-xl py-2.5 text-sm transition-colors"
               >
                 <Send size={14} />
-                {sending ? 'Enviando…' : 'Enviar'}
+                {sending ? 'Enviandoâ€¦' : 'Enviar'}
               </button>
             </div>
           </div>

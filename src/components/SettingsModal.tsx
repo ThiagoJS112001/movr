@@ -39,11 +39,11 @@ export default function SettingsModal({ open, onClose, navItems, accent }: Props
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
 
       {/* Panel */}
-      <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-80 max-w-full flex flex-col gap-6 p-6">
+      <div className="relative bg-white dark:bg-[#0D1025] rounded-2xl shadow-xl w-80 max-w-full flex flex-col gap-6 p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-slate-800 dark:text-slate-100 text-base">
-            Configurações
+            ConfiguraÃ§Ãµes
           </h2>
           <button
             onClick={onClose}
@@ -56,7 +56,7 @@ export default function SettingsModal({ open, onClose, navItems, accent }: Props
         {/* Theme */}
         <div>
           <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-3">
-            Aparência
+            AparÃªncia
           </p>
           <div className="flex gap-2">
             <button

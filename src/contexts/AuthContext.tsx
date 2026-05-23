@@ -19,11 +19,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-async function fetchProfile(userId: string, timeoutMs = 6000): Promise<User | null> {
+async function fetchProfile(userId: string, timeoutMs = 12000): Promise<User | null> {
   try {
     const queryPromise = supabase
       .from('profiles')
-      .select('id, name, email, role, avatar_url, is_blocked')
+      .select('id, name, email, role, avatar_url, is_blocked, connection_status, personal_id')
       .eq('id', userId)
       .single();
     const timeoutPromise = new Promise<null>((resolve) =>
@@ -31,16 +31,28 @@ async function fetchProfile(userId: string, timeoutMs = 6000): Promise<User | nu
     );
     const result = await Promise.race([queryPromise, timeoutPromise]);
     if (!result) {
-      console.error('[fetchProfile] timeout ou resultado nulo para userId:', userId);
+      if (import.meta.env.DEV) console.error('[fetchProfile] timeout ou resultado nulo para userId:', userId);
       return null;
     }
     const { data, error } = result as Awaited<typeof queryPromise>;
     if (error || !data) {
-      console.error('[fetchProfile] erro ou dados nulos:', { error, data, userId });
+      if (import.meta.env.DEV) console.error('[fetchProfile] erro ou dados nulos:', { error, data, userId });
       return null;
     }
     const rolePrefix: RolePrefix =
       data.role === 'personal' ? 'PT' : data.role === 'academia' ? 'ACD' : 'ALN';
+
+    // For alunos with a pending connection, fetch personal's name
+    let personalName: string | undefined;
+    if (data.role === 'aluno' && data.connection_status === 'pending' && data.personal_id) {
+      const { data: pData } = await supabase
+        .from('profiles')
+        .select('name')
+        .eq('id', data.personal_id)
+        .single();
+      personalName = pData?.name ?? undefined;
+    }
+
     return {
       id: data.id,
       name: data.name,
@@ -49,6 +61,8 @@ async function fetchProfile(userId: string, timeoutMs = 6000): Promise<User | nu
       rolePrefix: rolePrefix,
       avatarUrl: data.avatar_url ?? undefined,
       isBlocked: data.is_blocked ?? false,
+      connectionStatus: (data.connection_status as User['connectionStatus']) ?? undefined,
+      personalName,
     };
   } catch {
     return null;
@@ -75,15 +89,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Se o login/signup está sendo gerenciado diretamente, ignorar o listener
+      // Se o login/signup estÃ¡ sendo gerenciado diretamente, ignorar o listener
       // para evitar race condition de fetchProfile duplicado.
       if (signingUpRef.current) return;
 
       if (session?.user) {
-        // SIGNED_IN disparado por uma sessão existente (ex: refresh de aba)
+        // SIGNED_IN disparado por uma sessÃ£o existente (ex: refresh de aba)
         let profile = await fetchProfile(session.user.id);
         if (!profile && event === 'SIGNED_IN') {
-          // Trigger pode ainda não ter criado o perfil (caso de signUp externo)
+          // Trigger pode ainda nÃ£o ter criado o perfil (caso de signUp externo)
           for (let i = 0; i < 3 && !profile; i++) {
             await new Promise((r) => setTimeout(r, 800));
             profile = await fetchProfile(session.user.id);
@@ -113,22 +127,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('email not confirmed') || msg.includes('not confirmed')) {
-          return { success: false, error: 'E-mail não confirmado. Verifique sua caixa de entrada e clique no link de confirmação.' };
+          return { success: false, error: 'E-mail nÃ£o confirmado. Verifique sua caixa de entrada e clique no link de confirmaÃ§Ã£o.' };
         }
-        return { success: false, error: 'E-mail ou senha inválidos.' };
+        return { success: false, error: 'E-mail ou senha invÃ¡lidos.' };
       }
       if (!data.session) {
-        return { success: false, error: 'E-mail ou senha inválidos.' };
+        return { success: false, error: 'E-mail ou senha invÃ¡lidos.' };
       }
 
-      // Buscar perfil uma vez; se falhar, tentar mais uma com delay curto
+      // Buscar perfil; se falhar, tentar mais 2x com delays progressivos
       let profile = await fetchProfile(data.session.user.id);
       if (!profile) {
-        await new Promise((r) => setTimeout(r, 800));
+        await new Promise((r) => setTimeout(r, 1000));
         profile = await fetchProfile(data.session.user.id);
       }
-      // Perfil ausente: trigger pode ter falhado na criação da conta.
-      // Tentar criar o perfil com os metadados disponíveis.
+      if (!profile) {
+        await new Promise((r) => setTimeout(r, 2000));
+        profile = await fetchProfile(data.session.user.id);
+      }
+      // Perfil ausente: trigger pode ter falhado na criaÃ§Ã£o da conta.
+      // Tentar criar o perfil com os metadados disponÃ­veis.
       if (!profile) {
         const meta = data.session.user.user_metadata ?? {};
         const fallbackName =
@@ -149,13 +167,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       if (!profile) {
         await supabase.auth.signOut();
-        return { success: false, error: 'Não foi possível carregar seu perfil. Tente novamente.' };
+        return { success: false, error: 'NÃ£o foi possÃ­vel carregar seu perfil. Tente novamente.' };
       }
       setUser(profile);
       return { success: true, role: profile.role };
     } catch (err) {
-      console.error('[login] catch:', err);
-      return { success: false, error: 'Erro de conexão. Verifique sua internet e tente novamente.' };
+      if (import.meta.env.DEV) console.error('[login] catch:', err);
+      return { success: false, error: 'Erro de conexÃ£o. Verifique sua internet e tente novamente.' };
     } finally {
       signingUpRef.current = false;
     }
@@ -171,10 +189,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return 'Limite de e-mails atingido. Aguarde alguns minutos e tente novamente.';
     }
     if (msg.toLowerCase().includes('user already registered') || msg.toLowerCase().includes('already registered')) {
-      return 'Este e-mail já está cadastrado.';
+      return 'Este e-mail jÃ¡ estÃ¡ cadastrado.';
     }
     if (msg.toLowerCase().includes('invalid email')) {
-      return 'E-mail inválido.';
+      return 'E-mail invÃ¡lido.';
     }
     if (msg.toLowerCase().includes('password')) {
       return 'Senha muito fraca. Use pelo menos 6 caracteres.';
@@ -192,7 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (error) return { success: false, error: translateAuthError(error.message) };
       if (data.session) {
-        // Retry até 3x — trigger pode levar um momento para criar o profile
+        // Retry atÃ© 3x â€” trigger pode levar um momento para criar o profile
         let profile = null;
         for (let i = 0; i < 3; i++) {
           profile = await fetchProfile(data.session.user.id);
@@ -201,12 +219,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         if (!profile) {
           await supabase.auth.signOut();
-          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexão e tente novamente.' };
+          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexÃ£o e tente novamente.' };
         }
         setUser(profile);
         return { success: true, role: profile.role };
       }
-      // Email confirmation enabled — session not available yet
+      // Email confirmation enabled â€” session not available yet
       return { success: true, role, needsEmailConfirmation: true };
     } finally {
       signingUpRef.current = false;
@@ -230,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) return { success: false, error: translateAuthError(error.message) };
 
       if (data.session) {
-        // Retry até 3x — trigger pode levar um momento
+        // Retry atÃ© 3x â€” trigger pode levar um momento
         let profile = null;
         for (let i = 0; i < 3; i++) {
           profile = await fetchProfile(data.session.user.id);
@@ -239,7 +257,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         if (!profile) {
           await supabase.auth.signOut();
-          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexão e tente novamente.' };
+          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexÃ£o e tente novamente.' };
         }
         if (city || state) {
           await supabase

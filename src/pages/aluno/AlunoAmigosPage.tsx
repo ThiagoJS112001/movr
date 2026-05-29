@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Search, UserPlus, UserCheck, UserX, Clock, Users } from 'lucide-react';
 import {
   useSearchByEmail,
@@ -128,7 +128,7 @@ export default function AlunoAmigosPage() {
           ) : searchResult ? (
             <SearchResultCard profile={searchResult} />
           ) : (
-            <p className="text-sm text-slate-400">Nenhum usuÃ¡rio encontrado com esse e-mail.</p>
+            <p className="text-sm text-slate-400">Nenhum usuário encontrado com esse e-mail.</p>
           )}
         </div>
       )}
@@ -182,8 +182,8 @@ export default function AlunoAmigosPage() {
         {friends.length === 0 ? (
           <div className="text-center py-12 text-slate-500">
             <Users size={32} className="mx-auto mb-3 opacity-40" />
-            <p className="text-sm">VocÃª ainda nÃ£o tem amigos adicionados.</p>
-            <p className="text-xs mt-1">Busque pelo e-mail de alguÃ©m acima.</p>
+            <p className="text-sm">Você ainda não tem amigos adicionados.</p>
+            <p className="text-xs mt-1">Busque pelo e-mail de alguém acima.</p>
           </div>
         ) : (
           <div className="space-y-2">

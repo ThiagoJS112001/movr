@@ -1,5 +1,12 @@
 export const APP_NAME = 'Movr' as const;
 
+/** Maps each user role to its home route */
+export const ROLE_ROUTES: Record<string, string> = {
+  personal: '/personal/dashboard',
+  academia: '/academia/dashboard',
+  aluno: '/aluno/dashboard',
+} as const;
+
 // ── UI tokens ─────────────────────────────────────────────────────────────────
 /** Standard card shell — white/dark-800, rounded-2xl, shadow, border */
 export const CARD = 'bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/60 shadow-sm' as const;

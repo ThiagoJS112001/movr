@@ -56,7 +56,7 @@ export async function fetchWorkouts(personalId: string): Promise<Workout[]> {
     .eq('personal_id', personalId)
     .order('created_at', { ascending: false });
 
-  if (wErr) throw wErr;
+  if (wErr) throw new Error(wErr.message);
   if (!workoutRows || workoutRows.length === 0) return [];
 
   const workoutIds = workoutRows.map((w) => w.id);
@@ -67,7 +67,7 @@ export async function fetchWorkouts(personalId: string): Promise<Workout[]> {
     .in('workout_id', workoutIds)
     .order('order_index', { ascending: true });
 
-  if (exErr) throw exErr;
+  if (exErr) throw new Error(exErr.message);
 
   return workoutRows.map((w) => {
     const exercises = (exRows ?? [])
@@ -104,7 +104,7 @@ export async function fetchWorkoutsByIds(ids: string[]): Promise<Workout[]> {
     .select('*')
     .in('id', ids);
 
-  if (wErr) throw wErr;
+  if (wErr) throw new Error(wErr.message);
   if (!workoutRows?.length) return [];
 
   const { data: exRows, error: exErr } = await supabase
@@ -113,7 +113,7 @@ export async function fetchWorkoutsByIds(ids: string[]): Promise<Workout[]> {
     .in('workout_id', ids)
     .order('order_index', { ascending: true });
 
-  if (exErr) throw exErr;
+  if (exErr) throw new Error(exErr.message);
 
   return workoutRows.map((w) => {
     const exercises = (exRows ?? [])
@@ -139,7 +139,7 @@ export async function createWorkout(
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return mapWorkout(row as Record<string, unknown>, []);
 }
 
@@ -155,12 +155,12 @@ export async function updateWorkout(id: string, data: Partial<Omit<Workout, 'exe
     })
     .eq('id', id);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function deleteWorkout(id: string): Promise<void> {
   const { error } = await supabase.from('workouts').delete().eq('id', id);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 // ── Workout Exercises ──────────────────────────────────────────────────────────
@@ -192,12 +192,12 @@ export async function addExerciseToWorkout(
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return mapExercise(data as Record<string, unknown>);
 }
 
 export async function updateExerciseInWorkout(
-  _workoutId: string,
+  workoutId: string,
   exerciseId: string,
   data: Partial<WorkoutExercise>
 ): Promise<void> {
@@ -213,21 +213,23 @@ export async function updateExerciseInWorkout(
       ...(data.imageUrl !== undefined && { image_url: data.imageUrl ?? null }),
       ...(data.videoUrl !== undefined && { video_url: data.videoUrl ?? null }),
     })
-    .eq('id', exerciseId);
+    .eq('id', exerciseId)
+    .eq('workout_id', workoutId);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function removeExerciseFromWorkout(
-  _workoutId: string,
+  workoutId: string,
   exerciseId: string
 ): Promise<void> {
   const { error } = await supabase
     .from('workout_exercises')
     .delete()
-    .eq('id', exerciseId);
+    .eq('id', exerciseId)
+    .eq('workout_id', workoutId);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 // ── Assignments ────────────────────────────────────────────────────────────────
@@ -239,7 +241,7 @@ export async function fetchAssignments(personalId: string): Promise<WorkoutAssig
     .eq('personal_id', personalId)
     .order('assigned_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return (data ?? []).map((r) => mapAssignment(r as Record<string, unknown>));
 }
 
@@ -250,7 +252,7 @@ export async function fetchStudentAssignments(studentId: string): Promise<Workou
     .eq('student_id', studentId)
     .order('assigned_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return (data ?? []).map((r) => mapAssignment(r as Record<string, unknown>));
 }
 
@@ -269,7 +271,7 @@ export async function assignWorkout(
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return mapAssignment(row as Record<string, unknown>);
 }
 
@@ -285,12 +287,12 @@ export async function updateAssignment(
     })
     .eq('id', id);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function removeAssignment(id: string): Promise<void> {
   const { error } = await supabase.from('workout_assignments').delete().eq('id', id);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 // ── Workout Logs ──────────────────────────────────────────────────────────────
@@ -307,7 +309,7 @@ export async function addWorkoutLog(log: Omit<WorkoutLog, 'id'>): Promise<void> 
     duration_minutes: log.durationMinutes ?? null,
     notes: log.notes ?? null,
   });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }
 
 export async function fetchWorkoutLogs(studentId: string): Promise<WorkoutLog[]> {
@@ -317,7 +319,7 @@ export async function fetchWorkoutLogs(studentId: string): Promise<WorkoutLog[]>
     .eq('student_id', studentId)
     .order('completed_at', { ascending: false });
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return (data ?? []).map((r) => ({
     id: r.id,
     assignmentId: r.assignment_id ?? '',
@@ -341,7 +343,7 @@ export async function fetchWorkoutLogsForPersonal(studentIds: string[]): Promise
     .order('completed_at', { ascending: false })
     .limit(50);
 
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return (data ?? []).map((r) => ({
     id: r.id,
     assignmentId: r.assignment_id ?? '',

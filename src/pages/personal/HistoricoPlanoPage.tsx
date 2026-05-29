@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents } from '../../hooks/useStudents';
@@ -11,7 +11,7 @@ import type { WeeklyPlanArchive } from '../../types';
 const DAYS_ORDER = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'];
 const DAYS_SHORT: Record<string, string> = {
   segunda: 'Seg', terca: 'Ter', quarta: 'Qua',
-  quinta: 'Qui', sexta: 'Sex', sabado: 'SÃ¡b', domingo: 'Dom',
+  quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb', domingo: 'Dom',
 };
 
 function formatDate(iso: string) {
@@ -96,7 +96,7 @@ export default function HistoricoPlanoPage() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight">
-              HistÃ³rico de Planos
+              Histórico de Planos
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {myArchives.length} plano{myArchives.length !== 1 ? 's' : ''} arquivado{myArchives.length !== 1 ? 's' : ''}
@@ -239,7 +239,7 @@ export default function HistoricoPlanoPage() {
                           </div>
                         ) : (
                           <p className="text-xs text-slate-400 dark:text-slate-500 pl-2 italic">
-                            Sem exercÃ­cios â€” apenas rÃ³tulo
+                            Sem exercícios â€” apenas rótulo
                           </p>
                         )}
                       </div>

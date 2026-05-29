@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkouts, useCreateWorkout, useDeleteWorkout } from '../../hooks/useWorkouts';
@@ -74,7 +74,7 @@ export default function TreinosPage() {
                 <div>
                   <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{workout.name}</p>
                   <p className="text-xs text-slate-400 dark:text-slate-500">
-                    {workout.exercises.length} exercÃ­cio{workout.exercises.length !== 1 ? 's' : ''} Â·{' '}
+                    {workout.exercises.length} exercício{workout.exercises.length !== 1 ? 's' : ''} ·{' '}
                     {new Date(workout.createdAt).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -121,7 +121,7 @@ export default function TreinosPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  DescriÃ§Ã£o <span className="text-slate-400">(opcional)</span>
+                  Descrição <span className="text-slate-400">(opcional)</span>
                 </label>
                 <textarea
                   value={description}

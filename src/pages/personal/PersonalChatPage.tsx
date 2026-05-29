@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+﻿import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents } from '../../hooks/useStudents';
 import { useAssignments, usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
@@ -42,10 +42,10 @@ const MUSCLE_BADGE_COLORS: Record<string, string> = {
   Costas: 'bg-cyan-500/20 text-cyan-400',
   Pernas: 'bg-violet-500/20 text-violet-400',
   Ombros: 'bg-amber-500/20 text-amber-400',
-  'GlÃºteos': 'bg-pink-500/20 text-pink-400',
-  'BÃ­ceps': 'bg-rose-500/20 text-rose-400',
-  'TrÃ­ceps': 'bg-orange-500/20 text-orange-400',
-  'AbdÃ´men': 'bg-green-500/20 text-green-400',
+  'Glúteos': 'bg-pink-500/20 text-pink-400',
+  'Bíceps': 'bg-rose-500/20 text-rose-400',
+  'Tríceps': 'bg-orange-500/20 text-orange-400',
+  'Abdômen': 'bg-green-500/20 text-green-400',
 };
 
 const QUICK_REPLIES = [
@@ -65,7 +65,7 @@ function formatContactTime(dateStr: string) {
   const diffDays = Math.floor((now.getTime() - date.getTime()) / 86_400_000);
   if (diffDays === 0) return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   if (diffDays === 1) return 'Ontem';
-  if (diffDays < 7) return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b'][date.getDay()];
+  if (diffDays < 7) return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][date.getDay()];
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
@@ -310,12 +310,12 @@ export default function PersonalChatPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] text-slate-500 mb-0.5">
-                    PrÃ³ximo treino de {selectedStudent.name.split(' ')[0]}:
+                    Próximo treino de {selectedStudent.name.split(' ')[0]}:
                   </p>
                   <p className="text-xs font-semibold text-slate-200 truncate">{nextAssignment.workoutName}</p>
                 </div>
                 <span className="text-[10px] text-indigo-400 bg-indigo-500/15 rounded-full px-2.5 py-1 shrink-0 font-medium">
-                  amanhÃ£
+                  amanhã
                 </span>
               </div>
             )}
@@ -323,7 +323,7 @@ export default function PersonalChatPage() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col">
               {conversation.length === 0 && (
-                <p className="text-center text-slate-600 text-sm mt-12">Nenhuma mensagem ainda. Diga olÃ¡! ðŸ‘‹</p>
+                <p className="text-center text-slate-600 text-sm mt-12">Nenhuma mensagem ainda. Diga olá! ðŸ‘‹</p>
               )}
               {groupedMessages.map(({ date, msgs }) => (
                 <div key={date}>
@@ -438,10 +438,10 @@ export default function PersonalChatPage() {
             <div className="bg-[#0D1025]/50 rounded-xl p-3">
               <p className="text-[10px] text-slate-500 mb-1">Treinos</p>
               <p className="text-xl font-bold text-slate-100">{studentLogs.length || 47}</p>
-              <p className="text-[10px] text-emerald-400 mt-0.5">+{logsThisMonth.length || 3} este mÃªs</p>
+              <p className="text-[10px] text-emerald-400 mt-0.5">+{logsThisMonth.length || 3} este mês</p>
             </div>
             <div className="bg-[#0D1025]/50 rounded-xl p-3">
-              <p className="text-[10px] text-slate-500 mb-1">FrequÃªncia</p>
+              <p className="text-[10px] text-slate-500 mb-1">Frequência</p>
               <p className="text-xl font-bold text-slate-100">{frequencyPct}%</p>
               <p className="text-[10px] text-indigo-400 mt-0.5">{frequencyLabel}</p>
             </div>
@@ -466,7 +466,7 @@ export default function PersonalChatPage() {
                   style={{ width: `${Math.min(100, Math.max(0, weightProgress))}%` }}
                 />
               </div>
-              <p className="text-[10px] text-slate-600">{weightProgress}% concluÃ­do</p>
+              <p className="text-[10px] text-slate-600">{weightProgress}% concluído</p>
             </div>
           )}
 

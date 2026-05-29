@@ -11,7 +11,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // Verify the caller is authenticated (personal trainer)
+    // Step 1: Verify the caller has a valid JWT
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -34,11 +34,48 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    // Step 2: Validate password strength
+    if (password.length < 8) {
+      return new Response(JSON.stringify({ error: 'A senha deve ter ao menos 8 caracteres.' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseAnon = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+    );
+
+    // Step 3: Validate the JWT and confirm the caller is the personalId they claim
+    const { data: { user: callerUser }, error: callerErr } = await supabaseAnon.auth.getUser(
+      authHeader.replace('Bearer ', ''),
+    );
+    if (callerErr || !callerUser || callerUser.id !== personalId) {
+      return new Response(JSON.stringify({ error: 'Forbidden.' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
       { auth: { autoRefreshToken: false, persistSession: false } },
     );
+
+    // Step 4: Confirm the caller has role = 'personal' in the DB
+    const { data: callerProfile, error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', callerUser.id)
+      .single();
+    if (profileErr || callerProfile?.role !== 'personal') {
+      return new Response(JSON.stringify({ error: 'Forbidden.' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Create the auth user (email already confirmed)
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({

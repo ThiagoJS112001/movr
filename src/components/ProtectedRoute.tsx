@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { ROLE_ROUTES } from '../lib/constants';
 import type { UserRole } from '../types';
 
 interface Props {
@@ -19,14 +20,9 @@ export default function ProtectedRoute({ requiredRole, redirectTo = '/login' }: 
   }
   if (!user) return <Navigate to={redirectTo} replace />;
   if (user.role !== requiredRole) {
-    const roleMap: Record<string, string> = {
-      personal: '/personal/dashboard',
-      aluno: '/aluno/dashboard',
-      academia: '/academia/dashboard',
-    };
-    return <Navigate to={roleMap[user.role] ?? '/login'} replace />;
+    return <Navigate to={ROLE_ROUTES[user.role] ?? '/login'} replace />;
   }
-  if (user.role === 'aluno' && user.isBlocked) {
+  if (user.isBlocked) {
     return <Navigate to="/aluno/bloqueado" replace />;
   }
   return <Outlet />;

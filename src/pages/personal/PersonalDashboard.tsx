@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents } from '../../hooks/useStudents';
 import { useWorkouts, usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
@@ -208,7 +208,7 @@ export default function PersonalDashboard() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Treinos hoje
               {workouts.length > 0 && (
-                <span className="ml-1 text-slate-400 dark:text-slate-500">Â· {workouts.length} fichas</span>
+                <span className="ml-1 text-slate-400 dark:text-slate-500">· {workouts.length} fichas</span>
               )}
             </p>
           </div>

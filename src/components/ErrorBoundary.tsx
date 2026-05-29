@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -34,7 +34,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             </div>
             <h1 className="text-2xl font-bold mb-2">Algo deu errado</h1>
             <p className="text-slate-400 text-sm mb-8">
-              Ocorreu um erro inesperado. Tente recarregar a pÃ¡gina.
+              Ocorreu um erro inesperado. Tente recarregar a página.
             </p>
             {import.meta.env.DEV && this.state.error && (
               <pre className="bg-red-900/20 border border-red-500/20 rounded-xl p-4 text-xs text-red-300 text-left mb-6 overflow-auto max-h-40">
@@ -46,7 +46,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
               className="inline-flex items-center gap-2 bg-[#7c5cfc] hover:bg-[#9b7fff] text-white font-semibold px-6 py-3 rounded-xl transition-colors"
             >
               <RefreshCw size={16} />
-              Voltar ao inÃ­cio
+              Voltar ao início
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail,
@@ -25,7 +25,7 @@ const HOW_STEPS = [
   {
     number: 3,
     title: 'Crie uma nova senha',
-    description: 'Escolha uma nova senha e pronto! VocÃª jÃ¡ pode acessar sua conta.',
+    description: 'Escolha uma nova senha e pronto! Você já pode acessar sua conta.',
   },
 ];
 
@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
                   <h2 className="text-2xl font-bold text-white mb-2">Esqueci minha senha</h2>
                   <p className="text-slate-400 text-sm leading-relaxed">
                     Sem problemas! Informe seu e-mail e enviaremos
-                    um link para vocÃª redefinir sua senha.
+                    um link para você redefinir sua senha.
                   </p>
                 </div>
 
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
                     className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold rounded-xl py-2.5 text-sm transition-colors"
                   >
                     <Send size={15} />
-                    {loading ? 'Enviandoâ€¦' : 'Enviar link de recuperaÃ§Ã£o'}
+                    {loading ? 'Enviandoâ€¦' : 'Enviar link de recuperação'}
                   </button>
 
                   <div className="flex items-center gap-3">
@@ -146,9 +146,9 @@ export default function ForgotPasswordPage() {
                 <div>
                   <h3 className="text-lg font-bold text-white">Verifique seu e-mail</h3>
                   <p className="text-sm text-slate-400 mt-2 leading-relaxed">
-                    Enviamos um link de recuperaÃ§Ã£o para{' '}
+                    Enviamos um link de recuperação para{' '}
                     <span className="font-semibold text-white">{email}.</span>{' '}
-                    Clique no link e siga as instruÃ§Ãµes.
+                    Clique no link e siga as instruções.
                   </p>
                 </div>
                 <div className="w-full bg-white/5 border border-white/10 rounded-xl p-4 flex items-start gap-3 text-left">
@@ -156,8 +156,8 @@ export default function ForgotPasswordPage() {
                     <ShieldCheck size={16} className="text-indigo-400" />
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Por seguranÃ§a, o link expira em 30 minutos.<br />
-                    Caso nÃ£o receba, verifique sua caixa de spam.
+                    Por segurança, o link expira em 30 minutos.<br />
+                    Caso não receba, verifique sua caixa de spam.
                   </p>
                 </div>
                 <button
@@ -179,7 +179,7 @@ export default function ForgotPasswordPage() {
             </div>
             <div className="flex flex-col gap-0.5">
               <p className="text-sm font-semibold text-white">Precisa de ajuda?</p>
-              <p className="text-xs text-slate-400">Nossa equipe estÃ¡ pronta para te ajudar sempre que precisar.</p>
+              <p className="text-xs text-slate-400">Nossa equipe está pronta para te ajudar sempre que precisar.</p>
               <button type="button" className="text-xs text-indigo-400 hover:text-indigo-300 transition mt-1 text-left w-fit">
                 Falar com o suporte â†’
               </button>
@@ -188,10 +188,10 @@ export default function ForgotPasswordPage() {
 
           {/* Footer */}
           <p className="text-xs text-slate-400 dark:text-slate-600 text-center">
-            Ao continuar, vocÃª concorda com nossos{' '}
+            Ao continuar, você concorda com nossos{' '}
             <button type="button" className="text-slate-500 dark:text-slate-500 hover:text-slate-400 transition">Termos de Uso</button>
             {' '}e{' '}
-            <button type="button" className="text-slate-500 dark:text-slate-500 hover:text-slate-400 transition">PolÃ­tica de Privacidade</button>
+            <button type="button" className="text-slate-500 dark:text-slate-500 hover:text-slate-400 transition">Política de Privacidade</button>
             .
           </p>
         </div>
@@ -259,8 +259,8 @@ export default function ForgotPasswordPage() {
                 <ShieldCheck size={15} className="text-indigo-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-semibold text-white">Seus dados estÃ£o seguros</p>
-                <p className="text-xs text-slate-400 mt-0.5">Utilizamos criptografia e boas prÃ¡ticas para garantir sua seguranÃ§a.</p>
+                <p className="text-xs font-semibold text-white">Seus dados estão seguros</p>
+                <p className="text-xs text-slate-400 mt-0.5">Utilizamos criptografia e boas práticas para garantir sua segurança.</p>
               </div>
               <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
             </div>

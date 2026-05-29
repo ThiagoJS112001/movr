@@ -1,4 +1,4 @@
-import { X, Sun, Moon } from 'lucide-react';
+﻿import { X, Sun, Moon } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useSettings } from '../contexts/SettingsContext';
@@ -43,7 +43,7 @@ export default function SettingsModal({ open, onClose, navItems, accent }: Props
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-slate-800 dark:text-slate-100 text-base">
-            ConfiguraÃ§Ãµes
+            Configurações
           </h2>
           <button
             onClick={onClose}
@@ -56,7 +56,7 @@ export default function SettingsModal({ open, onClose, navItems, accent }: Props
         {/* Theme */}
         <div>
           <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-3">
-            AparÃªncia
+            Aparência
           </p>
           <div className="flex gap-2">
             <button

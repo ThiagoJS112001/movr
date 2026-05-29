@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Check,
@@ -25,19 +25,19 @@ import { supabase } from '../lib/supabase';
 // â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const SPECIALTIES_LIST = [
-  'MusculaÃ§Ã£o',
+  'Musculação',
   'Hipertrofia',
   'Emagrecimento',
   'Funcional',
   'Crossfit',
   'Corrida',
   'Pilates',
-  'ReabilitaÃ§Ã£o',
+  'Reabilitação',
   'Yoga',
   'Mobilidade',
   'Powerlifting',
   'HIIT',
-  'NataÃ§Ã£o',
+  'Natação',
   'Spinning',
   'Boxe / Muay Thai',
   'Flexibilidade',
@@ -46,7 +46,7 @@ const SPECIALTIES_LIST = [
 ];
 
 const MODALITY_OPTIONS = [
-  { value: 'presencial' as const, label: 'Presencial', desc: 'SÃ³ atendimento presencial' },
+  { value: 'presencial' as const, label: 'Presencial', desc: 'Só atendimento presencial' },
   { value: 'online'     as const, label: 'Online',     desc: 'Atendimento remoto/online' },
   { value: 'ambos'      as const, label: 'Ambos',      desc: 'Presencial e online'       },
 ];
@@ -54,8 +54,8 @@ const MODALITY_OPTIONS = [
 const STEPS_PERSONAL = [
   { id: 1, title: 'Dados pessoais'      },
   { id: 2, title: 'Dados profissionais' },
-  { id: 3, title: 'FormaÃ§Ã£o'            },
-  { id: 4, title: 'RevisÃ£o'             },
+  { id: 3, title: 'Formação'            },
+  { id: 4, title: 'Revisão'             },
 ] as const;
 
 const STEPS_ALUNO = [
@@ -261,7 +261,7 @@ function Step1Form({
               type="text"
               value={data.city}
               onChange={(e) => onChange({ city: e.target.value })}
-              placeholder="SÃ£o Paulo"
+              placeholder="São Paulo"
               className={inputCls}
             />
           </FieldWrap>
@@ -283,7 +283,7 @@ function Step1Form({
         <textarea
           value={data.bio}
           onChange={(e) => onChange({ bio: e.target.value.slice(0, 300) })}
-          placeholder="Conte um pouco sobre vocÃª, seus objetivos..."
+          placeholder="Conte um pouco sobre você, seus objetivos..."
           rows={3}
           className={`${inputCls} resize-none`}
         />
@@ -371,7 +371,7 @@ function Step2Form({
           label="Raio de atendimento (km) *"
           icon={MapPin}
           error={errors.service_radius}
-          hint="DistÃ¢ncia mÃ¡xima que vocÃª se desloca para atender"
+          hint="DistÃ¢ncia máxima que você se desloca para atender"
         >
           <input
             type="number"
@@ -387,7 +387,7 @@ function Step2Form({
 
       {/* Prices */}
       <div className="grid grid-cols-2 gap-4">
-        <FieldWrap label="Valor por sessÃ£o (R$) *" error={errors.price_session}>
+        <FieldWrap label="Valor por sessão (R$) *" error={errors.price_session}>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-slate-500 pointer-events-none">R$</span>
             <input
@@ -459,7 +459,7 @@ function Step3Form({
       {/* Diplomas */}
       <div>
         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Diploma(s) de EducaÃ§Ã£o FÃ­sica *
+          Diploma(s) de Educação Física *
         </p>
 
         {data.diplomas.length > 0 && (
@@ -493,7 +493,7 @@ function Step3Form({
           }`}
         >
           <Upload size={16} />
-          Enviar diploma ou certificado de graduaÃ§Ã£o
+          Enviar diploma ou certificado de graduação
         </button>
         {errors.diplomas && <p className="text-xs text-red-400 mt-1">{errors.diplomas}</p>}
         <input
@@ -509,7 +509,7 @@ function Step3Form({
       {/* Extra courses */}
       <div>
         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Cursos e certificaÃ§Ãµes extras (opcional)
+          Cursos e certificações extras (opcional)
         </p>
 
         {data.courses.length > 0 && (
@@ -542,7 +542,7 @@ function Step3Form({
                 addCourse();
               }
             }}
-            placeholder="Ex: CrossFit Level 2, NASM CPT, Pilates AvanÃ§adoâ€¦"
+            placeholder="Ex: CrossFit Level 2, NASM CPT, Pilates Avançadoâ€¦"
             className={`${inputCls} flex-1`}
           />
           <button
@@ -572,10 +572,10 @@ function Step3Form({
           </div>
           <div>
             <p className="text-sm font-medium text-white">
-              OfereÃ§o acompanhamento nutricional
+              Ofereço acompanhamento nutricional
             </p>
             <p className="text-xs text-slate-500 mt-0.5">
-              Marque se vocÃª tambÃ©m oferece consultoria nutricional aos seus alunos
+              Marque se você também oferece consultoria nutricional aos seus alunos
             </p>
           </div>
         </button>
@@ -583,7 +583,7 @@ function Step3Form({
         {data.offers_nutrition && (
           <div className="pt-4 border-t border-white/8">
             <p className="text-[11px] font-medium text-slate-400 mb-2">
-              Comprovante de formaÃ§Ã£o em NutriÃ§Ã£o *
+              Comprovante de formação em Nutrição *
             </p>
 
             {data.nutrition_proof ? (
@@ -610,7 +610,7 @@ function Step3Form({
                   }`}
                 >
                   <Upload size={15} />
-                  Enviar comprovante de NutriÃ§Ã£o
+                  Enviar comprovante de Nutrição
                 </button>
                 {errors.nutrition_proof && (
                   <p className="text-xs text-red-400 mt-1">{errors.nutrition_proof}</p>
@@ -661,7 +661,7 @@ function Step4Review({ s1, s2, s3 }: { s1: S1; s2: S2; s3: S3 }) {
           <ReviewRow label="Nome"       value={s1.name} />
           <ReviewRow label="Telefone"   value={s1.phone} />
           <ReviewRow label="Nascimento" value={s1.birth_date} />
-          <ReviewRow label="LocalizaÃ§Ã£o" value={s1.city && s1.state ? `${s1.city}, ${s1.state}` : s1.city || s1.state} />
+          <ReviewRow label="Localização" value={s1.city && s1.state ? `${s1.city}, ${s1.state}` : s1.city || s1.state} />
           <ReviewRow label="Bio"        value={s1.bio} multiline />
         </div>
       </section>
@@ -678,7 +678,7 @@ function Step4Review({ s1, s2, s3 }: { s1: S1; s2: S2; s3: S3 }) {
           {s2.modality !== 'online' && (
             <ReviewRow label="Raio" value={`${s2.service_radius} km`} />
           )}
-          <ReviewRow label="Valor / sessÃ£o" value={`R$ ${s2.price_session}`} />
+          <ReviewRow label="Valor / sessão" value={`R$ ${s2.price_session}`} />
           <ReviewRow label="Valor mensal"  value={`R$ ${s2.price_monthly}`} />
         </div>
       </section>
@@ -686,7 +686,7 @@ function Step4Review({ s1, s2, s3 }: { s1: S1; s2: S2; s3: S3 }) {
       {/* Formation */}
       <section>
         <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">
-          FormaÃ§Ã£o
+          Formação
         </p>
         <div className="rounded-xl bg-[#131722] border border-white/8 divide-y divide-white/5">
           <ReviewRow
@@ -698,14 +698,14 @@ function Step4Review({ s1, s2, s3 }: { s1: S1; s2: S2; s3: S3 }) {
             value={s3.courses.join(', ')}
           />
           <ReviewRow
-            label="NutriÃ§Ã£o"
-            value={s3.offers_nutrition ? `Sim${s3.nutrition_proof ? ` Â· ${s3.nutrition_proof.name}` : ''}` : 'NÃ£o'}
+            label="Nutrição"
+            value={s3.offers_nutrition ? `Sim${s3.nutrition_proof ? ` · ${s3.nutrition_proof.name}` : ''}` : 'Não'}
           />
         </div>
       </section>
 
       <p className="text-xs text-slate-500 text-center pb-2">
-        Confira os dados acima antes de salvar. VocÃª poderÃ¡ editÃ¡-los depois.
+        Confira os dados acima antes de salvar. Você poderá editá-los depois.
       </p>
     </div>
   );
@@ -791,22 +791,22 @@ export default function CompletarPerfilPage() {
     const e: Errors = {};
 
     if (s === 1) {
-      if (!s1.name.trim()) e.name = 'Nome Ã© obrigatÃ³rio';
+      if (!s1.name.trim()) e.name = 'Nome é obrigatório';
     }
 
     if (s === 2 && isPersonal) {
-      if (!s2.cref.trim()) e.cref = 'CREF Ã© obrigatÃ³rio';
+      if (!s2.cref.trim()) e.cref = 'CREF é obrigatório';
       if (s2.specialties.length === 0) e.specialties = 'Selecione ao menos 1 especialidade';
       if ((s2.modality === 'presencial' || s2.modality === 'ambos') && s2.service_radius < 1)
         e.service_radius = 'Informe o raio de atendimento';
-      if (!s2.price_session || s2.price_session <= 0) e.price_session = 'Informe o valor por sessÃ£o';
+      if (!s2.price_session || s2.price_session <= 0) e.price_session = 'Informe o valor por sessão';
       if (!s2.price_monthly || s2.price_monthly <= 0) e.price_monthly = 'Informe o valor mensal';
     }
 
     if (s === 3 && isPersonal) {
       if (s3.diplomas.length === 0) e.diplomas = 'Envie ao menos 1 diploma ou certificado';
       if (s3.offers_nutrition && !s3.nutrition_proof)
-        e.nutrition_proof = 'Envie o comprovante de formaÃ§Ã£o em nutriÃ§Ã£o';
+        e.nutrition_proof = 'Envie o comprovante de formação em nutrição';
     }
 
     setErrors(e);
@@ -979,9 +979,9 @@ export default function CompletarPerfilPage() {
         <div className="mb-7">
           <h2 className="text-xl font-bold text-white">{steps[step - 1].title}</h2>
           <p className="text-sm text-slate-500 mt-0.5">
-            {step === 1 && 'InformaÃ§Ãµes bÃ¡sicas do seu perfil'}
-            {step === 2 && 'Sua atuaÃ§Ã£o como personal trainer'}
-            {step === 3 && 'Diplomas, certificaÃ§Ãµes e formaÃ§Ã£o'}
+            {step === 1 && 'Informações básicas do seu perfil'}
+            {step === 2 && 'Sua atuação como personal trainer'}
+            {step === 3 && 'Diplomas, certificações e formação'}
             {step === 4 && 'Revise seus dados antes de salvar'}
           </p>
         </div>
@@ -1047,7 +1047,7 @@ export default function CompletarPerfilPage() {
             ) : isLastStep ? (
               <><Check size={15} /> Salvar perfil</>
             ) : (
-              <>PrÃ³ximo <ChevronRight size={16} /></>
+              <>Próximo <ChevronRight size={16} /></>
             )}
           </button>
         </div>

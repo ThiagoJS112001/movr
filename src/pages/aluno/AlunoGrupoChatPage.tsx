@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, Users } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -37,7 +37,7 @@ export default function AlunoGrupoChatPage() {
         <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-[#0D1025] flex items-center justify-center mx-auto mb-4">
           <Users size={24} className="text-slate-400" />
         </div>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">Grupo nÃ£o encontrado.</p>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">Grupo não encontrado.</p>
         <button
           onClick={() => navigate('/aluno/grupos')}
           className="mt-4 flex items-center gap-2 text-[#7c5cfc] text-sm font-medium mx-auto"

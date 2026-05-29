@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Lock,
@@ -12,10 +12,10 @@ import {
 import { supabase } from '../lib/supabase';
 
 const PASSWORD_TIPS = [
-  'Use no mÃ­nimo 8 caracteres',
-  'Misture letras maiÃºsculas e minÃºsculas',
-  'Inclua nÃºmeros e sÃ­mbolos',
-  'Evite senhas Ã³bvias como "123456"',
+  'Use no mínimo 8 caracteres',
+  'Misture letras maiúsculas e minúsculas',
+  'Inclua números e símbolos',
+  'Evite senhas óbvias como "123456"',
 ];
 
 function StrengthBar({ password }: { password: string }) {
@@ -26,7 +26,7 @@ function StrengthBar({ password }: { password: string }) {
     /[^A-Za-z0-9]/.test(password),
   ].filter(Boolean).length;
 
-  const labels = ['', 'Fraca', 'RazoÃ¡vel', 'Boa', 'Forte'];
+  const labels = ['', 'Fraca', 'Razoável', 'Boa', 'Forte'];
   const colors = ['', 'bg-red-500', 'bg-amber-400', 'bg-blue-400', 'bg-emerald-500'];
   const textColors = ['', 'text-red-400', 'text-amber-400', 'text-blue-400', 'text-emerald-400'];
 
@@ -90,7 +90,7 @@ export default function ResetPasswordPage() {
       return;
     }
     if (password !== confirm) {
-      setError('As senhas nÃ£o coincidem.');
+      setError('As senhas não coincidem.');
       return;
     }
 
@@ -132,8 +132,8 @@ export default function ResetPasswordPage() {
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 dark:text-white">Link expirado</h2>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
-                    O link de redefiniÃ§Ã£o expirou. Os links sÃ£o vÃ¡lidos por{' '}
-                    <span className="font-semibold text-white">15 minutos</span> por seguranÃ§a.
+                    O link de redefinição expirou. Os links são válidos por{' '}
+                    <span className="font-semibold text-white">15 minutos</span> por segurança.
                   </p>
                 </div>
                 <button
@@ -181,7 +181,7 @@ export default function ResetPasswordPage() {
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
                     <AlertCircle size={15} className="text-amber-400 flex-shrink-0" />
                     <p className="text-xs text-amber-400">
-                      Aguardando validaÃ§Ã£o do linkâ€¦ Se vocÃª nÃ£o veio pelo e-mail de recuperaÃ§Ã£o, este acesso nÃ£o Ã© permitido.
+                      Aguardando validação do linkâ€¦ Se você não veio pelo e-mail de recuperação, este acesso não é permitido.
                     </p>
                   </div>
                 )}
@@ -235,7 +235,7 @@ export default function ResetPasswordPage() {
                       </button>
                     </div>
                     {confirm && password !== confirm && (
-                      <p className="text-xs text-red-400 mt-1">As senhas nÃ£o coincidem.</p>
+                      <p className="text-xs text-red-400 mt-1">As senhas não coincidem.</p>
                     )}
                     {confirm && password === confirm && confirm.length >= 8 && (
                       <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
@@ -265,10 +265,10 @@ export default function ResetPasswordPage() {
 
           {/* Footer */}
           <p className="text-xs text-slate-400 dark:text-slate-600 text-center">
-            Ao continuar, vocÃª concorda com nossos{' '}
+            Ao continuar, você concorda com nossos{' '}
             <button type="button" className="text-slate-500 hover:text-slate-400 transition">Termos de Uso</button>
             {' '}e{' '}
-            <button type="button" className="text-slate-500 hover:text-slate-400 transition">PolÃ­tica de Privacidade</button>.
+            <button type="button" className="text-slate-500 hover:text-slate-400 transition">Política de Privacidade</button>.
           </p>
         </div>
 
@@ -316,8 +316,8 @@ export default function ResetPasswordPage() {
                 <ShieldCheck size={15} className="text-indigo-400" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-semibold text-slate-900 dark:text-white">Seus dados estÃ£o seguros</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Utilizamos criptografia e boas prÃ¡ticas para garantir sua seguranÃ§a.</p>
+                <p className="text-xs font-semibold text-slate-900 dark:text-white">Seus dados estão seguros</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Utilizamos criptografia e boas práticas para garantir sua segurança.</p>
               </div>
               <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0" />
             </div>

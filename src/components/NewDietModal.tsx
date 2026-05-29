@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { X, Plus, Trash2, Salad, TrendingUp, TrendingDown, Activity, Scale, GripVertical, MoreVertical, CheckCircle2, Droplets } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useCreateDiet, useAssignDiet as useAssignDietMutation } from '../hooks/useDiets';
@@ -8,19 +8,19 @@ import type { Meal } from '../types';
 
 const GOALS = [
   { key: 'hipertrofia',   label: 'Hipertrofia',  Icon: TrendingUp   },
-  { key: 'definicao',     label: 'DefiniÃ§Ã£o',    Icon: Activity     },
-  { key: 'manutencao',    label: 'ManutenÃ§Ã£o',   Icon: Scale        },
+  { key: 'definicao',     label: 'Definição',    Icon: Activity     },
+  { key: 'manutencao',    label: 'Manutenção',   Icon: Scale        },
   { key: 'emagrecimento', label: 'Emagrecimento', Icon: TrendingDown },
 ] as const;
 
 type GoalKey = typeof GOALS[number]['key'];
 
 const MEAL_ICONS: Record<string, string> = {
-  'cafÃ©': 'â˜€ï¸', 'cafe': 'â˜€ï¸', 'manhÃ£': 'â˜€ï¸', 'manha': 'â˜€ï¸',
-  'almoÃ§o': 'ðŸ½ï¸', 'almoco': 'ðŸ½ï¸',
+  'café': 'â˜€ï¸', 'cafe': 'â˜€ï¸', 'manhã': 'â˜€ï¸', 'manha': 'â˜€ï¸',
+  'almoço': 'ðŸ½ï¸', 'almoco': 'ðŸ½ï¸',
   'tarde': 'ðŸ§ƒ', 'lanche': 'ðŸ¥™',
-  'prÃ©': 'âš¡', 'pre': 'âš¡', 'treino': 'âš¡',
-  'pÃ³s': 'ðŸŒ™', 'pos': 'ðŸŒ™', 'jantar': 'ðŸŒ™', 'ceia': 'ðŸŒ™',
+  'pré': 'âš¡', 'pre': 'âš¡', 'treino': 'âš¡',
+  'pós': 'ðŸŒ™', 'pos': 'ðŸŒ™', 'jantar': 'ðŸŒ™', 'ceia': 'ðŸŒ™',
 };
 function getMealIcon(name: string): string {
   const n = name.toLowerCase();
@@ -126,7 +126,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
       personalId: user.id,
     });
 
-    toast.success(`Dieta "${diet.name}" criada e atribuÃ­da a ${studentName}!`);
+    toast.success(`Dieta "${diet.name}" criada e atribuída a ${studentName}!`);
     onClose();
   }
 
@@ -202,17 +202,17 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               </div>
             </div>
 
-            {/* Metas diÃ¡rias */}
+            {/* Metas diárias */}
             <div>
-              <p className="text-sm font-semibold text-slate-200 mb-1">Metas diÃ¡rias</p>
-              <p className="text-xs text-slate-500 mb-3">Defina as metas nutricionais diÃ¡rias.</p>
+              <p className="text-sm font-semibold text-slate-200 mb-1">Metas diárias</p>
+              <p className="text-xs text-slate-500 mb-3">Defina as metas nutricionais diárias.</p>
               <div className="grid grid-cols-4 gap-3">
                 <div>
                   <label className="block text-xs text-slate-400 mb-1.5">Calorias (kcal)</label>
                   <input type="number" min="0" value={targetCals}  onChange={(e) => setTargetCals(e.target.value)}  placeholder="2500" className={INPUT_CLS} />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1.5">ProteÃ­nas (g)</label>
+                  <label className="block text-xs text-slate-400 mb-1.5">Proteínas (g)</label>
                   <input type="number" min="0" value={targetProt}  onChange={(e) => setTargetProt(e.target.value)}  placeholder="180"  className={INPUT_CLS} />
                 </div>
                 <div>
@@ -226,13 +226,13 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               </div>
             </div>
 
-            {/* DistribuiÃ§Ã£o de macronutrientes */}
+            {/* Distribuição de macronutrientes */}
             {macroCals > 0 && (
               <div>
-                <p className="text-sm font-semibold text-slate-200 mb-3">DistribuiÃ§Ã£o de macronutrientes</p>
+                <p className="text-sm font-semibold text-slate-200 mb-3">Distribuição de macronutrientes</p>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'ProteÃ­nas',    g: protG, pct: pctProt,  color: 'bg-violet-500' },
+                    { label: 'Proteínas',    g: protG, pct: pctProt,  color: 'bg-violet-500' },
                     { label: 'Carboidratos', g: carbG, pct: pctCarbs, color: 'bg-amber-500'  },
                     { label: 'Gorduras',     g: fatG,  pct: pctFat,   color: 'bg-rose-500'   },
                   ].map(({ label, g, pct, color }) => (
@@ -251,19 +251,19 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               </div>
             )}
 
-            {/* RefeiÃ§Ãµes */}
+            {/* Refeições */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-semibold text-slate-200">RefeiÃ§Ãµes</p>
+                <p className="text-sm font-semibold text-slate-200">Refeições</p>
                 <button
                   type="button"
                   onClick={() => setAddMealOpen((p) => !p)}
                   className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
-                  <Plus size={13} /> Adicionar refeiÃ§Ã£o
+                  <Plus size={13} /> Adicionar refeição
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mb-3">Configure as refeiÃ§Ãµes que farÃ£o parte da dieta.</p>
+              <p className="text-xs text-slate-500 mb-3">Configure as refeições que farão parte da dieta.</p>
 
               {/* Inline add form */}
               {addMealOpen && (
@@ -272,7 +272,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                     value={addMealName}
                     onChange={(e) => setAddMealName(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMeal(); } }}
-                    placeholder="Nome da refeiÃ§Ã£o..."
+                    placeholder="Nome da refeição..."
                     className="flex-1 bg-[#0D1025] border border-emerald-500/60 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     autoFocus
                   />
@@ -294,13 +294,13 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
 
               {meals.length === 0 && !addMealOpen ? (
                 <div className="border border-dashed border-white/[0.07] rounded-xl py-8 text-center">
-                  <p className="text-sm text-slate-500">Nenhuma refeiÃ§Ã£o adicionada.</p>
+                  <p className="text-sm text-slate-500">Nenhuma refeição adicionada.</p>
                   <button
                     type="button"
                     onClick={() => setAddMealOpen(true)}
                     className="mt-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors"
                   >
-                    Adicionar primeira refeiÃ§Ã£o
+                    Adicionar primeira refeição
                   </button>
                 </div>
               ) : (
@@ -311,7 +311,7 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                       <span className="text-xl w-8 text-center shrink-0">{getMealIcon(m.name)}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-slate-100">{m.name}</p>
-                        <p className="text-xs text-slate-500">{m.time} Â· 0 alimentos</p>
+                        <p className="text-xs text-slate-500">{m.time} · 0 alimentos</p>
                       </div>
                       <div className="relative shrink-0">
                         <button
@@ -337,27 +337,27 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
               )}
             </div>
 
-            {/* ObservaÃ§Ãµes */}
+            {/* Observações */}
             <div>
               <p className="text-sm font-semibold text-slate-200 mb-1">
-                ObservaÃ§Ãµes <span className="text-xs font-normal text-slate-500">(opcional)</span>
+                Observações <span className="text-xs font-normal text-slate-500">(opcional)</span>
               </p>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 maxLength={500}
-                placeholder="Adicione informaÃ§Ãµes adicionais sobre esta dieta..."
+                placeholder="Adicione informações adicionais sobre esta dieta..."
                 className="w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition-colors"
               />
             </div>
           </div>
 
-          {/* â”€â”€ Right panel: Resumo diÃ¡rio â”€â”€ */}
+          {/* â”€â”€ Right panel: Resumo diário â”€â”€ */}
           <div className="w-[290px] shrink-0 flex flex-col overflow-hidden">
             <div className="px-5 py-4 border-b border-white/[0.07] shrink-0">
-              <p className="text-sm font-bold text-white">Resumo diÃ¡rio</p>
-              <p className="text-xs text-slate-400 mt-0.5">VisÃ£o geral da dieta criada.</p>
+              <p className="text-sm font-bold text-white">Resumo diário</p>
+              <p className="text-xs text-slate-400 mt-0.5">Visão geral da dieta criada.</p>
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
 
@@ -374,10 +374,10 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                 <p className="text-xs text-slate-500 mt-0.5">/ dia</p>
               </div>
 
-              {/* ProteÃ­nas */}
+              {/* Proteínas */}
               <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs text-slate-400">ProteÃ­nas</p>
+                  <p className="text-xs text-slate-400">Proteínas</p>
                   {pctProt > 0 && <span className="text-xs text-slate-400">{pctProt}%</span>}
                 </div>
                 <p className="text-xl font-bold text-white">
@@ -419,15 +419,15 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
                 </div>
               </div>
 
-              {/* RefeiÃ§Ãµes */}
+              {/* Refeições */}
               <div className="bg-[#0D1025]/60 border border-white/[0.07] rounded-xl px-4 py-3">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs text-slate-400">RefeiÃ§Ãµes</p>
+                  <p className="text-xs text-slate-400">Refeições</p>
                   <Salad size={14} className="text-emerald-400" />
                 </div>
                 <p className="text-xl font-bold text-white">{meals.length}</p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {meals.length === 1 ? '1 refeiÃ§Ã£o' : `${meals.length} refeiÃ§Ãµes`} / 0 alimentos
+                  {meals.length === 1 ? '1 refeição' : `${meals.length} refeições`} / 0 alimentos
                 </p>
               </div>
             </div>

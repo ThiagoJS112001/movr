@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuth } from './contexts/AuthContext';
 import { PageSkeleton } from './components/ui';
+import { ROLE_ROUTES } from './lib/constants';
 
 // Layouts & guard â€” small, needed immediately, keep eager
 import PersonalLayout from './components/layout/PersonalLayout';
@@ -40,6 +41,7 @@ const AlunoDietaPage        = lazy(() => import('./pages/aluno/AlunoDietaPage'))
 const AlunoProgressoPage    = lazy(() => import('./pages/aluno/AlunoProgressoPage'));
 const AcessoBloqueadoPage   = lazy(() => import('./pages/aluno/AcessoBloqueadoPage'));
 const AlunoAcademiasPage    = lazy(() => import('./pages/aluno/AlunoAcademiasPage'));
+const GymPerfilPage         = lazy(() => import('./pages/aluno/GymPerfilPage'));
 const AlunoAmigosPage       = lazy(() => import('./pages/aluno/AlunoAmigosPage'));
 const AlunoPersonaisPage    = lazy(() => import('./pages/aluno/AlunoPersonaisPage'));
 const PersonalPerfilPage    = lazy(() => import('./pages/aluno/PersonalPerfilPage'));
@@ -57,12 +59,7 @@ const AcademiaGruposPage    = lazy(() => import('./pages/academia/AcademiaGrupos
 function RootRedirect() {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  const roleMap: Record<string, string> = {
-    personal: '/personal/dashboard',
-    academia: '/academia/dashboard',
-    aluno: '/aluno/dashboard',
-  };
-  return <Navigate to={roleMap[user.role] ?? '/aluno/dashboard'} replace />;
+  return <Navigate to={ROLE_ROUTES[user.role] ?? '/aluno/dashboard'} replace />;
 }
 
 export default function App() {
@@ -103,6 +100,7 @@ export default function App() {
               <Route path="/aluno/progresso" element={<AlunoProgressoPage />} />
               <Route path="/aluno/chat" element={<AlunoChatPage />} />
               <Route path="/aluno/academias" element={<AlunoAcademiasPage />} />
+              <Route path="/aluno/academias/:id" element={<GymPerfilPage />} />
               <Route path="/aluno/personais" element={<AlunoPersonaisPage />} />
               <Route path="/aluno/personais/:id" element={<PersonalPerfilPage />} />
               <Route path="/aluno/checkout/:id" element={<CheckoutPage />} />

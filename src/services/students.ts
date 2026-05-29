@@ -98,6 +98,7 @@ export async function createStudent(params: {
     name: data.name,
     email: data.email,
     role: 'aluno',
+    rolePrefix: 'ALN',
     avatarUrl: data.avatar_url ?? undefined,
     isBlocked: data.is_blocked ?? false,
   };

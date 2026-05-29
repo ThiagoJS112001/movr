@@ -96,11 +96,15 @@ export function useSendGroupMessage(groupId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (content: string) => {
+      const trimmed = content.trim();
+      if (!trimmed || trimmed.length > 2000) {
+        throw new Error('Mensagem deve ter entre 1 e 2000 caracteres.');
+      }
       const { error } = await supabase.from('group_messages').insert({
         group_id: groupId,
         from_id: user!.id,
         from_name: user!.name,
-        content,
+        content: trimmed,
         type: 'text',
       });
       if (error) throw error;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import {
   X, ArrowLeft, Dumbbell, Clock, Activity, ListChecks,
   GripVertical, Copy, Video,
@@ -12,11 +12,11 @@ const MUSCLE_BADGE: Record<string, string> = {
   'Peito':       'bg-purple-500/20 text-purple-300 border-purple-500/30',
   'Costas':      'bg-teal-500/20 text-teal-300 border-teal-500/30',
   'Pernas':      'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  'GlÃºteos':     'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+  'Glúteos':     'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
   'Ombros':      'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  'BÃ­ceps':      'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-  'TrÃ­ceps':     'bg-pink-500/20 text-pink-300 border-pink-500/30',
-  'AbdÃ´men':     'bg-amber-500/20 text-amber-300 border-amber-500/30',
+  'Bíceps':      'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+  'Tríceps':     'bg-pink-500/20 text-pink-300 border-pink-500/30',
+  'Abdômen':     'bg-amber-500/20 text-amber-300 border-amber-500/30',
   'Panturrilha': 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
 };
 
@@ -25,9 +25,9 @@ function muscleBadge(g: string) {
 }
 
 const TABS: { key: Tab; label: string }[] = [
-  { key: 'visao-geral', label: 'VisÃ£o geral' },
-  { key: 'exercicios',  label: 'ExercÃ­cios' },
-  { key: 'observacoes', label: 'ObservaÃ§Ãµes' },
+  { key: 'visao-geral', label: 'Visão geral' },
+  { key: 'exercicios',  label: 'Exercícios' },
+  { key: 'observacoes', label: 'Observações' },
 ];
 
 interface Props {
@@ -113,7 +113,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             ))}
           </div>
 
-          {/* â”€â”€ Tab: VisÃ£o geral â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* â”€â”€ Tab: Visão geral â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {activeTab === 'visao-geral' && (
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_288px] gap-4">
 
@@ -122,8 +122,8 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
 
                 {/* Stats strip */}
                 <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
-                  <p className="font-semibold text-white mb-0.5">VisÃ£o geral do treino</p>
-                  <p className="text-xs text-slate-400 mb-4">Resumo das principais informaÃ§Ãµes do treino.</p>
+                  <p className="font-semibold text-white mb-0.5">Visão geral do treino</p>
+                  <p className="text-xs text-slate-400 mb-4">Resumo das principais informações do treino.</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
                       {
@@ -135,7 +135,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                       {
                         Icon: Clock,
                         color: 'bg-blue-500/15 text-blue-400',
-                        label: 'DuraÃ§Ã£o mÃ©dia',
+                        label: 'Duração média',
                         value: workout.durationMinutes ? `${workout.durationMinutes} min` : 'â€”',
                       },
                       {
@@ -147,8 +147,8 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                       {
                         Icon: ListChecks,
                         color: 'bg-indigo-500/15 text-indigo-400',
-                        label: 'ExercÃ­cios',
-                        value: `${workout.exercises.length} exercÃ­cio${workout.exercises.length !== 1 ? 's' : ''}`,
+                        label: 'Exercícios',
+                        value: `${workout.exercises.length} exercício${workout.exercises.length !== 1 ? 's' : ''}`,
                       },
                     ].map(({ Icon, color, label, value }) => (
                       <div key={label} className="bg-slate-700/40 rounded-xl p-3 flex flex-col gap-2">
@@ -167,13 +167,13 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                 {/* Exercise list */}
                 <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl overflow-hidden">
                   <div className="px-5 py-4 border-b border-white/[0.07]">
-                    <p className="font-semibold text-white text-sm">ExercÃ­cios do treino</p>
-                    <p className="text-xs text-slate-400 mt-0.5">Lista de exercÃ­cios na ordem definida.</p>
+                    <p className="font-semibold text-white text-sm">Exercícios do treino</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Lista de exercícios na ordem definida.</p>
                   </div>
                   {workout.exercises.length === 0 ? (
                     <div className="py-14 text-center">
                       <Dumbbell size={28} className="mx-auto mb-2 text-slate-600" />
-                      <p className="text-sm text-slate-500">Nenhum exercÃ­cio adicionado.</p>
+                      <p className="text-sm text-slate-500">Nenhum exercício adicionado.</p>
                     </div>
                   ) : (
                     <div className="divide-y divide-slate-700/40">
@@ -206,7 +206,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                             </div>
                             <div className="flex items-center gap-6 text-right shrink-0">
                               <div>
-                                <p className="text-xs font-medium text-slate-200">{ex.sets} sÃ©ries</p>
+                                <p className="text-xs font-medium text-slate-200">{ex.sets} séries</p>
                                 <p className="text-xs text-slate-400">{ex.reps} reps</p>
                               </div>
                               <div>
@@ -221,7 +221,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                                 <button
                                   onClick={() => setVideoOpen(videoUrl)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                                  title="Ver vÃ­deo"
+                                  title="Ver vídeo"
                                 >
                                   <Video size={14} />
                                 </button>
@@ -240,7 +240,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
 
                 {/* Info card */}
                 <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
-                  <p className="font-semibold text-white text-sm mb-4">InformaÃ§Ãµes do treino</p>
+                  <p className="font-semibold text-white text-sm mb-4">Informações do treino</p>
                   <div className="space-y-3.5">
                     <div>
                       <p className="text-xs text-slate-400 mb-1">Nome do treino</p>
@@ -262,7 +262,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                       </div>
                     )}
                     <div className="flex justify-between items-center py-2 border-b border-white/[0.07]">
-                      <p className="text-xs text-slate-400">DuraÃ§Ã£o mÃ©dia</p>
+                      <p className="text-xs text-slate-400">Duração média</p>
                       <p className="text-xs font-medium text-white">
                         {workout.durationMinutes ? `${workout.durationMinutes} minutos` : 'â€”'}
                       </p>
@@ -285,7 +285,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                       </p>
                     </div>
                     <div className="flex justify-between items-center py-2">
-                      <p className="text-xs text-slate-400">ExercÃ­cios</p>
+                      <p className="text-xs text-slate-400">Exercícios</p>
                       <p className="text-xs text-white">{workout.exercises.length}</p>
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                 {/* Notes card */}
                 {workout.description && (
                   <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
-                    <p className="font-semibold text-white text-sm mb-2">ObservaÃ§Ãµes do treino</p>
+                    <p className="font-semibold text-white text-sm mb-2">Observações do treino</p>
                     <p className="text-sm text-slate-300 leading-relaxed">{workout.description}</p>
                   </div>
                 )}
@@ -326,19 +326,19 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             </div>
           )}
 
-          {/* â”€â”€ Tab: ExercÃ­cios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* â”€â”€ Tab: Exercícios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {activeTab === 'exercicios' && (
             <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl overflow-hidden">
               <div className="px-5 py-4 border-b border-white/[0.07]">
-                <p className="font-semibold text-white text-sm">Lista de exercÃ­cios</p>
+                <p className="font-semibold text-white text-sm">Lista de exercícios</p>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {workout.exercises.length} exercÃ­cio{workout.exercises.length !== 1 ? 's' : ''} neste treino
+                  {workout.exercises.length} exercício{workout.exercises.length !== 1 ? 's' : ''} neste treino
                 </p>
               </div>
               {workout.exercises.length === 0 ? (
                 <div className="py-16 text-center">
                   <Dumbbell size={32} className="mx-auto mb-3 text-slate-600" />
-                  <p className="text-sm text-slate-500">Nenhum exercÃ­cio adicionado.</p>
+                  <p className="text-sm text-slate-500">Nenhum exercício adicionado.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -346,12 +346,12 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                     <thead>
                       <tr className="border-b border-white/[0.07]">
                         <th className="text-left text-xs font-medium text-slate-400 px-5 py-3 uppercase tracking-wide">#</th>
-                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">ExercÃ­cio</th>
-                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">SÃ©ries</th>
+                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Exercício</th>
+                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Séries</th>
                         <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Reps</th>
                         <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Carga</th>
                         <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Descanso</th>
-                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">VÃ­deo</th>
+                        <th className="text-left text-xs font-medium text-slate-400 px-4 py-3 uppercase tracking-wide">Vídeo</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700/40">
@@ -389,7 +389,7 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
                                 <button
                                   onClick={() => setVideoOpen(videoUrl)}
                                   className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors"
-                                  title="Ver vÃ­deo"
+                                  title="Ver vídeo"
                                 >
                                   <Video size={14} />
                                 </button>
@@ -407,14 +407,14 @@ export default function WorkoutViewModal({ workout, exercises, onClose }: Props)
             </div>
           )}
 
-          {/* â”€â”€ Tab: ObservaÃ§Ãµes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* â”€â”€ Tab: Observações â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
           {activeTab === 'observacoes' && (
             <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-6">
-              <p className="font-semibold text-white mb-3">ObservaÃ§Ãµes</p>
+              <p className="font-semibold text-white mb-3">Observações</p>
               {workout.description ? (
                 <p className="text-sm text-slate-300 leading-relaxed">{workout.description}</p>
               ) : (
-                <p className="text-sm text-slate-500">Nenhuma observaÃ§Ã£o registrada para este treino.</p>
+                <p className="text-sm text-slate-500">Nenhuma observação registrada para este treino.</p>
               )}
             </div>
           )}

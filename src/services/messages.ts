@@ -45,7 +45,7 @@ export async function fetchMyMessages(userId: string): Promise<Message[]> {
     .select('*')
     .or(`from_id.eq.${userId},to_id.eq.${userId}`)
     .order('sent_at', { ascending: true });
-  if (error) throw error;
+  if (error) throw new Error(error.message);
   return (data ?? []).map(mapMessage);
 }
 
@@ -68,11 +68,17 @@ export async function fetchProfileById(id: string): Promise<BasicProfile | null>
 
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
+const MESSAGE_MAX_LENGTH = 2000;
+
 export async function sendMessage(fromId: string, toId: string, content: string): Promise<void> {
+  const trimmed = content.trim();
+  if (!trimmed || trimmed.length > MESSAGE_MAX_LENGTH) {
+    throw new Error(`Mensagem deve ter entre 1 e ${MESSAGE_MAX_LENGTH} caracteres.`);
+  }
   const { error } = await supabase
     .from('messages')
-    .insert({ from_id: fromId, to_id: toId, content });
-  if (error) throw error;
+    .insert({ from_id: fromId, to_id: toId, content: trimmed });
+  if (error) throw new Error(error.message);
 }
 
 /** Mark all unread messages FROM `fromId` TO `toId` (current user) as read. */
@@ -83,5 +89,5 @@ export async function markConversationRead(fromId: string, toId: string): Promis
     .eq('from_id', fromId)
     .eq('to_id', toId)
     .eq('read', false);
-  if (error) throw error;
+  if (error) throw new Error(error.message);
 }

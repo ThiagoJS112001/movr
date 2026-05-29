@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail,
@@ -16,7 +16,8 @@ import {
   Dumbbell,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import MovrLogo from '../components/ui/MovrLogo';
+import BrandLogo from '../components/ui/BrandLogo';
+import { ROLE_ROUTES } from '../lib/constants';
 
 type RegRole = 'personal' | 'aluno' | 'academia';
 
@@ -33,7 +34,7 @@ const PROFILES: {
   {
     role: 'personal',
     label: 'Personal Trainer',
-    description: 'Gerencie seus alunos, treinos, dietas e avaliaÃ§Ãµes.',
+    description: 'Gerencie seus alunos, treinos, dietas e avaliações.',
     icon: Dumbbell,
     ringColor: 'border-indigo-500 ring-1 ring-indigo-500 bg-indigo-500/10',
     dotColor: 'bg-rose-500',
@@ -43,7 +44,7 @@ const PROFILES: {
   {
     role: 'aluno',
     label: 'Aluno',
-    description: 'Acompanhe seus treinos, dietas e sua evoluÃ§Ã£o.',
+    description: 'Acompanhe seus treinos, dietas e sua evolução.',
     icon: User,
     ringColor: 'border-teal-500 ring-1 ring-teal-500 bg-teal-500/10',
     dotColor: 'bg-slate-500',
@@ -65,29 +66,29 @@ const PROFILES: {
 const RIGHT_FEATURES = [
   {
     icon: TrendingUp,
-    title: 'GestÃ£o completa',
-    description: 'Gerencie treinos, dietas, avaliaÃ§Ãµes e mÃ©tricas de forma prÃ¡tica e eficiente.',
+    title: 'Gestão completa',
+    description: 'Gerencie treinos, dietas, avaliações e métricas de forma prática e eficiente.',
     iconBg: 'bg-indigo-600/20',
     iconColor: 'text-indigo-400',
   },
   {
     icon: MessageCircle,
-    title: 'ComunicaÃ§Ã£o facilitada',
-    description: 'Fale com seus alunos ou personal trainer de forma rÃ¡pida e organizada.',
+    title: 'Comunicação facilitada',
+    description: 'Fale com seus alunos ou personal trainer de forma rápida e organizada.',
     iconBg: 'bg-emerald-600/20',
     iconColor: 'text-emerald-400',
   },
   {
     icon: CalendarDays,
     title: 'Acompanhamento inteligente',
-    description: 'Acompanhe seu progresso com relatÃ³rios e grÃ¡ficos avanÃ§ados.',
+    description: 'Acompanhe seu progresso com relatórios e gráficos avançados.',
     iconBg: 'bg-amber-600/20',
     iconColor: 'text-amber-400',
   },
   {
     icon: ShieldCheck,
     title: 'Seus dados protegidos',
-    description: 'Utilizamos criptografia e boas prÃ¡ticas para garantir sua seguranÃ§a.',
+    description: 'Utilizamos criptografia e boas práticas para garantir sua segurança.',
     iconBg: 'bg-slate-600/30',
     iconColor: 'text-slate-400',
   },
@@ -103,23 +104,6 @@ function formatPhone(value: string): string {
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
-}
-
-function BrandLogo({ size = 38 }: { size?: number }) {
-  const [imgError, setImgError] = useState(false);
-  if (!imgError) {
-    return (
-      <img
-        src="/images/logo_escura.png"
-        alt="Movr"
-        width={size}
-        height={size}
-        className="object-contain"
-        onError={() => setImgError(true)}
-      />
-    );
-  }
-  return <MovrLogo size={size} withContainer />;
 }
 
 export default function RegisterPage() {
@@ -143,8 +127,8 @@ export default function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    if (!terms) { setError('VocÃª precisa aceitar os Termos de Uso para continuar.'); return; }
-    if (password !== confirmPassword) { setError('As senhas nÃ£o coincidem.'); return; }
+    if (!terms) { setError('Você precisa aceitar os Termos de Uso para continuar.'); return; }
+    if (password !== confirmPassword) { setError('As senhas não coincidem.'); return; }
     if (password.length < 6) { setError('A senha deve ter pelo menos 6 caracteres.'); return; }
     setLoading(true);
 
@@ -158,8 +142,7 @@ export default function RegisterPage() {
       setLoading(false);
       if (!result.success) { setError(result.error ?? 'Erro ao criar conta.'); return; }
       if (result.needsEmailConfirmation) { setEmailSent(true); return; }
-      const roleMap: Record<string, string> = { personal: '/personal/dashboard', aluno: '/aluno/dashboard' };
-      navigate(roleMap[result.role ?? role] ?? '/aluno/dashboard');
+      navigate(ROLE_ROUTES[result.role ?? role] ?? '/aluno/dashboard');
     }
   }
 
@@ -172,11 +155,11 @@ export default function RegisterPage() {
           </div>
           <h2 className="text-2xl font-bold text-white">Confirme seu e-mail</h2>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Enviamos um link de confirmaÃ§Ã£o para{' '}
+            Enviamos um link de confirmação para{' '}
             <span className="font-semibold text-white">{email}</span>.{' '}
-            Clique no link para ativar sua conta e depois faÃ§a login normalmente.
+            Clique no link para ativar sua conta e depois faça login normalmente.
           </p>
-          <p className="text-xs text-slate-600">NÃ£o recebeu? Verifique a pasta de spam.</p>
+          <p className="text-xs text-slate-600">Não recebeu? Verifique a pasta de spam.</p>
           <button type="button" onClick={() => navigate('/login')} className="mt-2 w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold transition">
             Ir para o login
           </button>
@@ -200,13 +183,13 @@ export default function RegisterPage() {
           </div>
 
           <h2 className="text-2xl font-bold text-white mb-1">
-            Vamos comeÃ§ar sua{' '}
+            Vamos começar sua{' '}
             <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              evoluÃ§Ã£o.
+              evolução.
             </span>
           </h2>
           <p className="text-slate-400 text-sm mb-7 leading-relaxed">
-            Crie sua conta e faÃ§a parte da plataforma que conecta treinos, pessoas e resultados.
+            Crie sua conta e faça parte da plataforma que conecta treinos, pessoas e resultados.
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -312,7 +295,7 @@ export default function RegisterPage() {
                 Eu concordo com os{' '}
                 <button type="button" className="text-indigo-400 hover:text-indigo-300 transition hover:underline">Termos de Uso</button>
                 {' '}e a{' '}
-                <button type="button" className="text-indigo-400 hover:text-indigo-300 transition hover:underline">PolÃ­tica de Privacidade</button>
+                <button type="button" className="text-indigo-400 hover:text-indigo-300 transition hover:underline">Política de Privacidade</button>
                 .
               </span>
             </label>
@@ -349,7 +332,7 @@ export default function RegisterPage() {
             </button>
 
             <p className="text-center text-sm text-slate-500">
-              JÃ¡ tem uma conta?{' '}
+              Já tem uma conta?{' '}
               <button type="button" onClick={() => navigate('/login')} className="text-indigo-400 hover:text-indigo-300 font-medium transition">
                 Fazer login
               </button>
@@ -362,7 +345,7 @@ export default function RegisterPage() {
 
           {/* Features */}
           <div>
-            <h3 className="text-sm font-bold text-white mb-5">O que vocÃª terÃ¡ com o Movr</h3>
+            <h3 className="text-sm font-bold text-white mb-5">O que você terá com o Movr</h3>
             <ul className="space-y-4">
               {RIGHT_FEATURES.map(({ icon: Icon, title, description, iconBg, iconColor }) => (
                 <li key={title} className="flex items-start gap-3">
@@ -397,8 +380,8 @@ export default function RegisterPage() {
             <div className="rounded-xl bg-white/[0.04] border border-white/[0.07] px-4 py-3 -mt-1">
               <span className="text-indigo-400 text-2xl font-serif leading-none">"</span>
               <p className="text-sm text-white font-medium leading-relaxed mt-0.5">
-                Movimento gera evoluÃ§Ã£o.<br />
-                ConexÃ£o cria resultados.<br />
+                Movimento gera evolução.<br />
+                Conexão cria resultados.<br />
                 Juntos, vamos mais longe.
               </p>
               <span className="w-2 h-2 rounded-full bg-rose-500 inline-block mt-2" />
@@ -414,7 +397,7 @@ export default function RegisterPage() {
               <p className="text-sm font-semibold text-white">Precisa de ajuda?</p>
             </div>
             <p className="text-xs text-slate-500 mb-3 leading-relaxed">
-              Nossa equipe estÃ¡ pronta para te ajudar sempre que precisar.
+              Nossa equipe está pronta para te ajudar sempre que precisar.
             </p>
             <button type="button" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition">
               Entrar em contato â†’

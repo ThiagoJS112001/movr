@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useExercises } from '../hooks/useExercises';
@@ -16,17 +16,17 @@ type DayKey = typeof DAYS[number];
 
 const DAYS_LABEL: Record<DayKey, string> = {
   segunda: 'Segunda-feira',
-  terca:   'TerÃ§a-feira',
+  terca:   'Terça-feira',
   quarta:  'Quarta-feira',
   quinta:  'Quinta-feira',
   sexta:   'Sexta-feira',
-  sabado:  'SÃ¡bado',
+  sabado:  'Sábado',
   domingo: 'Domingo',
 };
 
 const DAYS_SHORT: Record<DayKey, string> = {
   segunda: 'Seg', terca: 'Ter', quarta: 'Qua',
-  quinta: 'Qui', sexta: 'Sex', sabado: 'SÃ¡b', domingo: 'Dom',
+  quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb', domingo: 'Dom',
 };
 
 function getMuscleGroupColor(group: string): string {
@@ -35,9 +35,9 @@ function getMuscleGroupColor(group: string): string {
     'Costas':      'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
     'Pernas':      'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
     'Ombros':      'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
-    'BÃ­ceps':      'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
-    'TrÃ­ceps':     'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
-    'AbdÃ´men':     'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+    'Bíceps':      'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+    'Tríceps':     'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300',
+    'Abdômen':     'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
     'Panturrilha': 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
   };
   return map[group] ?? 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-400';
@@ -144,7 +144,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
             <div>
               <p className="font-bold text-slate-800 dark:text-slate-100 mb-1">Arquivar plano atual?</p>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                O plano de <strong>{studentName}</strong> jÃ¡ possui conteÃºdo. Deseja enviÃ¡-lo para o histÃ³rico antes de criar um novo?
+                O plano de <strong>{studentName}</strong> já possui conteúdo. Deseja enviá-lo para o histórico antes de criar um novo?
               </p>
             </div>
             <div className="flex flex-col gap-2 w-full">
@@ -152,7 +152,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
                 onClick={() => {
                   archiveMutation.mutate({ studentId, studentName, days: planDays });
                   resetPlanDays();
-                  toast.success('Plano arquivado no histÃ³rico!');
+                  toast.success('Plano arquivado no histórico!');
                 }}
                 className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
               >
@@ -192,7 +192,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
               className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-[#0D1025] transition-colors"
             >
               <History size={14} />
-              <span>HistÃ³rico</span>
+              <span>Histórico</span>
             </button>
             <button
               onClick={handleNewPlan}
@@ -263,7 +263,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
             {/* Exercises section */}
             <div>
               <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-3">
-                ExercÃ­cios{' '}
+                Exercícios{' '}
                 <span className="text-slate-400 font-normal text-xs">
                   ({activeDayData?.exerciseIds.length ?? 0} selecionados)
                 </span>
@@ -275,7 +275,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
                   <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                   <input
                     type="text"
-                    placeholder="Buscar por nome do exercÃ­cio..."
+                    placeholder="Buscar por nome do exercício..."
                     value={exerciseSearch}
                     onChange={(e) => setExerciseSearch(e.target.value)}
                     className="w-full pl-8 pr-3 py-2 text-sm border border-slate-200 dark:border-white/[0.07] dark:bg-[#0D1025] dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-slate-300 dark:placeholder:text-slate-600"
@@ -318,11 +318,11 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
               {/* Exercise list */}
               {exercises.length === 0 ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center">
-                  Nenhum exercÃ­cio no catÃ¡logo ainda. Adicione em ExercÃ­cios.
+                  Nenhum exercício no catálogo ainda. Adicione em Exercícios.
                 </p>
               ) : filteredExercises.length === 0 ? (
                 <p className="text-sm text-slate-400 dark:text-slate-500 py-4 text-center">
-                  Nenhum exercÃ­cio encontrado.
+                  Nenhum exercício encontrado.
                 </p>
               ) : (
                 <div className="flex flex-col gap-1.5">
@@ -376,10 +376,10 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
                   <ClipboardList size={26} className="text-slate-300 dark:text-slate-600" />
                 </div>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-snug">
-                  Nenhum exercÃ­cio selecionado ainda.
+                  Nenhum exercício selecionado ainda.
                 </p>
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  Selecione exercÃ­cios ao lado para montar seu treino.
+                  Selecione exercícios ao lado para montar seu treino.
                 </p>
               </div>
             ) : (
@@ -404,10 +404,10 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
                 Dicas
               </p>
               <ul className="text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-1.5">
-                <li>â€¢ Comece pelos exercÃ­cios compostos.</li>
-                <li>â€¢ Respeite seu descanso entre as sÃ©ries.</li>
-                <li>â€¢ Mantenha a execuÃ§Ã£o correta.</li>
-                <li>â€¢ Progresso Ã© consistÃªncia!</li>
+                <li>â€¢ Comece pelos exercícios compostos.</li>
+                <li>â€¢ Respeite seu descanso entre as séries.</li>
+                <li>â€¢ Mantenha a execução correta.</li>
+                <li>â€¢ Progresso é consistência!</li>
               </ul>
             </div>
 
@@ -415,7 +415,7 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
             <div className="flex items-start gap-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl px-3 py-2.5">
               <Info size={13} className="text-indigo-500 dark:text-indigo-400 shrink-0 mt-0.5" />
               <span className="text-xs text-indigo-600 dark:text-indigo-300">
-                Arraste os exercÃ­cios para reordenar. O plano serÃ¡ salvo automaticamente.
+                Arraste os exercícios para reordenar. O plano será salvo automaticamente.
               </span>
             </div>
           </div>

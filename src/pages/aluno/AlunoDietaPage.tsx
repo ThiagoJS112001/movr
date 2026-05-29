@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useStudentDiet } from '../../hooks/useDiets';
 import { CheckCircle2, ChevronDown, ChevronUp, Clock, Droplets, Salad } from 'lucide-react';
 
@@ -29,7 +29,7 @@ function CaloricRing({ consumed, total }: { consumed: number; total: number }) {
         <span className="text-[10px] text-slate-500 font-medium">/ {total} kcal</span>
       </div>
       <p className="text-xs font-semibold mt-1" style={{ color: ringColor }}>
-        {total === 0 ? 'Sem meta' : pct >= 1 ? 'Meta atingida!' : onTrack ? 'No caminho certo' : 'Aguardando refeiÃ§Ãµes'}
+        {total === 0 ? 'Sem meta' : pct >= 1 ? 'Meta atingida!' : onTrack ? 'No caminho certo' : 'Aguardando refeições'}
       </p>
     </div>
   );
@@ -64,7 +64,7 @@ function HydrationPanel({ glasses, setGlasses }: { glasses: number; setGlasses: 
     <div className="bg-[#131722] border border-white/5 rounded-2xl p-4 flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <Droplets size={16} className="text-sky-500" />
-        <span className="text-sm font-semibold text-slate-200">HidrataÃ§Ã£o</span>
+        <span className="text-sm font-semibold text-slate-200">Hidratação</span>
         <span className="ml-auto text-xs font-bold text-sky-500">{glasses}/{WATER_GOAL} copos</span>
       </div>
       <div className="grid grid-cols-4 gap-2">
@@ -96,7 +96,7 @@ function HydrationPanel({ glasses, setGlasses }: { glasses: number; setGlasses: 
         />
       </div>
       {glasses >= WATER_GOAL && (
-        <p className="text-xs text-center font-semibold text-sky-500">Meta de hidrataÃ§Ã£o atingida! ðŸ’§</p>
+        <p className="text-xs text-center font-semibold text-sky-500">Meta de hidratação atingida! ðŸ’§</p>
       )}
     </div>
   );
@@ -130,7 +130,7 @@ export default function AlunoDietaPage() {
           </div>
           <div className="flex flex-col items-center justify-center py-16 text-slate-500">
           <Salad size={40} className="mb-3 opacity-30" />
-          <p className="text-sm">Nenhuma dieta atribuÃ­da ainda.</p>
+          <p className="text-sm">Nenhuma dieta atribuída ainda.</p>
           <p className="text-xs mt-1">Aguarde seu personal atribuir uma dieta.</p>
         </div>
         </div>
@@ -179,7 +179,7 @@ export default function AlunoDietaPage() {
 
   const stateStyles = {
     done:    { border: 'border-l-4 border-emerald-500', badge: 'bg-emerald-900/40 text-emerald-400', label: 'Feito', header: 'bg-emerald-600' },
-    next:    { border: 'border-l-4 border-violet-500', badge: 'bg-violet-900/40 text-violet-400', label: 'PrÃ³xima', header: 'bg-violet-600' },
+    next:    { border: 'border-l-4 border-violet-500', badge: 'bg-violet-900/40 text-violet-400', label: 'Próxima', header: 'bg-violet-600' },
     pending: { border: 'border-l-4 border-white/10', badge: 'bg-white/[0.05] text-slate-400', label: 'Pendente', header: 'bg-slate-600' },
   };
 
@@ -210,7 +210,7 @@ export default function AlunoDietaPage() {
         <div className="bg-[#131722] border border-white/5 rounded-2xl p-5 flex flex-col gap-4">
           <CaloricRing consumed={consumed.cal} total={totals.cal} />
           <div className="flex flex-col gap-2.5">
-            <MacroBar label="ProteÃ­na" consumed={consumed.prot} total={totals.prot} color="#3b82f6" />
+            <MacroBar label="Proteína" consumed={consumed.prot} total={totals.prot} color="#3b82f6" />
             <MacroBar label="Carboidrato" consumed={consumed.carb} total={totals.carb} color="#eab308" />
             <MacroBar label="Gordura" consumed={consumed.fat} total={totals.fat} color="#ef4444" />
           </div>
@@ -245,7 +245,7 @@ export default function AlunoDietaPage() {
                   {(mealCal > 0 || mealProt > 0) && (
                     <p className="text-white/70 text-xs">
                       {mealCal > 0 && `${mealCal} kcal`}
-                      {mealCal > 0 && mealProt > 0 && ' Â· '}
+                      {mealCal > 0 && mealProt > 0 && ' · '}
                       {mealProt > 0 && `${mealProt}g prot`}
                     </p>
                   )}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -55,14 +55,14 @@ const MOCK_PROFILES: Record<string, ProfileSummary> = {
     name: 'Rafael Costa',
     initials: 'RC',
     avatarColor: 'from-violet-500 to-indigo-600',
-    title: 'Personal Trainer Â· Nutricionista',
+    title: 'Personal Trainer · Nutricionista',
     rating: 4.9,
-    specialties: ['MusculaÃ§Ã£o', 'NutriÃ§Ã£o', 'Emagrecimento', 'Funcional', 'Hipertrofia'],
+    specialties: ['Musculação', 'Nutrição', 'Emagrecimento', 'Funcional', 'Hipertrofia'],
     modality: 'ambos',
     plans: [
-      { id: 'avulso',  name: 'SessÃ£o avulsa',          subtitle: '1 sessÃ£o presencial ou online Â· Sem compromisso',                          price: 120, perLabel: 'sessÃ£o' },
-      { id: 'mensal3', name: 'Plano mensal Â· 3Ã—/semana', subtitle: '12 sessÃµes + treinos + acompanhamento nutricional',                        price: 350, perLabel: 'mÃªs'    },
-      { id: 'mensal5', name: 'Plano mensal Â· 5Ã—/semana', subtitle: '20 sessÃµes + treinos + dieta + acesso ilimitado ao chat',                   price: 520, perLabel: 'mÃªs'    },
+      { id: 'avulso',  name: 'Sessão avulsa',          subtitle: '1 sessão presencial ou online · Sem compromisso',                          price: 120, perLabel: 'sessão' },
+      { id: 'mensal3', name: 'Plano mensal · 3Ã—/semana', subtitle: '12 sessões + treinos + acompanhamento nutricional',                        price: 350, perLabel: 'mês'    },
+      { id: 'mensal5', name: 'Plano mensal · 5Ã—/semana', subtitle: '20 sessões + treinos + dieta + acesso ilimitado ao chat',                   price: 520, perLabel: 'mês'    },
     ],
   },
   '2': {
@@ -75,8 +75,8 @@ const MOCK_PROFILES: Record<string, ProfileSummary> = {
     specialties: ['Emagrecimento', 'Funcional', 'Corrida', 'Pilates'],
     modality: 'presencial',
     plans: [
-      { id: 'avulso',  name: 'SessÃ£o avulsa',           subtitle: '1 sessÃ£o presencial Â· Sem compromisso',              price: 90,  perLabel: 'sessÃ£o' },
-      { id: 'mensal3', name: 'Plano mensal Â· 3Ã—/semana', subtitle: '12 sessÃµes + plano de treino personalizado',          price: 280, perLabel: 'mÃªs'    },
+      { id: 'avulso',  name: 'Sessão avulsa',           subtitle: '1 sessão presencial · Sem compromisso',              price: 90,  perLabel: 'sessão' },
+      { id: 'mensal3', name: 'Plano mensal · 3Ã—/semana', subtitle: '12 sessões + plano de treino personalizado',          price: 280, perLabel: 'mês'    },
     ],
   },
 };
@@ -118,7 +118,7 @@ function fmtBRLShort(n: number): string {
 
 // â”€â”€ Stepper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-const STEPS = ['Escolha do plano', 'Agendamento', 'Pagamento', 'ConfirmaÃ§Ã£o'];
+const STEPS = ['Escolha do plano', 'Agendamento', 'Pagamento', 'Confirmação'];
 
 function Stepper({ current }: { current: number }) {
   return (
@@ -256,7 +256,7 @@ function PixPanel({ price }: { price: number }) {
       </div>
 
       <p className="text-center text-xs text-slate-500">
-        Aponte a cÃ¢mera do seu app bancÃ¡rio para o QR Code
+        Aponte a cÃ¢mera do seu app bancário para o QR Code
       </p>
 
       {/* Pix key */}
@@ -277,8 +277,8 @@ function PixPanel({ price }: { price: number }) {
       <div className="flex items-start gap-2 bg-amber-500/5 border border-amber-500/15 rounded-xl p-3">
         <Clock size={13} className="text-amber-400 shrink-0 mt-0.5" />
         <p className="text-xs text-slate-400 leading-relaxed">
-          QR Code vÃ¡lido por{' '}
-          <strong className="text-amber-400">30 minutos</strong>. ApÃ³s o pagamento, confirmaÃ§Ã£o em atÃ© 1 minuto.
+          QR Code válido por{' '}
+          <strong className="text-amber-400">30 minutos</strong>. Após o pagamento, confirmação em até 1 minuto.
         </p>
       </div>
 
@@ -317,7 +317,7 @@ function BoletoPanel() {
 
       {/* Boleto number */}
       <div className="bg-[#080B18] border border-white/8 rounded-xl p-4">
-        <p className="text-xs text-slate-500 mb-1">CÃ³digo de barras</p>
+        <p className="text-xs text-slate-500 mb-1">Código de barras</p>
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs text-slate-300 font-mono truncate">{BOLETO_LINE}</p>
           <button
@@ -332,7 +332,7 @@ function BoletoPanel() {
 
       <div className="flex items-center justify-between">
         <p className="text-xs text-slate-500">
-          Vence em <strong className="text-slate-300">3 dias Ãºteis</strong>
+          Vence em <strong className="text-slate-300">3 dias úteis</strong>
         </p>
         <button className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors">
           <Printer size={13} />
@@ -341,7 +341,7 @@ function BoletoPanel() {
       </div>
 
       <p className="text-xs text-slate-600 text-center leading-relaxed">
-        O pagamento pode levar atÃ© 3 dias Ãºteis para ser confirmado.
+        O pagamento pode levar até 3 dias úteis para ser confirmado.
       </p>
     </div>
   );
@@ -408,7 +408,7 @@ export default function CheckoutPage() {
     } else {
       setAppliedDiscount(0);
       setAppliedCode('');
-      setCouponError('Cupom invÃ¡lido ou expirado.');
+      setCouponError('Cupom inválido ou expirado.');
     }
   }
 
@@ -458,7 +458,7 @@ export default function CheckoutPage() {
                 <p className="text-xs text-slate-400">{selectedPlan.name}</p>
                 {day && (
                   <p className="text-[10px] text-slate-600 mt-0.5">
-                    1Âª sessÃ£o: {day} de {monthName}{hour ? ` Â· ${hour}` : ''}
+                    1Âª sessão: {day} de {monthName}{hour ? ` · ${hour}` : ''}
                   </p>
                 )}
               </div>
@@ -477,7 +477,7 @@ export default function CheckoutPage() {
               onClick={() => navigate('/aluno/dashboard')}
               className="w-full py-3 rounded-xl text-sm font-medium text-slate-500 hover:text-white transition-colors"
             >
-              Voltar para o inÃ­cio
+              Voltar para o início
             </button>
           </div>
         </div>
@@ -518,7 +518,7 @@ export default function CheckoutPage() {
         <Stepper current={3} />
 
         {/* â”€â”€ Section 1: Contract summary â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
-        <SectionCard number={1} title="Resumo da contrataÃ§Ã£o">
+        <SectionCard number={1} title="Resumo da contratação">
           {/* Personal header */}
           <div className="flex items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-3">
@@ -588,12 +588,12 @@ export default function CheckoutPage() {
           {/* Mini info cards */}
           <div className="grid grid-cols-3 gap-2 mt-3">
             <MiniCard
-              label="1Âª sessÃ£o agendada"
+              label="1Âª sessão agendada"
               value={day ? `${day} de ${monthName}, 2026` : 'A definir'}
             />
             <MiniCard
-              label="HorÃ¡rio"
-              value={hour ? `${hour} Â· ${profile.modality === 'online' ? 'Online' : 'Presencial'}` : 'A definir'}
+              label="Horário"
+              value={hour ? `${hour} · ${profile.modality === 'online' ? 'Online' : 'Presencial'}` : 'A definir'}
             />
             <MiniCard
               label="Modalidade"
@@ -608,7 +608,7 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-3 gap-2 mb-5">
             {(
               [
-                { key: 'cartao', label: 'CartÃ£o',  Icon: CreditCard, iconClass: 'text-blue-400' },
+                { key: 'cartao', label: 'Cartão',  Icon: CreditCard, iconClass: 'text-blue-400' },
                 { key: 'pix',    label: 'Pix',     Icon: Zap,        iconClass: 'text-[#22c55e]' },
                 { key: 'boleto', label: 'Boleto',  Icon: FileText,   iconClass: 'text-slate-400' },
               ] as { key: PayMethod; label: string; Icon: React.FC<{ size?: number; className?: string }>; iconClass: string }[]
@@ -630,14 +630,14 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          {/* CartÃ£o form */}
+          {/* Cartão form */}
           {payMethod === 'cartao' && (
             <div className="space-y-4">
               <CardPreview number={cardNumber} name={cardName} expiry={cardExpiry} />
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-slate-500 mb-1.5 block">NÃºmero do cartÃ£o</label>
+                  <label className="text-xs text-slate-500 mb-1.5 block">Número do cartão</label>
                   <input
                     value={cardNumber}
                     onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
@@ -649,11 +649,11 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-500 mb-1.5 block">Nome no cartÃ£o</label>
+                  <label className="text-xs text-slate-500 mb-1.5 block">Nome no cartão</label>
                   <input
                     value={cardName}
                     onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                    placeholder="Como estÃ¡ no cartÃ£o"
+                    placeholder="Como está no cartão"
                     className="w-full bg-[#080B18] border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-700 focus:outline-none focus:border-[#7c5cfc]/40 transition-colors uppercase"
                   />
                 </div>
@@ -725,7 +725,7 @@ export default function CheckoutPage() {
               </div>
             )}
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-400">Taxa de serviÃ§o Movr</span>
+              <span className="text-slate-400">Taxa de serviço Movr</span>
               <span className="text-white">R$ 0,00</span>
             </div>
           </div>
@@ -734,8 +734,8 @@ export default function CheckoutPage() {
           <div className="pt-3 border-t border-white/5 flex items-end justify-between">
             <div>
               <p className="text-sm font-semibold text-white">Total hoje</p>
-              {selectedPlan.perLabel === 'mÃªs' && (
-                <p className="text-[10px] text-slate-600 mt-0.5">RenovaÃ§Ã£o automÃ¡tica em 30 dias</p>
+              {selectedPlan.perLabel === 'mês' && (
+                <p className="text-[10px] text-slate-600 mt-0.5">Renovação automática em 30 dias</p>
               )}
             </div>
             <div className="text-right">
@@ -794,7 +794,7 @@ export default function CheckoutPage() {
             <ShieldCheck size={15} className="text-[#22c55e] shrink-0 mt-0.5" />
             <p className="text-xs text-slate-300 leading-relaxed">
               <strong className="text-[#22c55e]">Garantia de 7 dias.</strong>{' '}
-              Se nÃ£o ficar satisfeito com o primeiro atendimento, devolvemos 100% do valor pago.
+              Se não ficar satisfeito com o primeiro atendimento, devolvemos 100% do valor pago.
             </p>
           </div>
 
@@ -810,7 +810,7 @@ export default function CheckoutPage() {
           {/* Security */}
           <p className="text-center text-[11px] text-slate-600 flex items-center justify-center gap-1.5">
             <Lock size={10} />
-            Pagamento 100% seguro Â· SSL Â· PCI DSS
+            Pagamento 100% seguro · SSL · PCI DSS
           </p>
         </div>
       </div>

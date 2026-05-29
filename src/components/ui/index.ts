@@ -1,3 +1,4 @@
+export { default as BrandLogo } from './BrandLogo';
 export { default as PageHeader } from './PageHeader';
 export { default as EmptyState } from './EmptyState';
 export { default as MovrLogo } from './MovrLogo';

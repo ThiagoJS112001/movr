@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail,
@@ -13,50 +13,33 @@ import {
   Sun,
   ArrowRight,
 } from 'lucide-react';
-import MovrLogo from '../components/ui/MovrLogo';
+import BrandLogo from '../components/ui/BrandLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { ROLE_ROUTES } from '../lib/constants';
 
 const FEATURES = [
   {
     icon: TrendingUp,
-    title: 'EvoluÃ§Ã£o que se vÃª',
-    description: 'Acompanhe mÃ©tricas, resultados e performance em tempo real.',
+    title: 'Evolução que se vê',
+    description: 'Acompanhe métricas, resultados e performance em tempo real.',
   },
   {
     icon: Users,
-    title: 'ConexÃ£o que transforma',
-    description: 'Conecte personal, alunos e academias em um sÃ³ lugar.',
+    title: 'Conexão que transforma',
+    description: 'Conecte personal, alunos e academias em um só lugar.',
   },
   {
     icon: Target,
     title: 'Foco que gera resultado',
-    description: 'Planeje treinos, dietas e acompanhamentos com mais clareza e eficiÃªncia.',
+    description: 'Planeje treinos, dietas e acompanhamentos com mais clareza e eficiência.',
   },
   {
     icon: ShieldCheck,
-    title: 'Seus dados estÃ£o protegidos',
-    description: 'Utilizamos criptografia e boas prÃ¡ticas para garantir a seguranÃ§a das suas informaÃ§Ãµes.',
+    title: 'Seus dados estão protegidos',
+    description: 'Utilizamos criptografia e boas práticas para garantir a segurança das suas informações.',
   },
 ];
-
-/** Logo com fallback para o SVG se a imagem nÃ£o existir */
-function BrandLogo({ size = 38 }: { size?: number }) {
-  const [imgError, setImgError] = useState(false);
-  if (!imgError) {
-    return (
-      <img
-        src="/images/logo_escura.png"
-        alt="Movr"
-        width={size}
-        height={size}
-        className="object-contain"
-        onError={() => setImgError(true)}
-      />
-    );
-  }
-  return <MovrLogo size={size} withContainer />;
-}
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -65,7 +48,6 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -80,12 +62,7 @@ export default function LoginPage() {
       setError(result.error ?? 'Erro ao fazer login.');
       return;
     }
-    const roleMap: Record<string, string> = {
-      personal: '/personal/dashboard',
-      academia: '/academia/dashboard',
-      aluno: '/aluno/dashboard',
-    };
-    navigate(roleMap[result.role ?? ''] ?? '/aluno/dashboard');
+    navigate(ROLE_ROUTES[result.role ?? ''] ?? '/aluno/dashboard');
   }
 
   return (
@@ -111,7 +88,7 @@ export default function LoginPage() {
             Bem-vindo de volta! ðŸ‘‹
           </h2>
           <p className="text-slate-400 text-sm mb-7">
-            FaÃ§a login para continuar{' '}
+            Faça login para continuar{' '}
             <span className="text-indigo-400 font-medium">evoluindo.</span>
           </p>
 
@@ -167,17 +144,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Remember me */}
-            <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 accent-indigo-500 rounded"
-              />
-              <span className="text-sm text-slate-400">Lembrar de mim</span>
-            </label>
-
             {error && (
               <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
                 {error}
@@ -222,7 +188,7 @@ export default function LoginPage() {
             </button>
 
             <p className="text-center text-sm text-slate-500">
-              NÃ£o tem uma conta?{' '}
+              Não tem uma conta?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/register')}
@@ -277,7 +243,7 @@ export default function LoginPage() {
                 </span>
               </h3>
               <p className="text-slate-400 text-sm mt-3 leading-relaxed">
-                Tudo o que vocÃª precisa para levar<br />
+                Tudo o que você precisa para levar<br />
                 seus treinos e seus alunos mais longe.
               </p>
             </div>
@@ -348,10 +314,10 @@ export default function LoginPage() {
       {/* Footer */}
       <div className="mt-5 flex flex-col items-center gap-2">
         <p className="text-xs text-slate-600 text-center">
-          Ao continuar, vocÃª concorda com nossos{' '}
+          Ao continuar, você concorda com nossos{' '}
           <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Termos de Uso</button>
           {' '}e{' '}
-          <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">PolÃ­tica de Privacidade</button>
+          <button type="button" className="text-slate-500 hover:text-slate-300 transition underline underline-offset-2">Política de Privacidade</button>
           .
         </p>
         <button

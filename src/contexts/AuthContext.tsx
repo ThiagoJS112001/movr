@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, RolePrefix } from '../types';
 import { supabase } from '../lib/supabase';
 
@@ -89,15 +89,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // Se o login/signup estÃ¡ sendo gerenciado diretamente, ignorar o listener
+      // Se o login/signup está sendo gerenciado diretamente, ignorar o listener
       // para evitar race condition de fetchProfile duplicado.
       if (signingUpRef.current) return;
 
       if (session?.user) {
-        // SIGNED_IN disparado por uma sessÃ£o existente (ex: refresh de aba)
+        // SIGNED_IN disparado por uma sessão existente (ex: refresh de aba)
         let profile = await fetchProfile(session.user.id);
         if (!profile && event === 'SIGNED_IN') {
-          // Trigger pode ainda nÃ£o ter criado o perfil (caso de signUp externo)
+          // Trigger pode ainda não ter criado o perfil (caso de signUp externo)
           for (let i = 0; i < 3 && !profile; i++) {
             await new Promise((r) => setTimeout(r, 800));
             profile = await fetchProfile(session.user.id);
@@ -127,12 +127,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('email not confirmed') || msg.includes('not confirmed')) {
-          return { success: false, error: 'E-mail nÃ£o confirmado. Verifique sua caixa de entrada e clique no link de confirmaÃ§Ã£o.' };
+          return { success: false, error: 'E-mail não confirmado. Verifique sua caixa de entrada e clique no link de confirmação.' };
         }
-        return { success: false, error: 'E-mail ou senha invÃ¡lidos.' };
+        return { success: false, error: 'E-mail ou senha inválidos.' };
       }
       if (!data.session) {
-        return { success: false, error: 'E-mail ou senha invÃ¡lidos.' };
+        return { success: false, error: 'E-mail ou senha inválidos.' };
       }
 
       // Buscar perfil; se falhar, tentar mais 2x com delays progressivos
@@ -145,8 +145,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await new Promise((r) => setTimeout(r, 2000));
         profile = await fetchProfile(data.session.user.id);
       }
-      // Perfil ausente: trigger pode ter falhado na criaÃ§Ã£o da conta.
-      // Tentar criar o perfil com os metadados disponÃ­veis.
+      // Perfil ausente: trigger pode ter falhado na criação da conta.
+      // Tentar criar o perfil com os metadados disponíveis.
       if (!profile) {
         const meta = data.session.user.user_metadata ?? {};
         const fallbackName =
@@ -167,13 +167,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       if (!profile) {
         await supabase.auth.signOut();
-        return { success: false, error: 'NÃ£o foi possÃ­vel carregar seu perfil. Tente novamente.' };
+        return { success: false, error: 'Não foi possível carregar seu perfil. Tente novamente.' };
       }
       setUser(profile);
       return { success: true, role: profile.role };
     } catch (err) {
       if (import.meta.env.DEV) console.error('[login] catch:', err);
-      return { success: false, error: 'Erro de conexÃ£o. Verifique sua internet e tente novamente.' };
+      return { success: false, error: 'Erro de conexão. Verifique sua internet e tente novamente.' };
     } finally {
       signingUpRef.current = false;
     }
@@ -189,10 +189,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return 'Limite de e-mails atingido. Aguarde alguns minutos e tente novamente.';
     }
     if (msg.toLowerCase().includes('user already registered') || msg.toLowerCase().includes('already registered')) {
-      return 'Este e-mail jÃ¡ estÃ¡ cadastrado.';
+      return 'Este e-mail já está cadastrado.';
     }
     if (msg.toLowerCase().includes('invalid email')) {
-      return 'E-mail invÃ¡lido.';
+      return 'E-mail inválido.';
     }
     if (msg.toLowerCase().includes('password')) {
       return 'Senha muito fraca. Use pelo menos 6 caracteres.';
@@ -210,7 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (error) return { success: false, error: translateAuthError(error.message) };
       if (data.session) {
-        // Retry atÃ© 3x â€” trigger pode levar um momento para criar o profile
+        // Retry até 3x â€” trigger pode levar um momento para criar o profile
         let profile = null;
         for (let i = 0; i < 3; i++) {
           profile = await fetchProfile(data.session.user.id);
@@ -219,7 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         if (!profile) {
           await supabase.auth.signOut();
-          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexÃ£o e tente novamente.' };
+          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexão e tente novamente.' };
         }
         setUser(profile);
         return { success: true, role: profile.role };
@@ -248,7 +248,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) return { success: false, error: translateAuthError(error.message) };
 
       if (data.session) {
-        // Retry atÃ© 3x â€” trigger pode levar um momento
+        // Retry até 3x â€” trigger pode levar um momento
         let profile = null;
         for (let i = 0; i < 3; i++) {
           profile = await fetchProfile(data.session.user.id);
@@ -257,7 +257,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         if (!profile) {
           await supabase.auth.signOut();
-          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexÃ£o e tente novamente.' };
+          return { success: false, error: 'Erro ao configurar sua conta. Verifique sua conexão e tente novamente.' };
         }
         if (city || state) {
           await supabase

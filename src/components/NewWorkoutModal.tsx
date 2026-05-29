@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+﻿import { useState, useMemo, useRef } from 'react';
 import {
   X, Search, SlidersHorizontal, Plus, Trash2, GripVertical,
   Dumbbell, Sparkles,
@@ -16,19 +16,19 @@ const DAYS = [
   { key: 'quarta',  label: 'Qua' },
   { key: 'quinta',  label: 'Qui' },
   { key: 'sexta',   label: 'Sex' },
-  { key: 'sabado',  label: 'SÃ¡b' },
+  { key: 'sabado',  label: 'Sáb' },
   { key: 'domingo', label: 'Dom' },
 ] as const;
 
-const MUSCLE_FILTERS = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombros', 'BraÃ§os', 'AbdÃ´men'] as const;
+const MUSCLE_FILTERS = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombros', 'Braços', 'Abdômen'] as const;
 
 const MUSCLE_MAP: Record<string, string[]> = {
   Peito:    ['Peito'],
   Costas:   ['Costas'],
-  Pernas:   ['Pernas', 'GlÃºteos', 'Panturrilha'],
+  Pernas:   ['Pernas', 'Glúteos', 'Panturrilha'],
   Ombros:   ['Ombros'],
-  BraÃ§os:   ['BÃ­ceps', 'TrÃ­ceps'],
-  AbdÃ´men:  ['AbdÃ´men'],
+  Braços:   ['Bíceps', 'Tríceps'],
+  Abdômen:  ['Abdômen'],
 };
 
 function estimateDuration(count: number): number {
@@ -155,12 +155,12 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
       return;
     }
     if (selectedExercises.length === 0) {
-      toast.error('Adicione pelo menos um exercÃ­cio.');
+      toast.error('Adicione pelo menos um exercício.');
       return;
     }
     if (status === 'ativo' && dayConflict) {
       const dayLabel = DAYS.find((d) => d.key === selectedDay)?.label ?? selectedDay;
-      toast.error(`JÃ¡ existe um treino ativo na ${dayLabel}. Mude o status para Rascunho.`);
+      toast.error(`Já existe um treino ativo na ${dayLabel}. Mude o status para Rascunho.`);
       return;
     }
     if (!user) return;
@@ -182,7 +182,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
       scheduledDays: selectedDay ? [selectedDay] : [],
     });
 
-    toast.success(`Treino "${workout.name}" criado e atribuÃ­do a ${studentName}!`);
+    toast.success(`Treino "${workout.name}" criado e atribuído a ${studentName}!`);
     onClose();
   }
 
@@ -231,7 +231,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     maxLength={80}
-                    placeholder="Ex: Peito e TrÃ­ceps"
+                    placeholder="Ex: Peito e Tríceps"
                     className="w-full bg-[#0D1025] border border-slate-600 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   />
                 </div>
@@ -290,21 +290,21 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
                 </div>
                 {dayConflict && (
                   <p className="text-xs text-amber-400 mt-1.5">
-                    âš  JÃ¡ existe um treino ativo neste dia. Para criar outro, use Rascunho.
+                    âš  Já existe um treino ativo neste dia. Para criar outro, use Rascunho.
                   </p>
                 )}
               </div>
 
               {/* Search + filter header */}
               <div>
-                <p className="text-xs font-semibold text-slate-300 mb-2">Adicionar exercÃ­cios</p>
+                <p className="text-xs font-semibold text-slate-300 mb-2">Adicionar exercícios</p>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 relative">
                     <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                     <input
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Buscar exercÃ­cio..."
+                      placeholder="Buscar exercício..."
                       className="w-full bg-[#0D1025] border border-white/[0.07] rounded-xl pl-8 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                   </div>
@@ -339,7 +339,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
               {filteredExercises.length === 0 ? (
                 <div className="py-12 text-center text-slate-500">
                   <Dumbbell size={24} className="mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">Nenhum exercÃ­cio encontrado.</p>
+                  <p className="text-sm">Nenhum exercício encontrado.</p>
                 </div>
               ) : (
                 <div className="flex flex-col divide-y divide-slate-700/40">
@@ -370,7 +370,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
                               ? 'bg-indigo-500/20 text-indigo-400 cursor-default'
                               : 'bg-slate-700 text-slate-400 hover:bg-indigo-600 hover:text-white border border-slate-600'
                           }`}
-                          title={already ? 'JÃ¡ adicionado' : 'Adicionar'}
+                          title={already ? 'Já adicionado' : 'Adicionar'}
                         >
                           <Plus size={14} />
                         </button>
@@ -388,7 +388,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07] shrink-0">
               <p className="text-sm font-semibold text-white">
-                ExercÃ­cios selecionados{' '}
+                Exercícios selecionados{' '}
                 <span className="text-slate-400 font-normal">({selectedExercises.length})</span>
               </p>
               {selectedExercises.length > 0 && (
@@ -406,7 +406,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
               {selectedExercises.length === 0 ? (
                 <div className="py-12 text-center text-slate-500">
                   <Dumbbell size={24} className="mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Nenhum exercÃ­cio selecionado.</p>
+                  <p className="text-sm">Nenhum exercício selecionado.</p>
                   <p className="text-xs mt-1 text-slate-600">Clique no + para adicionar.</p>
                 </div>
               ) : (
@@ -437,7 +437,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-white truncate">{we.exerciseName}</p>
                           <p className="text-[10px] text-slate-500">
-                            {we.sets} sÃ©ries Â· {we.reps} reps
+                            {we.sets} séries · {we.reps} reps
                           </p>
                         </div>
                         <button
@@ -462,7 +462,7 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
                     <p className="text-xs font-semibold text-indigo-300">Resumo</p>
                   </div>
                   <p className="text-xs text-slate-300">
-                    {selectedExercises.length} exercÃ­cio{selectedExercises.length !== 1 ? 's' : ''} Â· ~{duration} min
+                    {selectedExercises.length} exercício{selectedExercises.length !== 1 ? 's' : ''} · ~{duration} min
                   </p>
                   <p className="text-xs text-slate-400 mt-0.5">{summaryFocus}</p>
                 </div>

@@ -39,10 +39,10 @@ export function useWorkouts() {
   });
 }
 
-export function useWorkout(id: string) {
+export function useWorkout(id: string | undefined) {
   return useQuery({
-    queryKey: workoutKey(id),
-    queryFn: () => fetchWorkoutById(id),
+    queryKey: workoutKey(id ?? ''),
+    queryFn: () => fetchWorkoutById(id!),
     enabled: !!id,
   });
 }
@@ -196,7 +196,13 @@ export function usePersonalWorkoutLogs() {
 }
 
 export function useAddWorkoutLog() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
   return useMutation({
     mutationFn: (log: Omit<WorkoutLog, 'id'>) => addWorkoutLog(log),
+    onSuccess: (_data, log) => {
+      qc.invalidateQueries({ queryKey: workoutLogsKey(log.studentId) });
+      qc.invalidateQueries({ queryKey: personalWorkoutLogsKey(user?.id ?? '') });
+    },
   });
 }

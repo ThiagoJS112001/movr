@@ -1,14 +1,14 @@
-import { Dumbbell, Moon, ChevronRight, Calendar, RefreshCw } from 'lucide-react';
+﻿import { Dumbbell, Moon, ChevronRight, Calendar, RefreshCw } from 'lucide-react';
 import { useMyWeeklyPlan } from '../../hooks/useWeeklyPlans';
 import { useNavigate } from 'react-router-dom';
 
 const WEEK_DAYS = [
   { key: 'segunda', short: 'Seg', long: 'Segunda-feira' },
-  { key: 'terca',   short: 'Ter', long: 'TerÃ§a-feira'   },
+  { key: 'terca',   short: 'Ter', long: 'Terça-feira'   },
   { key: 'quarta',  short: 'Qua', long: 'Quarta-feira'  },
   { key: 'quinta',  short: 'Qui', long: 'Quinta-feira'  },
   { key: 'sexta',   short: 'Sex', long: 'Sexta-feira'   },
-  { key: 'sabado',  short: 'SÃ¡b', long: 'SÃ¡bado'        },
+  { key: 'sabado',  short: 'Sáb', long: 'Sábado'        },
   { key: 'domingo', short: 'Dom', long: 'Domingo'       },
 ];
 
@@ -48,9 +48,10 @@ export default function AlunoAgendaPage() {
   const todayPlan = planMap.get(todayKey);
 
   return (
-    <div className="min-h-screen bg-[#080B18] text-white px-4 pt-5 pb-10 max-w-2xl mx-auto">
+    <div className="min-h-screen bg-[#080B18] text-white">
+      <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-[#7c5cfc]/10 flex items-center justify-center">
           <Calendar size={18} className="text-[#7c5cfc]" />
         </div>
@@ -77,7 +78,7 @@ export default function AlunoAgendaPage() {
           </div>
           <p className="text-slate-300 font-semibold">Sem plano configurado</p>
           <p className="text-slate-500 text-sm mt-1 max-w-xs">
-            Aguarde seu personal trainer criar um plano de treinos semanal para vocÃª.
+            Aguarde seu personal trainer criar um plano de treinos semanal para você.
           </p>
           <button
             onClick={() => navigate('/aluno/treino')}
@@ -102,7 +103,7 @@ export default function AlunoAgendaPage() {
               }`}
             >
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
-                Hoje Â· {WEEK_DAYS[todayIndex]?.long}
+                Hoje · {WEEK_DAYS[todayIndex]?.long}
               </p>
               {todayPlan.label ? (
                 <>
@@ -112,7 +113,7 @@ export default function AlunoAgendaPage() {
                   </div>
                   {todayPlan.exerciseIds.length > 0 && (
                     <p className="text-xs text-slate-400 mt-1">
-                      {todayPlan.exerciseIds.length} exercÃ­cio{todayPlan.exerciseIds.length !== 1 ? 's' : ''}
+                      {todayPlan.exerciseIds.length} exercício{todayPlan.exerciseIds.length !== 1 ? 's' : ''}
                     </p>
                   )}
                   <button
@@ -164,7 +165,7 @@ export default function AlunoAgendaPage() {
                       <p className="text-sm font-semibold text-white truncate">{entry.label}</p>
                       {entry.exerciseIds.length > 0 && (
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {entry.exerciseIds.length} exercÃ­cio{entry.exerciseIds.length !== 1 ? 's' : ''}
+                          {entry.exerciseIds.length} exercício{entry.exerciseIds.length !== 1 ? 's' : ''}
                         </p>
                       )}
                     </>
@@ -195,6 +196,7 @@ export default function AlunoAgendaPage() {
           </p>
         </div>
       )}
+      </div>
     </div>
   );
 }

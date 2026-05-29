@@ -1,4 +1,4 @@
-import { CreditCard, Check, Zap, Star, Shield } from 'lucide-react';
+﻿import { CreditCard, Check, Zap, Star, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -19,44 +19,44 @@ const PLANS: Plan[] = [
     id: 'free',
     name: 'Gratuito',
     price: 'R$ 0',
-    period: '/mÃªs',
-    description: 'Para comeÃ§ar e explorar a plataforma',
+    period: '/mês',
+    description: 'Para começar e explorar a plataforma',
     cta: 'Plano atual',
     features: [
       'Acesso aos seus treinos',
       'Dieta do seu personal',
       'Chat com personal',
-      'HistÃ³rico de treinos',
+      'Histórico de treinos',
     ],
   },
   {
     id: 'pro',
     name: 'Pro',
     price: 'R$ 29,90',
-    period: '/mÃªs',
+    period: '/mês',
     description: 'Para alunos que querem mais recursos',
     highlight: true,
     cta: 'Assinar Pro',
     features: [
       'Tudo do plano gratuito',
-      'RelatÃ³rios de progresso avanÃ§ados',
-      'NotificaÃ§Ãµes personalizadas',
+      'Relatórios de progresso avançados',
+      'Notificações personalizadas',
       'Grupos e comunidade',
       'Agenda e lembretes de treino',
-      'Suporte prioritÃ¡rio',
+      'Suporte prioritário',
     ],
   },
   {
     id: 'premium',
     name: 'Premium',
     price: 'R$ 59,90',
-    period: '/mÃªs',
-    description: 'ExperiÃªncia completa com personal exclusivo',
+    period: '/mês',
+    description: 'Experiência completa com personal exclusivo',
     cta: 'Assinar Premium',
     features: [
       'Tudo do plano Pro',
       'Personal trainer dedicado',
-      'AvaliaÃ§Ãµes fÃ­sicas ilimitadas',
+      'Avaliações físicas ilimitadas',
       'Planos de treino personalizados',
       'Consultas nutricionais',
       'Acesso antecipado a novidades',
@@ -85,25 +85,26 @@ export default function AlunoAssinaturaPage() {
     // which creates a Stripe Checkout Session and returns a redirect URL.
     // Requires VITE_STRIPE_PUBLIC_KEY in your .env and the edge function deployed.
     toast.info('Checkout em breve', {
-      description: 'IntegraÃ§Ã£o com Stripe serÃ¡ habilitada em breve.',
+      description: 'Integração com Stripe será habilitada em breve.',
     });
   }
 
   return (
-    <div className="min-h-screen bg-[#080B18] text-white px-4 pt-5 pb-12 max-w-3xl mx-auto">
+    <div className="min-h-screen bg-[#080B18] text-white">
+      <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-[#7c5cfc]/10 flex items-center justify-center">
           <CreditCard size={18} className="text-[#7c5cfc]" />
         </div>
         <div>
           <h1 className="text-xl font-bold leading-none">Assinatura</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Gerencie seu plano e cobranÃ§as</p>
+          <p className="text-xs text-slate-500 mt-0.5">Gerencie seu plano e cobranças</p>
         </div>
       </div>
 
       {/* Current plan banner */}
-      <div className="mt-5 mb-7 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.07] flex items-center gap-3">
+      <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.07] flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-[#0D1025] flex items-center justify-center">
           {PLAN_ICONS[currentPlan]}
         </div>
@@ -115,7 +116,7 @@ export default function AlunoAssinaturaPage() {
             </span>
           </p>
           <p className="text-xs text-slate-500 mt-0.5">
-            {user?.name} Â· {user?.email}
+            {user?.name} · {user?.email}
           </p>
         </div>
         <span className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-medium">
@@ -187,11 +188,12 @@ export default function AlunoAssinaturaPage() {
       </div>
 
       {/* FAQ / info */}
-      <div className="mt-8 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+      <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
         <p className="text-xs text-slate-400 text-center">
-          Os planos pagos serÃ£o habilitados em breve. Pagamentos processados com seguranÃ§a via{' '}
+          Os planos pagos serão habilitados em breve. Pagamentos processados com segurança via{' '}
           <span className="text-white font-medium">Stripe</span>. Cancele a qualquer momento.
         </p>
+      </div>
       </div>
     </div>
   );

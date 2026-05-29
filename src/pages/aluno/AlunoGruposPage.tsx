@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Users, Plus, MessageCircle, X, Check, UserCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -51,7 +51,7 @@ export default function AlunoGruposPage() {
       setSelectedFriends([]);
       navigate(`/aluno/grupos/${groupId}`);
     } catch {
-      toast.error('NÃ£o foi possÃ­vel criar o grupo. Tente novamente.');
+      toast.error('Não foi possível criar o grupo. Tente novamente.');
     }
   }
 
@@ -110,7 +110,7 @@ export default function AlunoGruposPage() {
           {!groupsLoading && myGroups.length === 0 && (
             <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-10 text-center">
               <Users size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-              <p className="font-semibold dark:text-white">VocÃª ainda nÃ£o estÃ¡ em nenhum grupo</p>
+              <p className="font-semibold dark:text-white">Você ainda não está em nenhum grupo</p>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
                 Crie um grupo com seus amigos para treinar junto!
               </p>
@@ -166,7 +166,7 @@ export default function AlunoGruposPage() {
           {pendingRequests.length > 0 && (
             <div className="bg-white dark:bg-[#0D1025] rounded-2xl border border-slate-100 dark:border-white/[0.07] shadow-sm p-5">
               <h2 className="font-semibold dark:text-white mb-3">
-                SolicitaÃ§Ãµes pendentes ({pendingRequests.length})
+                Solicitações pendentes ({pendingRequests.length})
               </h2>
               <div className="space-y-3">
                 {pendingRequests.map((req) => {
@@ -186,7 +186,7 @@ export default function AlunoGruposPage() {
                         <button
                           onClick={() => {
                             respond.mutate({ id: req.id, status: 'accepted' });
-                            toast.success(`VocÃª e ${p.name} agora sÃ£o amigos!`);
+                            toast.success(`Você e ${p.name} agora são amigos!`);
                           }}
                           className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors"
                         >
@@ -216,10 +216,10 @@ export default function AlunoGruposPage() {
             {friends.length === 0 ? (
               <div className="text-center py-6">
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  VocÃª ainda nÃ£o tem amigos aqui.
+                  Você ainda não tem amigos aqui.
                 </p>
                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                  Adicione amigos pela pÃ¡gina{' '}
+                  Adicione amigos pela página{' '}
                   <button
                     onClick={() => navigate('/aluno/amigos')}
                     className="text-emerald-500 underline"
@@ -261,7 +261,7 @@ export default function AlunoGruposPage() {
           {/* Info box */}
           <div className="bg-slate-50 dark:bg-[#0D1025]/50 rounded-2xl border border-dashed border-slate-300 dark:border-white/[0.07] p-4 text-center">
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Para adicionar novos amigos, acesse a pÃ¡gina{' '}
+              Para adicionar novos amigos, acesse a página{' '}
               <button
                 onClick={() => navigate('/aluno/amigos')}
                 className="text-emerald-500 font-medium underline"
@@ -327,7 +327,7 @@ export default function AlunoGruposPage() {
 
             {friends.length === 0 && (
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
-                Adicione amigos na aba <strong>Amigos</strong> para poder convidÃ¡-los.
+                Adicione amigos na aba <strong>Amigos</strong> para poder convidá-los.
               </p>
             )}
 

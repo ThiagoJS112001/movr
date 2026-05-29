@@ -1,4 +1,4 @@
-import { ShieldOff } from 'lucide-react';
+﻿import { ShieldOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function AcessoBloqueadoPage() {
@@ -16,11 +16,11 @@ export default function AcessoBloqueadoPage() {
         </h1>
 
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-          OlÃ¡, <span className="font-medium text-slate-700 dark:text-slate-300">{user?.name}</span>.
+          Olá, <span className="font-medium text-slate-700 dark:text-slate-300">{user?.name}</span>.
         </p>
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
           Seu acesso foi temporariamente bloqueado pelo seu personal trainer.
-          Entre em contato para regularizar sua situaÃ§Ã£o.
+          Entre em contato para regularizar sua situação.
         </p>
 
         <button

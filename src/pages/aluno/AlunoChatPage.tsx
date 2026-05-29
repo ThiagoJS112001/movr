@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+﻿import { useState, useEffect, useRef, useMemo } from 'react';
 import { Plus, Send, Users, User, ChevronLeft, X, Check, Search, Phone, MoreVertical, Smile, Paperclip, Edit } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -51,7 +51,7 @@ function formatConvoTime(dateStr: string): string {
   const diffDays = Math.floor(diffMs / 86_400_000);
   if (diffDays === 0) return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   if (diffDays === 1) return 'Ontem';
-  if (diffDays < 7) return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'SÃ¡b'][date.getDay()];
+  if (diffDays < 7) return ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][date.getDay()];
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
 
@@ -217,7 +217,7 @@ function DirectChat({ otherId }: { otherId: string }) {
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-1">
         {conversation.length === 0 && (
           <div className="flex items-center justify-center h-full text-slate-500 text-sm">
-            Nenhuma mensagem ainda. Diga olÃ¡! ðŸ‘‹
+            Nenhuma mensagem ainda. Diga olá! ðŸ‘‹
           </div>
         )}
         {grouped.map(({ date, msgs }) => (
@@ -438,7 +438,7 @@ function CreateGroupModal({ friends, onClose }: { friends: FriendProfile[]; onCl
             <p className="text-xs text-slate-400 mb-2">Adicionar amigos ao grupo</p>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {friends.length === 0 && (
-                <p className="text-xs text-slate-500">VocÃª ainda nÃ£o tem amigos adicionados.</p>
+                <p className="text-xs text-slate-500">Você ainda não tem amigos adicionados.</p>
               )}
               {friends.map((f) => (
                 <button
@@ -573,7 +573,7 @@ export default function AlunoChatPage() {
                       : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
-                  {t === 'all' ? 'Todas' : t === 'unread' ? 'NÃ£o lidas' : 'Favoritas'}
+                  {t === 'all' ? 'Todas' : t === 'unread' ? 'Não lidas' : 'Favoritas'}
                   {t === 'unread' && totalUnread > 0 && tab !== 'unread' && (
                     <span className="ml-1 text-[10px] text-[#7c5cfc]">({totalUnread})</span>
                   )}
@@ -687,7 +687,7 @@ export default function AlunoChatPage() {
                         {active.type !== 'group' ? (
                           <>
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                            <span className="text-[11px] text-emerald-400">Online â€¢ Responde rÃ¡pido</span>
+                            <span className="text-[11px] text-emerald-400">Online â€¢ Responde rápido</span>
                           </>
                         ) : (
                           <span className="text-[11px] text-slate-500 capitalize">{active.label}</span>

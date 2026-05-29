@@ -1,539 +1,392 @@
-import { useState } from 'react';
-import {
-  Search,
-  MapPin,
-  Map,
-  Star,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  MessageCircle,
-  Award,
-  GraduationCap,
-  Wifi,
-  Calendar,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+﻿import { useState, useEffect, useCallback } from 'react';
+import { Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
+import GymCard, { GymCardSkeleton } from '../../components/GymCard';
+import { useGyms } from '../../hooks/useGyms';
+import type { GymFilters } from '../../services/gyms';
 
-// -- Types ----------------------------------------------------------------------
+// ── Constants ─────────────────────────────────────────────────────────────────
 
-type Modality = 'online' | 'presencial' | 'ambos';
+const MODALITY_OPTIONS = [
+  'Musculação',
+  'Funcional',
+  'CrossFit',
+  'Natação',
+  'Spinning',
+  'Yoga',
+  'Pilates',
+  'Lutas',
+  'Dança',
+  'Corrida',
+  'Boxe',
+  'Jiu-Jitsu',
+];
 
-interface Certification {
-  label: string;
-  type: 'cref' | 'grad' | 'cert';
+const SORT_OPTIONS: { value: GymFilters['orderBy']; label: string }[] = [
+  { value: 'relevancia', label: 'Relevância' },
+  { value: 'menor_preco', label: 'Menor preço' },
+  { value: 'melhor_avaliacao', label: 'Melhor avaliação' },
+];
+
+const MAX_PRICE = 600;
+const PRICE_STEP = 10;
+const PAGE_SIZE = 20;
+
+// ── Debounce hook ─────────────────────────────────────────────────────────────
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState<T>(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
 }
 
-interface Personal {
-  id: string;
-  name: string;
-  initials: string;
-  avatarColor: string;
-  verified: boolean;
-  title: string;
-  yearsExp: number;
-  specialties: string[];
-  certifications: Certification[];
-  modality: Modality;
-  city: string;
-  state: string;
-  schedule: string;
-  priceMonth: number;
-  planLabel: string;
-  sessionsPerWeek: number;
-  rating: number;
-  reviewCount: number;
-  distanceKm: number;
+// ── ModalidadeMultiselect ─────────────────────────────────────────────────────
+
+interface ModalidadeSelectProps {
+  selected: string[];
+  onChange: (v: string[]) => void;
 }
 
-type FilterKey = 'todos' | 'perto' | 'avaliados' | 'online' | 'presencial';
-type SpecialtyFilter = string | null;
+function ModalidadeMultiselect({ selected, onChange }: ModalidadeSelectProps) {
+  const [open, setOpen] = useState(false);
 
-// -- Mock data ------------------------------------------------------------------
-
-const SPECIALTIES_LIST = [
-  'Musculação', 'Hipertrofia', 'Emagrecimento', 'Funcional',
-  'Crossfit', 'Corrida', 'Pilates', 'Nutrição', 'Reabilitação',
-];
-
-const MOCK_PERSONALS: Personal[] = [
-  {
-    id: '1',
-    name: 'Rafael Costa',
-    initials: 'RC',
-    avatarColor: 'from-violet-500 to-indigo-600',
-    verified: true,
-    title: 'Personal Trainer · Nutricionista',
-    yearsExp: 8,
-    specialties: ['Musculação', 'Nutrição', 'Emagrecimento', 'Funcional'],
-    certifications: [
-      { label: 'CREF 012345-G/SC', type: 'cref' },
-      { label: 'Pós-grad. Nutrição Esportiva · UNIVALI', type: 'grad' },
-      { label: 'Cert. Funcional · CrossFit L1', type: 'cert' },
-    ],
-    modality: 'ambos',
-    city: 'Blumenau',
-    state: 'SC',
-    schedule: 'Atende fins de semana',
-    priceMonth: 350,
-    planLabel: 'Plano mensal',
-    sessionsPerWeek: 3,
-    rating: 4.9,
-    reviewCount: 127,
-    distanceKm: 1.2,
-  },
-  {
-    id: '2',
-    name: 'Ana Martins',
-    initials: 'AM',
-    avatarColor: 'from-emerald-500 to-teal-600',
-    verified: true,
-    title: 'Personal Trainer',
-    yearsExp: 5,
-    specialties: ['Emagrecimento', 'Funcional', 'Corrida', 'Pilates'],
-    certifications: [
-      { label: 'CREF 054321-G/SC', type: 'cref' },
-      { label: 'Grad. Ed. Física · FURB', type: 'grad' },
-      { label: 'Cert. Treinamento Funcional · NASM', type: 'cert' },
-    ],
-    modality: 'presencial',
-    city: 'Blumenau',
-    state: 'SC',
-    schedule: 'Seg a Sex',
-    priceMonth: 280,
-    planLabel: 'Plano mensal',
-    sessionsPerWeek: 2,
-    rating: 4.8,
-    reviewCount: 89,
-    distanceKm: 2.8,
-  },
-  {
-    id: '3',
-    name: 'Bruno Lima',
-    initials: 'BL',
-    avatarColor: 'from-orange-500 to-rose-500',
-    verified: false,
-    title: 'Personal Trainer',
-    yearsExp: 3,
-    specialties: ['Hipertrofia', 'Crossfit', 'Musculação'],
-    certifications: [
-      { label: 'CREF 078900-G/SC', type: 'cref' },
-      { label: 'CrossFit Level 2 Trainer', type: 'cert' },
-    ],
-    modality: 'ambos',
-    city: 'Blumenau',
-    state: 'SC',
-    schedule: 'Seg a Sáb',
-    priceMonth: 220,
-    planLabel: 'Plano mensal',
-    sessionsPerWeek: 3,
-    rating: 4.6,
-    reviewCount: 41,
-    distanceKm: 4.1,
-  },
-  {
-    id: '4',
-    name: 'Carla Souza',
-    initials: 'CS',
-    avatarColor: 'from-pink-500 to-purple-600',
-    verified: true,
-    title: 'Personal Trainer · Fisioterapeuta',
-    yearsExp: 10,
-    specialties: ['Reabilitação', 'Pilates', 'Funcional'],
-    certifications: [
-      { label: 'CREF 011223-G/SC', type: 'cref' },
-      { label: 'Fisioterapia · UFSC', type: 'grad' },
-      { label: 'Pilates Avançado · Stott', type: 'cert' },
-    ],
-    modality: 'online',
-    city: 'Florianópolis',
-    state: 'SC',
-    schedule: 'Seg, Qua, Sex',
-    priceMonth: 400,
-    planLabel: 'Plano mensal',
-    sessionsPerWeek: 3,
-    rating: 5.0,
-    reviewCount: 214,
-    distanceKm: 12.5,
-  },
-];
-
-const PRICE_RANGES = [
-  { label: 'Até R$ 200', min: 0,   max: 200  },
-  { label: 'R$ 200–300', min: 200, max: 300  },
-  { label: 'R$ 300–400', min: 300, max: 400  },
-  { label: 'Acima de R$ 400', min: 400, max: Infinity },
-];
-
-const DISTANCE_OPTIONS = [
-  { label: 'Até 2 km',  max: 2   },
-  { label: 'Até 5 km',  max: 5   },
-  { label: 'Até 10 km', max: 10  },
-  { label: 'Qualquer',  max: Infinity },
-];
-
-// -- Sub-components -------------------------------------------------------------
-
-function CertBadge({ cert }: { cert: Certification }) {
-  if (cert.type === 'cref') {
-    return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#22c55e]/10 border border-[#22c55e]/20 text-[#22c55e]">
-        <CheckCircle2 size={10} />
-        {cert.label}
-      </span>
-    );
-  }
-  if (cert.type === 'grad') {
-    return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400">
-        <GraduationCap size={10} />
-        {cert.label}
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#7c5cfc]/10 border border-[#7c5cfc]/20 text-[#7c5cfc]">
-      <Award size={10} />
-      {cert.label}
-    </span>
+  const toggle = useCallback(
+    (mod: string) => {
+      if (selected.includes(mod)) {
+        onChange(selected.filter((m) => m !== mod));
+      } else {
+        onChange([...selected, mod]);
+      }
+    },
+    [selected, onChange],
   );
-}
 
-function ModalityDot({ modality }: { modality: Modality }) {
-  if (modality === 'ambos') return <span className="w-2 h-2 rounded-full bg-[#22c55e] inline-block" />;
-  if (modality === 'online') return <span className="w-2 h-2 rounded-full bg-[#7c5cfc] inline-block" />;
-  return <span className="w-2 h-2 rounded-full bg-slate-400 inline-block" />;
-}
-
-function ModalityLabel({ modality }: { modality: Modality }) {
-  if (modality === 'ambos')      return 'Online e presencial';
-  if (modality === 'online')     return 'Apenas online';
-  return 'Apenas presencial';
-}
-
-function AccordionSection({
-  label,
-  open,
-  onToggle,
-  children,
-}: {
-  label: string;
-  open: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
   return (
-    <div className="border border-white/8 rounded-xl overflow-hidden">
+    <div className="relative">
       <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between px-4 py-3.5 bg-[#131722] text-left"
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-colors ${
+          selected.length > 0
+            ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300'
+            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+        } hover:border-violet-400 dark:hover:border-violet-500`}
       >
-        <span className="text-sm font-medium text-slate-300">{label}</span>
-        {open ? <ChevronUp size={16} className="text-slate-500" /> : <ChevronDown size={16} className="text-slate-500" />}
+        Modalidade
+        {selected.length > 0 && (
+          <span className="bg-violet-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+            {selected.length}
+          </span>
+        )}
+        <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
+
       {open && (
-        <div className="bg-[#0f111a] border-t border-white/5 px-4 py-3">
-          {children}
-        </div>
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute top-full mt-1.5 left-0 z-20 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-2 min-w-[180px] max-h-64 overflow-y-auto">
+            {MODALITY_OPTIONS.map((mod) => {
+              const checked = selected.includes(mod);
+              return (
+                <label
+                  key={mod}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggle(mod)}
+                    className="w-3.5 h-3.5 accent-violet-600"
+                  />
+                  <span className="text-slate-700 dark:text-slate-200">{mod}</span>
+                </label>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-function PersonalCard({
-  personal,
-  onContact,
-  onViewProfile,
-}: {
-  personal: Personal;
-  onContact: (p: Personal) => void;
-  onViewProfile: (p: Personal) => void;
-}) {
+// ── PriceSlider ────────────────────────────────────────────────────────────────
+
+interface PriceSliderProps {
+  value: number | undefined;
+  onChange: (v: number | undefined) => void;
+}
+
+function PriceSlider({ value, onChange }: PriceSliderProps) {
+  const [open, setOpen] = useState(false);
+  const displayValue = value ?? MAX_PRICE;
+
   return (
-    <div className="rounded-2xl bg-[#131722] border border-white/5 p-5 space-y-4">
-      {/* Top row */}
-      <div className="flex items-start gap-3">
-        {/* Avatar */}
-        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${personal.avatarColor} flex items-center justify-center text-white font-bold text-lg shrink-0`}>
-          {personal.initials}
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-semibold text-white text-base">{personal.name}</h3>
-            {personal.verified && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-1.5 py-0.5 rounded bg-[#22c55e]/15 text-[#22c55e]">
-                <CheckCircle2 size={10} />
-                Verificado
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            {personal.title} · {personal.yearsExp} anos de experiência
-          </p>
-          {/* Specialty chips */}
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {personal.specialties.map((s) => (
-              <span key={s} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-slate-300">
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Rating + distance */}
-        <div className="text-right shrink-0">
-          <div className="flex items-center gap-1 justify-end">
-            <Star size={13} fill="#f59e0b" className="text-amber-400" />
-            <span className="text-sm font-bold text-white">{personal.rating.toFixed(1)}</span>
-          </div>
-          <p className="text-[10px] text-slate-500 mt-0.5">{personal.reviewCount} avaliações</p>
-          <div className="flex items-center gap-1 justify-end mt-1">
-            <MapPin size={10} className="text-slate-500" />
-            <span className="text-[10px] text-slate-500">{personal.distanceKm} km</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Certifications */}
-      <div className="flex flex-wrap gap-1.5">
-        {personal.certifications.map((c) => (
-          <CertBadge key={c.label} cert={c} />
-        ))}
-      </div>
-
-      {/* Modality + location + schedule */}
-      <div className="flex items-center gap-1.5 text-xs text-slate-400 flex-wrap">
-        <ModalityDot modality={personal.modality} />
-        <ModalityLabel modality={personal.modality} />
-        <span className="text-slate-600">·</span>
-        {personal.city}, {personal.state}
-        <span className="text-slate-600">·</span>
-        <Calendar size={11} />
-        {personal.schedule}
-        {personal.modality === 'online' || personal.modality === 'ambos' ? (
-          <>
-            <span className="text-slate-600">·</span>
-            <Wifi size={11} className="text-[#7c5cfc]" />
-            <span className="text-[#7c5cfc]">Remoto disponível</span>
-          </>
-        ) : null}
-      </div>
-
-      {/* Price + actions */}
-      <div className="flex items-end justify-between pt-1 border-t border-white/5">
-        <div>
-          <span className="text-2xl font-bold text-white">R$ {personal.priceMonth}</span>
-          <span className="text-sm text-slate-400">/mês</span>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            {personal.planLabel} · {personal.sessionsPerWeek}x/semana
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onViewProfile(personal)}
-            className="px-4 py-2 rounded-xl text-sm font-semibold border border-white/10 text-slate-200 hover:bg-white/5 transition-colors"
+    <div className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-sm transition-colors ${
+          value !== undefined
+            ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300'
+            : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+        } hover:border-violet-400 dark:hover:border-violet-500`}
+      >
+        {value !== undefined ? `Até R$ ${value}` : 'Preço máximo'}
+        {value !== undefined && (
+          <span
+            role="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange(undefined);
+            }}
+            className="ml-0.5 hover:opacity-70"
           >
-            Ver perfil
-          </button>
-          <button
-            onClick={() => onContact(personal)}
-            className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#7c5cfc] hover:bg-[#6d4ef0] text-white transition-colors"
-          >
-            Entrar em contato
-          </button>
-        </div>
-      </div>
+            <X className="w-3 h-3" />
+          </span>
+        )}
+        <ChevronDown className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute top-full mt-1.5 left-0 z-20 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg p-4 w-56">
+            <div className="flex items-center justify-between mb-3 text-xs text-slate-500 dark:text-slate-400">
+              <span>R$ 0</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-200">
+                {displayValue < MAX_PRICE ? `R$ ${displayValue}` : 'Sem limite'}
+              </span>
+              <span>R$ {MAX_PRICE}+</span>
+            </div>
+            <input
+              type="range"
+              min={50}
+              max={MAX_PRICE}
+              step={PRICE_STEP}
+              value={displayValue}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                onChange(v >= MAX_PRICE ? undefined : v);
+              }}
+              className="w-full accent-violet-600 cursor-pointer"
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-// -- Main page ------------------------------------------------------------------
+// ── Sort select ────────────────────────────────────────────────────────────────
+
+interface SortSelectProps {
+  value: GymFilters['orderBy'];
+  onChange: (v: GymFilters['orderBy']) => void;
+}
+
+function SortSelect({ value, onChange }: SortSelectProps) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value as GymFilters['orderBy'])}
+      className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm focus:outline-none focus:border-violet-400 cursor-pointer"
+    >
+      {SORT_OPTIONS.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+// ── Active filter chips ────────────────────────────────────────────────────────
+
+interface ActiveChipProps {
+  label: string;
+  onRemove: () => void;
+}
+
+function ActiveChip({ label, onRemove }: ActiveChipProps) {
+  return (
+    <span className="flex items-center gap-1 text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 px-2.5 py-1 rounded-full">
+      {label}
+      <button onClick={onRemove} className="hover:opacity-70 transition-opacity">
+        <X className="w-3 h-3" />
+      </button>
+    </span>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function AlunoAcademiasPage() {
-  const navigate = useNavigate();
+  const [searchInput, setSearchInput] = useState('');
+  const [modalidades, setModalidades] = useState<string[]>([]);
+  const [precoMax, setPrecoMax] = useState<number | undefined>(undefined);
+  const [orderBy, setOrderBy] = useState<GymFilters['orderBy']>('relevancia');
+  const [offset, setOffset] = useState(0);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const [search, setSearch]               = useState('');
-  const [activeFilter, setActiveFilter]   = useState<FilterKey>('todos');
-  const [specialtyOpen, setSpecialtyOpen] = useState(false);
-  const [priceOpen, setPriceOpen]         = useState(false);
-  const [distanceOpen, setDistanceOpen]   = useState(false);
-  const [selectedSpecialty, setSelectedSpecialty] = useState<SpecialtyFilter>(null);
-  const [selectedPrice, setSelectedPrice]   = useState<number | null>(null);
-  const [selectedDistance, setSelectedDistance] = useState<number>(Infinity);
+  const debouncedSearch = useDebounce(searchInput, 300);
 
-  const FILTERS: { key: FilterKey; label: string }[] = [
-    { key: 'todos',      label: 'Todos'          },
-    { key: 'perto',      label: 'Perto de mim'   },
-    { key: 'avaliados',  label: 'Melhor avaliados'},
-    { key: 'online',     label: 'Online'         },
-    { key: 'presencial', label: 'Presencial'     },
-  ];
+  // Reset pagination when filters change
+  useEffect(() => {
+    setOffset(0);
+  }, [debouncedSearch, modalidades, precoMax, orderBy]);
 
-  const filtered = MOCK_PERSONALS
-    .filter((p) => {
-      const q = search.toLowerCase();
-      if (q && !p.name.toLowerCase().includes(q) &&
-          !p.specialties.some((s) => s.toLowerCase().includes(q)) &&
-          !p.city.toLowerCase().includes(q)) return false;
+  const filters: GymFilters = {
+    search: debouncedSearch || undefined,
+    modalidades: modalidades.length > 0 ? modalidades : undefined,
+    precoMax,
+    orderBy,
+    limit: PAGE_SIZE,
+    offset,
+  };
 
-      if (activeFilter === 'online' && p.modality === 'presencial') return false;
-      if (activeFilter === 'presencial' && p.modality === 'online')  return false;
+  const { data: gyms, isLoading, isFetching } = useGyms(filters);
 
-      if (selectedSpecialty && !p.specialties.includes(selectedSpecialty)) return false;
+  const hasActiveFilters = modalidades.length > 0 || precoMax !== undefined;
 
-      if (selectedPrice !== null) {
-        const range = PRICE_RANGES[selectedPrice];
-        if (p.priceMonth < range.min || p.priceMonth > range.max) return false;
-      }
+  const clearAll = () => {
+    setModalidades([]);
+    setPrecoMax(undefined);
+    setSearchInput('');
+    setOrderBy('relevancia');
+  };
 
-      if (p.distanceKm > selectedDistance) return false;
-
-      return true;
-    })
-    .sort((a, b) => {
-      if (activeFilter === 'avaliados') return b.rating - a.rating;
-      if (activeFilter === 'perto')     return a.distanceKm - b.distanceKm;
-      return 0;
-    });
-
-  function handleContact(p: Personal) {
-    navigate('/aluno/chat');
-  }
-
-  function handleViewProfile(p: Personal) {
-    navigate(`/aluno/personais/${p.id}`);
-  }
-
-  function handleViewProfile(p: Personal) {
-    navigate(`/aluno/personais/${p.id}`);
-  }
+  const isEmpty = !isLoading && gyms?.length === 0;
 
   return (
-    <div className="min-h-screen bg-[#080B18] text-white">
-      <div className="max-w-6xl mx-auto px-4 pt-5 pb-6 space-y-5">
+    <div className="max-w-5xl mx-auto px-4 pb-12">
+      {/* Header */}
+      <div className="pt-5 mb-5">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Academias</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
+          Encontre a academia ideal e assine um plano
+        </p>
+      </div>
 
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-white">Encontrar Personal</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Profissionais verificados perto de você, prontos para te acompanhar
-          </p>
+      {/* Search + filter toggle row */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Buscar academia por nome…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-violet-400 dark:focus:border-violet-500 transition-colors"
+          />
+          {searchInput && (
+            <button
+              onClick={() => setSearchInput('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
-        {/* Search + map */}
-        <div className="flex gap-3">
-          <div className="relative flex-1">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nome, especialidade ou modalidade..."
-              className="w-full bg-[#131722] border border-white/8 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-[#7c5cfc]/50 transition-colors"
-            />
+        <button
+          onClick={() => setShowFilters((v) => !v)}
+          className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+            showFilters || hasActiveFilters
+              ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300'
+              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:border-violet-400'
+          }`}
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          Filtros
+          {hasActiveFilters && (
+            <span className="bg-violet-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold">
+              {(modalidades.length > 0 ? 1 : 0) + (precoMax !== undefined ? 1 : 0)}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Filters panel */}
+      {showFilters && (
+        <div className="flex flex-wrap items-center gap-2 bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 mb-3 border border-slate-100 dark:border-slate-700">
+          <ModalidadeMultiselect selected={modalidades} onChange={setModalidades} />
+          <PriceSlider value={precoMax} onChange={setPrecoMax} />
+          <div className="ml-auto flex items-center gap-2">
+            <SortSelect value={orderBy} onChange={setOrderBy} />
           </div>
-          <button className="shrink-0 flex items-center gap-2 bg-[#131722] border border-white/8 hover:border-[#7c5cfc]/40 text-slate-300 hover:text-white text-sm font-medium px-4 py-3 rounded-xl transition-colors">
-            <Map size={15} />
-            Ver mapa
+        </div>
+      )}
+
+      {/* Active filter chips */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {modalidades.map((m) => (
+            <ActiveChip
+              key={m}
+              label={m}
+              onRemove={() => setModalidades(modalidades.filter((x) => x !== m))}
+            />
+          ))}
+          {precoMax !== undefined && (
+            <ActiveChip label={`Até R$ ${precoMax}`} onRemove={() => setPrecoMax(undefined)} />
+          )}
+          <button
+            onClick={clearAll}
+            className="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 underline underline-offset-2 transition-colors"
+          >
+            Limpar tudo
           </button>
         </div>
+      )}
 
-        {/* Filter chips */}
-        <div className="flex gap-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-          {FILTERS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setActiveFilter(key)}
-              className={`shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-medium border transition-colors ${
-                activeFilter === key
-                  ? 'bg-white text-[#0d0f14] border-white'
-                  : 'bg-transparent border-white/10 text-slate-400 hover:border-white/25 hover:text-slate-200'
-              }`}
-            >
-              {key === 'perto' && <MapPin size={12} />}
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Accordion filters */}
-        <div className="space-y-2">
-          <AccordionSection label="Especialidade" open={specialtyOpen} onToggle={() => setSpecialtyOpen((v) => !v)}>
-            <div className="flex flex-wrap gap-2">
-              {SPECIALTIES_LIST.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSelectedSpecialty(selectedSpecialty === s ? null : s)}
-                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                    selectedSpecialty === s
-                      ? 'bg-[#7c5cfc] border-[#7c5cfc] text-white'
-                      : 'border-white/10 text-slate-400 hover:border-[#7c5cfc]/40 hover:text-slate-200'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </AccordionSection>
-
-          <AccordionSection label="Preço / mês" open={priceOpen} onToggle={() => setPriceOpen((v) => !v)}>
-            <div className="flex flex-wrap gap-2">
-              {PRICE_RANGES.map((r, i) => (
-                <button
-                  key={r.label}
-                  onClick={() => setSelectedPrice(selectedPrice === i ? null : i)}
-                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                    selectedPrice === i
-                      ? 'bg-[#7c5cfc] border-[#7c5cfc] text-white'
-                      : 'border-white/10 text-slate-400 hover:border-[#7c5cfc]/40 hover:text-slate-200'
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
-          </AccordionSection>
-
-          <AccordionSection label="Distância" open={distanceOpen} onToggle={() => setDistanceOpen((v) => !v)}>
-            <div className="flex flex-wrap gap-2">
-              {DISTANCE_OPTIONS.map((d) => (
-                <button
-                  key={d.label}
-                  onClick={() => setSelectedDistance(d.max)}
-                  className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                    selectedDistance === d.max
-                      ? 'bg-[#7c5cfc] border-[#7c5cfc] text-white'
-                      : 'border-white/10 text-slate-400 hover:border-[#7c5cfc]/40 hover:text-slate-200'
-                  }`}
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
-          </AccordionSection>
-        </div>
-
-        {/* Results count */}
-        <p className="text-xs text-slate-500">
-          {filtered.length} profissional{filtered.length !== 1 ? 'is' : ''} encontrado{filtered.length !== 1 ? 's' : ''}
-        </p>
-
-        {/* Cards */}
-        {filtered.length === 0 ? (
-          <div className="rounded-2xl bg-[#131722] border border-white/5 p-12 text-center">
-            <Search size={32} className="mx-auto text-slate-700 mb-3" />
-            <p className="font-semibold text-slate-300">Nenhum personal encontrado</p>
-            <p className="text-sm text-slate-600 mt-1">Tente ajustar os filtros.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filtered.map((p) => (
-              <PersonalCard key={p.id} personal={p} onContact={handleContact} onViewProfile={handleViewProfile} />
-            ))}
-          </div>
-        )}
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, i) => <GymCardSkeleton key={i} />)
+          : gyms?.map((gym) => <GymCard key={gym.id} gym={gym} />)}
       </div>
+
+      {/* Empty state */}
+      {isEmpty && (
+        <div className="text-center py-16 text-slate-400 dark:text-slate-500">
+          <Search className="w-12 h-12 mx-auto mb-3 opacity-40" />
+          <p className="text-base font-medium text-slate-600 dark:text-slate-300">
+            Nenhuma academia encontrada
+          </p>
+          <p className="text-sm mt-1">Tente ajustar os filtros ou buscar por outro nome.</p>
+          {hasActiveFilters && (
+            <button
+              onClick={clearAll}
+              className="mt-4 text-violet-600 dark:text-violet-400 text-sm font-medium hover:underline"
+            >
+              Limpar filtros
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!isLoading && (gyms?.length ?? 0) > 0 && (
+        <div className="flex items-center justify-center gap-3 mt-8">
+          <button
+            onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+            disabled={offset === 0 || isFetching}
+            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Anterior
+          </button>
+          <span className="text-sm text-slate-500 dark:text-slate-400">
+            {Math.floor(offset / PAGE_SIZE) + 1}
+          </span>
+          <button
+            onClick={() => setOffset(offset + PAGE_SIZE)}
+            disabled={(gyms?.length ?? 0) < PAGE_SIZE || isFetching}
+            className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Próxima
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
 import { useStudents } from '../../hooks/useStudents';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -76,7 +76,7 @@ export default function PersonalRelatoriosPage() {
     return weekLabels.map((semana) => ({ semana, treinos: map[semana] }));
   }, [logs, weekLabels]);
 
-  // DistribuiÃ§Ã£o por nome do treino (para Pie)
+  // Distribuição por nome do treino (para Pie)
   const byWorkout = useMemo(() => {
     const map: Record<string, number> = {};
     logs.forEach((l) => {
@@ -104,9 +104,9 @@ export default function PersonalRelatoriosPage() {
 
   return (
     <div className="p-5 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">RelatÃ³rios</h1>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Relatórios</h1>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
-        VisÃ£o geral da atividade dos seus alunos.
+        Visão geral da atividade dos seus alunos.
       </p>
 
       {/* Stat cards */}
@@ -255,7 +255,7 @@ export default function PersonalRelatoriosPage() {
   );
 }
 
-function EmptyChart({ message = 'Nenhum dado disponÃ­vel.' }: { message?: string }) {
+function EmptyChart({ message = 'Nenhum dado disponível.' }: { message?: string }) {
   return (
     <div className="h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500 text-sm text-center px-8">
       {message}

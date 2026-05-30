@@ -181,7 +181,7 @@ export default function ResetPasswordPage() {
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
                     <AlertCircle size={15} className="text-amber-400 flex-shrink-0" />
                     <p className="text-xs text-amber-400">
-                      Aguardando validação do linkâ€¦ Se você não veio pelo e-mail de recuperação, este acesso não é permitido.
+                      Aguardando validação do link… Se você não veio pelo e-mail de recuperação, este acesso não é permitido.
                     </p>
                   </div>
                 )}
@@ -197,7 +197,7 @@ export default function ResetPasswordPage() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••••••"
                         className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
                       <button
@@ -222,7 +222,7 @@ export default function ResetPasswordPage() {
                         required
                         value={confirm}
                         onChange={(e) => setConfirm(e.target.value)}
-                        placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                        placeholder="••••••••••••"
                         className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
                       <button

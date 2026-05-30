@@ -1,8 +1,10 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents } from '../../hooks/useStudents';
 import { useWorkouts, usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
 import { useTotalUnread, useMessages } from '../../hooks/useMessages';
+import { usePayments } from '../../hooks/usePayments';
+import { useSessions } from '../../hooks/useSessions';
 import {
   Users,
   ClipboardList,
@@ -15,6 +17,8 @@ import {
   CalendarCheck,
   Bell,
   User,
+  AlertTriangle,
+  Clock,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,10 +30,10 @@ function formatDateLabel(date: Date): string {
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 60) return `${mins} min atrás`;
+  if (mins < 60) return `${mins} min atr�s`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs} h atrás`;
-  return `${Math.floor(hrs / 24)} dia${Math.floor(hrs / 24) !== 1 ? 's' : ''} atrás`;
+  if (hrs < 24) return `${hrs} h atr�s`;
+  return `${Math.floor(hrs / 24)} dia${Math.floor(hrs / 24) !== 1 ? 's' : ''} atr�s`;
 }
 
 function Avatar({ name, size = 'md' }: { name: string; size?: 'sm' | 'md' }) {
@@ -47,6 +51,8 @@ export default function PersonalDashboard() {
   const { data: workouts = [] } = useWorkouts();
   const { data: allLogs = [] } = usePersonalWorkoutLogs();
   const { data: allMessages = [] } = useMessages();
+  const { data: payments = [] } = usePayments();
+  const { data: sessions = [] } = useSessions();
   const navigate = useNavigate();
 
   const unread = useTotalUnread();
@@ -61,7 +67,7 @@ export default function PersonalDashboard() {
   const profilePct = useMemo(() => (user?.avatarUrl ? 100 : 60), [user?.avatarUrl]);
   const profileIncomplete = profilePct < 100;
 
-  // Agenda do dia ââ‚¬â€ today's logs as "Confirmado", remaining as no-show
+  // Agenda do dia �€” today's logs as "Confirmado", remaining as no-show
   const agendaItems = useMemo(() => {
     const todayLogs = allLogs
       .filter((l) => l.completedAt.startsWith(todayStr))
@@ -88,7 +94,7 @@ export default function PersonalDashboard() {
           const student = students.find((s) => s.id === log.studentId);
           return {
             id: log.id,
-            label: `Treino concluído por ${student?.name ?? 'Aluno'}`,
+            label: `Treino conclu�do por ${student?.name ?? 'Aluno'}`,
             detail: log.workoutName,
             when: log.completedAt,
             type: 'workout' as const,
@@ -120,7 +126,40 @@ export default function PersonalDashboard() {
       }));
   }, [students, allLogs]);
 
-  // Mensagens não lidas
+  // Smart alerts
+  const smartAlerts = useMemo(() => {
+    const alerts: { id: string; type: 'warning' | 'info'; message: string; link?: string }[] = [];
+
+    // Overdue payments
+    const overdueCount = payments.filter(
+      (p) => p.status === 'pendente' && p.dueDate < todayStr
+    ).length;
+    if (overdueCount > 0)
+      alerts.push({ id: 'overdue', type: 'warning', message: `${overdueCount} pagamento${overdueCount > 1 ? 's' : ''} vencido${overdueCount > 1 ? 's' : ''}`, link: '/personal/financeiro' });
+
+    // Today's sessions
+    const todaySessions = sessions.filter((s) => s.date === todayStr && s.status === 'agendado');
+    if (todaySessions.length > 0)
+      alerts.push({ id: 'sessions', type: 'info', message: `${todaySessions.length} sess�o${todaySessions.length > 1 ? '�es' : ''} agendada${todaySessions.length > 1 ? 's' : ''} para hoje`, link: '/personal/agenda' });
+
+    // Inactive students (7+ days)
+    const lastLog = new Map<string, string>();
+    for (const l of allLogs) {
+      const existing = lastLog.get(l.studentId);
+      if (!existing || l.completedAt > existing) lastLog.set(l.studentId, l.completedAt);
+    }
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const inactiveCount = students.filter((s) => {
+      const last = lastLog.get(s.id);
+      return !last || last < sevenDaysAgo;
+    }).length;
+    if (inactiveCount > 0)
+      alerts.push({ id: 'inactive', type: 'warning', message: `${inactiveCount} aluno${inactiveCount > 1 ? 's' : ''} sem treino h� 7+ dias`, link: '/personal/alunos' });
+
+    return alerts;
+  }, [payments, sessions, allLogs, students, todayStr]);
+
+  // Mensagens n�o lidas
   const unreadMessages = useMemo(
     () =>
       allMessages
@@ -133,7 +172,7 @@ export default function PersonalDashboard() {
   return (
     <div className="p-5 max-w-screen-xl mx-auto flex flex-col gap-4">
 
-      {/* ââ€â‚¬ââ€â‚¬ Profile completion banner ââ€â‚¬ââ€â‚¬ */}
+      {/* �”€�”€ Profile completion banner �”€�”€ */}
       {profileIncomplete && (
         <button
           onClick={() => navigate('/completar-perfil')}
@@ -144,7 +183,7 @@ export default function PersonalDashboard() {
               <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 Perfil profissional{' '}
                 <span className="text-indigo-400 font-semibold">{profilePct}% completo</span>
-                {' '}ââ‚¬â€ aumente sua visibilidade e conquiste mais alunos
+                {' '}�€” aumente sua visibilidade e conquiste mais alunos
               </span>
             </div>
             <div className="w-full bg-slate-200 dark:bg-white/10 rounded-full h-1.5">
@@ -160,15 +199,37 @@ export default function PersonalDashboard() {
         </button>
       )}
 
-      {/* ââ€â‚¬ââ€â‚¬ Date + Greeting ââ€â‚¬ââ€â‚¬ */}
+      {/* �”€�”€ Date + Greeting �”€�”€ */}
       <div>
         <p className="text-sm text-slate-500 dark:text-slate-400">{formatDateLabel(today)}</p>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mt-0.5">
-          Olá, {user?.name?.split(' ')[0]}! ??
+          Ol�, {user?.name?.split(' ')[0]}! ??
         </h1>
       </div>
 
-      {/* ââ€â‚¬ââ€â‚¬ Stat cards ââ€â‚¬ââ€â‚¬ */}
+      {/* Smart Alerts */}
+      {smartAlerts.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {smartAlerts.map((alert) => (
+            <button
+              key={alert.id}
+              onClick={() => alert.link && navigate(alert.link)}
+              className={[
+                'flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-left transition',
+                alert.type === 'warning'
+                  ? 'bg-amber-500/10 border border-amber-500/25 text-amber-400 hover:bg-amber-500/15'
+                  : 'bg-blue-500/10 border border-blue-500/25 text-blue-300 hover:bg-blue-500/15',
+              ].join(' ')}
+            >
+              {alert.type === 'warning' ? <AlertTriangle size={14} /> : <Clock size={14} />}
+              <span>{alert.message}</span>
+              {alert.link && <ChevronRight size={13} className="ml-auto" />}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* �”€�”€ Stat cards �”€�”€ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Alunos ativos */}
         <button
@@ -208,7 +269,7 @@ export default function PersonalDashboard() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Treinos hoje
               {workouts.length > 0 && (
-                <span className="ml-1 text-slate-400 dark:text-slate-500">· {workouts.length} fichas</span>
+                <span className="ml-1 text-slate-400 dark:text-slate-500">� {workouts.length} fichas</span>
               )}
             </p>
           </div>
@@ -231,12 +292,12 @@ export default function PersonalDashboard() {
           </div>
           <div>
             <p className="text-3xl font-bold text-slate-900 dark:text-white">{unread}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Mensagens não lidas</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Mensagens n�o lidas</p>
           </div>
         </button>
       </div>
 
-      {/* ââ€â‚¬ââ€â‚¬ Main grid ââ€â‚¬ââ€â‚¬ */}
+      {/* �”€�”€ Main grid �”€�”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4">
 
         {/* Left column */}
@@ -263,7 +324,7 @@ export default function PersonalDashboard() {
                   <CalendarCheck size={20} className="text-indigo-400" />
                 </div>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhum treino hoje</p>
-                <p className="text-xs text-slate-400">Os treinos concluídos hoje aparecerão aqui.</p>
+                <p className="text-xs text-slate-400">Os treinos conclu�dos hoje aparecer�o aqui.</p>
               </div>
             ) : (
               <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/40">
@@ -299,7 +360,7 @@ export default function PersonalDashboard() {
                   <ClipboardList size={20} className="text-blue-400" />
                 </div>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhuma atividade recente</p>
-                <p className="text-xs text-slate-400">Os registros dos alunos aparecerão aqui.</p>
+                <p className="text-xs text-slate-400">Os registros dos alunos aparecer�o aqui.</p>
               </div>
             ) : (
               <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/40">
@@ -364,12 +425,12 @@ export default function PersonalDashboard() {
             )}
           </div>
 
-          {/* Mensagens não lidas */}
+          {/* Mensagens n�o lidas */}
           <div className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <MessageCircle size={15} className="text-indigo-400" />
-                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Mensagens não lidas</h2>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Mensagens n�o lidas</h2>
               </div>
               <button
                 onClick={() => navigate('/personal/chat')}
@@ -413,14 +474,14 @@ export default function PersonalDashboard() {
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Resumo financeiro</h2>
               </div>
               <button className="text-xs text-indigo-400 hover:text-indigo-300 transition flex items-center gap-0.5">
-                Ver relatório <ChevronRight size={12} />
+                Ver relat�rio <ChevronRight size={12} />
               </button>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { label: 'Faturamento (mês)', value: 'R$ —', color: 'text-slate-900 dark:text-white' },
-                { label: 'A receber', value: 'R$ —', color: 'text-emerald-400' },
-                { label: 'Próximo receb.', value: '—', color: 'text-slate-900 dark:text-white' },
+                { label: 'Faturamento (m�s)', value: 'R$ �', color: 'text-slate-900 dark:text-white' },
+                { label: 'A receber', value: 'R$ �', color: 'text-emerald-400' },
+                { label: 'Pr�ximo receb.', value: '�', color: 'text-slate-900 dark:text-white' },
               ].map((item) => (
                 <div key={item.label} className="flex flex-col gap-0.5">
                   <p className="text-[10px] text-slate-400 leading-tight">{item.label}</p>
@@ -430,7 +491,7 @@ export default function PersonalDashboard() {
             </div>
             <div className="mt-3 border-t border-slate-100 dark:border-white/[0.07]/40 pt-3">
               <p className="text-[11px] text-slate-400 text-center">
-                Módulo financeiro em breve
+                M�dulo financeiro em breve
               </p>
             </div>
           </div>

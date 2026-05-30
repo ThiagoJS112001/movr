@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Settings, LogOut } from 'lucide-react';
+import { Settings, LogOut, Calendar, DollarSign, UserCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTotalUnread } from '../../hooks/useMessages';
@@ -12,8 +12,10 @@ const NAV_SECTIONS = [
   {
     label: 'GESTÃO',
     items: [
-      { to: '/personal/dashboard', label: 'Dashboard' },
-      { to: '/personal/alunos',    label: 'Alunos'    },
+      { to: '/personal/dashboard',  label: 'Dashboard'  },
+      { to: '/personal/alunos',     label: 'Alunos'     },
+      { to: '/personal/agenda',     label: 'Agenda'     },
+      { to: '/personal/financeiro', label: 'Financeiro' },
     ],
   },
   {
@@ -35,14 +37,20 @@ const NAV_SECTIONS = [
       { to: '/personal/chat', label: 'Chat', badge: true },
     ],
   },
+  {
+    label: 'CONTA',
+    items: [
+      { to: '/personal/perfil', label: 'Meu Perfil' },
+    ],
+  },
 ];
 
 const BOTTOM_NAV = [
-  { to: '/personal/dashboard',  label: 'Home'    },
-  { to: '/personal/alunos',     label: 'Alunos'  },
-  { to: '/personal/exercicios', label: 'Exerc.'  },
-  { to: '/personal/dietas',     label: 'Dietas'  },
-  { to: '/personal/chat',       label: 'Chat'    },
+  { to: '/personal/dashboard',  label: 'Home'   },
+  { to: '/personal/alunos',     label: 'Alunos' },
+  { to: '/personal/agenda',     label: 'Agenda' },
+  { to: '/personal/dietas',     label: 'Dietas' },
+  { to: '/personal/chat',       label: 'Chat'   },
 ];
 
 // -- Component -----------------------------------------------------------------

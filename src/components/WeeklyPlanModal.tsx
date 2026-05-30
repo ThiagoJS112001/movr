@@ -404,10 +404,10 @@ export default function WeeklyPlanModal({ studentId, studentName, onClose }: Pro
                 Dicas
               </p>
               <ul className="text-xs text-slate-500 dark:text-slate-400 flex flex-col gap-1.5">
-                <li>â€¢ Comece pelos exercícios compostos.</li>
-                <li>â€¢ Respeite seu descanso entre as séries.</li>
-                <li>â€¢ Mantenha a execução correta.</li>
-                <li>â€¢ Progresso é consistência!</li>
+                <li>• Comece pelos exercícios compostos.</li>
+                <li>• Respeite seu descanso entre as séries.</li>
+                <li>• Mantenha a execução correta.</li>
+                <li>• Progresso é consistência!</li>
               </ul>
             </div>
 

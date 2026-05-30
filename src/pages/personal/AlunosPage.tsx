@@ -3,14 +3,14 @@ import emailjs from '@emailjs/browser';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents, useCreateStudent, useBlockStudent, useSearchAluno, useInviteStudent } from '../../hooks/useStudents';
 import { useDiets, useDietAssignments, useAssignDiet, useRemoveDietAssignment } from '../../hooks/useDiets';
-import { usePersonalWorkoutLogs, useAssignments } from '../../hooks/useWorkouts';
+import { usePersonalWorkoutLogs, useAssignments, useWorkouts, useAssignWorkout } from '../../hooks/useWorkouts';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   Salad, ShieldOff, ShieldCheck,
   Search, Check, MessageSquare, MoreHorizontal,
   UserPlus, CalendarDays, X, Mail, Clock,
-  ChevronLeft, ChevronRight, Download, ChevronDown, Users,
+  ChevronLeft, ChevronRight, Download, ChevronDown, Users, Dumbbell,
 } from 'lucide-react';
 import type { DietAssignment } from '../../types';
 import WeeklyPlanModal from '../../components/WeeklyPlanModal';
@@ -77,6 +77,8 @@ export default function AlunosPage() {
   const { user } = useAuth();
   const { data: diets = [] } = useDiets();
   const { data: dietAssignments = [] } = useDietAssignments();
+  const { data: workouts = [] } = useWorkouts();
+  const assignWorkoutMutation = useAssignWorkout();
   const assignDietMutation = useAssignDiet();
   const removeDietAssignmentMutation = useRemoveDietAssignment();
   const { data: logs = [] } = usePersonalWorkoutLogs();
@@ -117,6 +119,40 @@ export default function AlunosPage() {
   const [selectedDietId, setSelectedDietId] = useState('');
 
   const [confirmBlock, setConfirmBlock] = useState<{ id: string; name: string } | null>(null);
+
+  // Bulk selection
+  const [selectedStudents, setSelectedStudents] = useState<Set<string>>(new Set());
+  const [bulkModal, setBulkModal] = useState(false);
+  const [bulkWorkoutId, setBulkWorkoutId] = useState('');
+  const [bulkAssigning, setBulkAssigning] = useState(false);
+
+  function toggleSelectStudent(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    setSelectedStudents((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function handleBulkAssign() {
+    if (!bulkWorkoutId || !user) return;
+    const workout = workouts.find((w) => w.id === bulkWorkoutId);
+    if (!workout) return;
+    setBulkAssigning(true);
+    let ok = 0;
+    for (const studentId of selectedStudents) {
+      try {
+        await assignWorkoutMutation.mutateAsync({ workoutId: bulkWorkoutId, workoutName: workout.name, studentId, personalId: user.id });
+        ok++;
+      } catch { /* continue */ }
+    }
+    setBulkAssigning(false);
+    setBulkModal(false);
+    setBulkWorkoutId('');
+    setSelectedStudents(new Set());
+    toast.success(`Treino atribuído a ${ok} aluno${ok !== 1 ? 's' : ''}`);
+  }
 
   const myDiets = diets.filter((d) => d.personalId === user?.id);
 
@@ -262,8 +298,23 @@ export default function AlunosPage() {
           <h1 className="text-2xl font-bold text-white">Meus alunos</h1>
           <p className="text-sm text-slate-400 mt-1">Gerencie seus alunos, acompanhe o progresso e mantenha tudo organizado.</p>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button
+        <div className="flex items-center gap-3 shrink-0">          {selectedStudents.size >= 2 && (
+            <button
+              onClick={() => setBulkModal(true)}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            >
+              <Dumbbell size={15} />
+              Atribuir treino ({selectedStudents.size})
+            </button>
+          )}
+          {selectedStudents.size > 0 && (
+            <button
+              onClick={() => setSelectedStudents(new Set())}
+              className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200 transition-colors px-2"
+            >
+              <X size={13} /> Limpar seleção
+            </button>
+          )}          <button
             onClick={() => toast.info('Exportar em breve')}
             className="flex items-center gap-2 border border-white/[0.07] text-slate-300 hover:bg-[#0D1025]/60 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
           >
@@ -394,6 +445,7 @@ export default function AlunosPage() {
               <table className="w-full min-w-[900px]">
                 <thead>
                   <tr className="border-b border-white/[0.07]">
+                    <th className="w-10 px-4 py-3.5" />
                     <th className="text-left text-xs font-medium text-slate-400 px-5 py-3.5">Aluno</th>
                     <th className="text-left text-xs font-medium text-slate-400 px-4 py-3.5">Plano</th>
                     <th className="text-left text-xs font-medium text-slate-400 px-4 py-3.5">Status</th>
@@ -418,8 +470,18 @@ export default function AlunosPage() {
                       <tr
                         key={student.id}
                         onClick={() => navigate(`/personal/alunos/${student.id}`)}
-                        className="cursor-pointer hover:bg-white/[0.02] transition-colors"
+                        className={`cursor-pointer hover:bg-white/[0.02] transition-colors ${selectedStudents.has(student.id) ? 'bg-violet-500/5' : ''}`}
                       >
+                        {/* Checkbox */}
+                        <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={selectedStudents.has(student.id)}
+                            onChange={(e) => toggleSelectStudent(student.id, e as unknown as React.MouseEvent)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-4 h-4 accent-violet-500 cursor-pointer"
+                          />
+                        </td>
                         {/* Aluno */}
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
@@ -871,6 +933,49 @@ export default function AlunosPage() {
             <div className="flex gap-3">
               <button onClick={() => setConfirmBlock(null)} className="flex-1 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700">Cancelar</button>
               <button onClick={() => { toggleBlock({ studentId: confirmBlock.id, blocked: true }); setConfirmBlock(null); }} className="flex-1 bg-red-500 text-white rounded-lg py-2 text-sm font-semibold hover:bg-red-600">Bloquear</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk assign workout modal */}
+      {bulkModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-base font-semibold text-white">Atribuir treino em lote</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{selectedStudents.size} alunos selecionados</p>
+              </div>
+              <button onClick={() => setBulkModal(false)} className="text-slate-500 hover:text-slate-300">
+                <X size={18} />
+              </button>
+            </div>
+            <label className="block text-xs text-slate-400 mb-1.5">Selecione o treino</label>
+            <select
+              value={bulkWorkoutId}
+              onChange={(e) => setBulkWorkoutId(e.target.value)}
+              className="w-full bg-[#080B18] border border-white/[0.07] text-slate-300 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-violet-500/50 mb-5"
+            >
+              <option value="">Escolha um treino...</option>
+              {workouts.filter((w) => w.personalId === user?.id).map((w) => (
+                <option key={w.id} value={w.id}>{w.name}</option>
+              ))}
+            </select>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setBulkModal(false)}
+                className="flex-1 border border-white/[0.07] text-slate-300 hover:bg-white/[0.03] rounded-xl py-2.5 text-sm transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleBulkAssign}
+                disabled={!bulkWorkoutId || bulkAssigning}
+                className="flex-1 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white rounded-xl py-2.5 text-sm font-semibold transition-colors"
+              >
+                {bulkAssigning ? 'Atribuindo...' : 'Atribuir'}
+              </button>
             </div>
           </div>
         </div>

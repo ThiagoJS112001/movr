@@ -76,16 +76,18 @@ export default function LoginPage() {
 
           {/* Logo */}
           <div className="mb-6 shrink-0 flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#7c5cfc] flex items-center justify-center shrink-0">
-              <span className="text-white text-xs font-black">M</span>
-            </div>
+            <img
+              src="/images/android-chrome-192x192.png"
+              alt="Movr"
+              className="w-8 h-8 rounded-lg object-contain"
+            />
             <span className="text-white font-bold text-xl tracking-tight">movr.</span>
           </div>
 
           <div className="flex-1 flex flex-col justify-center">
 
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-            Bem-vindo de volta! ðŸ‘‹
+            Bem-vindo de volta! 👋
           </h2>
           <p className="text-slate-400 text-sm mb-7">
             Faça login para continuar{' '}
@@ -130,7 +132,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  placeholder="••••••••••••"
                   className="w-full bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 rounded-xl pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
                 <button
@@ -194,7 +196,7 @@ export default function LoginPage() {
                 onClick={() => navigate('/register')}
                 className="text-indigo-400 hover:text-indigo-300 font-medium transition"
               >
-                Criar conta â†’
+                Criar conta →
               </button>
             </p>
           </form>
@@ -283,7 +285,7 @@ export default function LoginPage() {
               {/* Center icon */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                 <div className="w-14 h-14 rounded-2xl bg-slate-200 dark:bg-[#141830] border border-indigo-500/30 flex items-center justify-center shadow-xl overflow-hidden p-1.5">
-                  <img src="/images/icone_new_black.png" alt="Movr" className="w-full h-full object-contain" />
+                  <img src="/images/android-chrome-192x192.png" alt="Movr" className="w-full h-full object-contain" />
                 </div>
               </div>
 

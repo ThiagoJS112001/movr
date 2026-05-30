@@ -329,7 +329,8 @@ CREATE POLICY "gym_group_messages: member read"
 
 -- ── profiles: academia reads alunos ──────────────────────────────────────────
 -- Needed so the gym can search for students when managing group membership.
--- Uses a DO block to avoid "policy already exists" errors on re-runs.
+-- NOTE: Must NOT use subquery on profiles inside a profiles policy (infinite
+--       recursion). Uses public.my_role() (SECURITY DEFINER) instead.
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -342,10 +343,7 @@ BEGIN
       CREATE POLICY "profiles: academia reads alunos"
         ON public.profiles FOR SELECT
         USING (
-          role = 'aluno'
-          AND EXISTS (
-            SELECT 1 FROM public.gyms WHERE user_id = auth.uid()
-          )
+          role = 'aluno' AND public.my_role() = 'academia'
         )
     $policy$;
   END IF;

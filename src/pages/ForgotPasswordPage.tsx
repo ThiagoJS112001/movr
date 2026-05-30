@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
                     className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold rounded-xl py-2.5 text-sm transition-colors"
                   >
                     <Send size={15} />
-                    {loading ? 'Enviandoâ€¦' : 'Enviar link de recuperação'}
+                    {loading ? 'Enviando…' : 'Enviar link de recuperação'}
                   </button>
 
                   <div className="flex items-center gap-3">

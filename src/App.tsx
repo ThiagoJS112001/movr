@@ -31,6 +31,9 @@ const DietasPage            = lazy(() => import('./pages/personal/DietasPage'));
 const DietaDetalhe          = lazy(() => import('./pages/personal/DietaDetalhe'));
 const PersonalRelatoriosPage = lazy(() => import('./pages/personal/PersonalRelatoriosPage'));
 const HistoricoPlanoPage    = lazy(() => import('./pages/personal/HistoricoPlanoPage'));
+const PersonalAgendaPage    = lazy(() => import('./pages/personal/PersonalAgendaPage'));
+const PersonalFinanceiroPage = lazy(() => import('./pages/personal/PersonalFinanceiroPage'));
+const PersonalMeuPerfilPage = lazy(() => import('./pages/personal/PersonalPerfilPage'));
 
 // Aluno
 const AlunoDashboard        = lazy(() => import('./pages/aluno/AlunoDashboard'));
@@ -87,6 +90,9 @@ export default function App() {
               <Route path="/personal/chat" element={<PersonalChatPage />} />
               <Route path="/personal/relatorios" element={<PersonalRelatoriosPage />} />
               <Route path="/personal/historico-planos" element={<HistoricoPlanoPage />} />
+              <Route path="/personal/agenda" element={<PersonalAgendaPage />} />
+              <Route path="/personal/financeiro" element={<PersonalFinanceiroPage />} />
+              <Route path="/personal/perfil" element={<PersonalMeuPerfilPage />} />
             </Route>
           </Route>
 

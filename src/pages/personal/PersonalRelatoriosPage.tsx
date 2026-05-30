@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react';
+﻿import { useMemo, useRef, useState } from 'react';
 import { usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
 import { useStudents } from '../../hooks/useStudents';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -17,7 +17,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Activity, Users, Dumbbell } from 'lucide-react';
+import { Activity, Users, Dumbbell, Download } from 'lucide-react';
 
 function getWeekLabel(dateStr: string): string {
   const d = new Date(dateStr);
@@ -52,6 +52,24 @@ export default function PersonalRelatoriosPage() {
   const { theme } = useTheme();
 
   const weekLabels = useMemo(() => getLastNWeeks(8), []);
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExportPDF() {
+    if (!reportRef.current) return;
+    setExporting(true);
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: html2canvas } = await import('html2canvas');
+      const canvas = await html2canvas(reportRef.current, { scale: 1.5, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width / 1.5, canvas.height / 1.5] });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 1.5, canvas.height / 1.5);
+      pdf.save('relatorio-movr.pdf');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   // Treinos por aluno
   const byStudent = useMemo(
@@ -104,10 +122,21 @@ export default function PersonalRelatoriosPage() {
 
   return (
     <div className="p-5 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-1">Relatórios</h1>
+      <div className="flex items-center justify-between mb-1">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Relatórios</h1>
+        <button
+          onClick={handleExportPDF}
+          disabled={exporting}
+          className="flex items-center gap-2 px-3 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-medium rounded-xl transition-colors"
+        >
+          <Download size={14} />
+          {exporting ? 'Exportando...' : 'Exportar PDF'}
+        </button>
+      </div>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
         Visão geral da atividade dos seus alunos.
       </p>
+      <div ref={reportRef}>
 
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3 mb-6">
@@ -250,6 +279,7 @@ export default function PersonalRelatoriosPage() {
             </LineChart>
           </ResponsiveContainer>
         )}
+      </div>
       </div>
     </div>
   );

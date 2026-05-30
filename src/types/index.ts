@@ -244,6 +244,67 @@ export interface GroupMessage {
   createdAt: string;
 }
 
+// ── Training Sessions (Agenda) ────────────────────────────────────────────────
+export type SessionStatus = 'agendado' | 'confirmado' | 'cancelado' | 'concluido';
+
+export interface TrainingSession {
+  id: string;
+  personalId: string;
+  studentId: string;
+  studentName?: string;
+  title: string;
+  date: string;       // ISO date 'YYYY-MM-DD'
+  startTime: string;  // 'HH:MM'
+  endTime: string;    // 'HH:MM'
+  status: SessionStatus;
+  notes?: string;
+  createdAt: string;
+}
+
+// ── Student Payments (Financeiro) ─────────────────────────────────────────────
+export type PaymentStatus = 'pendente' | 'pago' | 'vencido' | 'cancelado';
+
+export interface StudentPayment {
+  id: string;
+  personalId: string;
+  studentId: string;
+  studentName?: string;
+  amount: number;
+  description: string;
+  dueDate: string;    // 'YYYY-MM-DD'
+  paidAt?: string;    // 'YYYY-MM-DD'
+  status: PaymentStatus;
+  paymentMethod?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+// ── Student Anamnese (Ficha de Saúde) ─────────────────────────────────────────
+export type ActivityLevel = 'sedentario' | 'leve' | 'moderado' | 'ativo' | 'muito_ativo';
+export type PreferredTime = 'manha' | 'tarde' | 'noite';
+
+export interface StudentAnamnese {
+  id: string;
+  personalId: string;
+  studentId: string;
+  objective?: string;
+  activityLevel?: ActivityLevel;
+  hasHealthIssues: boolean;
+  healthIssues?: string;
+  medications?: string;
+  injuries?: string;
+  sleepHours?: number;
+  stressLevel?: number;   // 1–5
+  waterIntakeLiters?: number;
+  previousTraining?: string;
+  trainingYears?: number;
+  preferredDays: string[];
+  preferredTime?: PreferredTime;
+  observations?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Student Assessments ───────────────────────────────────────────────────────
 export interface StudentAssessment {
   id: string;

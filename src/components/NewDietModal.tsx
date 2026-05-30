@@ -16,18 +16,18 @@ const GOALS = [
 type GoalKey = typeof GOALS[number]['key'];
 
 const MEAL_ICONS: Record<string, string> = {
-  'café': 'â˜€ï¸', 'cafe': 'â˜€ï¸', 'manhã': 'â˜€ï¸', 'manha': 'â˜€ï¸',
-  'almoço': 'ðŸ½ï¸', 'almoco': 'ðŸ½ï¸',
-  'tarde': 'ðŸ§ƒ', 'lanche': 'ðŸ¥™',
-  'pré': 'âš¡', 'pre': 'âš¡', 'treino': 'âš¡',
-  'pós': 'ðŸŒ™', 'pos': 'ðŸŒ™', 'jantar': 'ðŸŒ™', 'ceia': 'ðŸŒ™',
+  'café': '☀️', 'cafe': '☀️', 'manhã': '☀️', 'manha': '☀️',
+  'almoço': '🍽️', 'almoco': '🍽️',
+  'tarde': '🧃', 'lanche': '🥙',
+  'pré': '⚡', 'pre': '⚡', 'treino': '⚡',
+  'pós': '🌙', 'pos': '🌙', 'jantar': '🌙', 'ceia': '🌙',
 };
 function getMealIcon(name: string): string {
   const n = name.toLowerCase();
   for (const [key, icon] of Object.entries(MEAL_ICONS)) {
     if (n.includes(key)) return icon;
   }
-  return 'ðŸ´';
+  return '🍴';
 }
 
 const INPUT_CLS =

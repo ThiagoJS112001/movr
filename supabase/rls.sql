@@ -67,10 +67,12 @@ CREATE POLICY "profiles: personal reads students"
   USING (personal_id = auth.uid());
 
 -- Alunos can read the profile of their personal
+-- NOTE: must use my_personal_id() (SECURITY DEFINER) — a plain sub-SELECT on
+-- public.profiles here would trigger the same RLS policies and cause infinite recursion.
 CREATE POLICY "profiles: aluno reads own personal"
   ON public.profiles FOR SELECT
   USING (
-    id = (SELECT personal_id FROM public.profiles WHERE id = auth.uid())
+    id = public.my_personal_id()
   );
 
 -- Anyone authenticated can read academia profiles (to browse gyms)

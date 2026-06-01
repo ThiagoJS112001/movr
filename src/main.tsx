@@ -11,6 +11,9 @@ import { SettingsProvider } from './contexts/SettingsContext.tsx'
 import { queryClient } from './lib/queryClient.ts'
 import ErrorBoundary from './components/ErrorBoundary.tsx'
 import NotificationsBootstrap from './components/NotificationsBootstrap.tsx'
+import { initSentry } from './lib/sentry.ts'
+
+initSentry();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

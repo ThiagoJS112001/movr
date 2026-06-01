@@ -1,6 +1,7 @@
 ﻿import { useMemo, useRef, useState } from 'react';
 import { usePersonalWorkoutLogs } from '../../hooks/useWorkouts';
 import { useStudents } from '../../hooks/useStudents';
+import { usePayments } from '../../hooks/usePayments';
 import { useTheme } from '../../contexts/ThemeContext';
 import {
   BarChart,
@@ -17,7 +18,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { Activity, Users, Dumbbell, Download } from 'lucide-react';
+import { Activity, Users, Dumbbell, Download, FileSpreadsheet, TrendingUp, DollarSign } from 'lucide-react';
 
 function getWeekLabel(dateStr: string): string {
   const d = new Date(dateStr);
@@ -49,6 +50,7 @@ const CHART_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 export default function PersonalRelatoriosPage() {
   const { data: logs = [] } = usePersonalWorkoutLogs();
   const { data: students = [] } = useStudents();
+  const { data: payments = [] } = usePayments();
   const { theme } = useTheme();
 
   const weekLabels = useMemo(() => getLastNWeeks(8), []);
@@ -69,6 +71,29 @@ export default function PersonalRelatoriosPage() {
     } finally {
       setExporting(false);
     }
+  }
+
+  function handleExportCSV() {
+    const rows = [
+      ['Aluno', 'Treino', 'Data', 'Duração (min)'],
+      ...logs.map((l) => {
+        const student = students.find((s) => s.id === l.studentId);
+        return [
+          student?.name ?? l.studentId,
+          l.workoutName,
+          new Date(l.completedAt).toLocaleDateString('pt-BR'),
+          l.durationMinutes?.toString() ?? '',
+        ];
+      }),
+    ];
+    const csv = rows.map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'treinos-movr.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   // Treinos por aluno
@@ -103,7 +128,48 @@ export default function PersonalRelatoriosPage() {
     });
     return Object.entries(map).map(([name, value]) => ({ name, value }));
   }, [logs]);
+  // Aderência: treinos realizados nas últimas 4 semanas vs. 4 semanas anteriores
+  const adherenceData = useMemo(() => {
+    const now = Date.now();
+    const week4 = 28 * 86_400_000;
+    return students
+      .map((s) => {
+        const recent = logs.filter((l) => l.studentId === s.id && now - new Date(l.completedAt).getTime() < week4).length;
+        const prev = logs.filter((l) => {
+          const age = now - new Date(l.completedAt).getTime();
+          return l.studentId === s.id && age >= week4 && age < week4 * 2;
+        }).length;
+        return {
+          nome: s.name.split(' ')[0],
+          recentes: recent,
+          anteriores: prev,
+          variacao: prev > 0 ? Math.round(((recent - prev) / prev) * 100) : 0,
+        };
+      })
+      .filter((s) => s.recentes > 0 || s.anteriores > 0);
+  }, [students, logs]);
 
+  // Financeiro por mês (últimos 6 meses)
+  const financialData = useMemo(() => {
+    const months: string[] = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }));
+    }
+    const today = now.toISOString().split('T')[0];
+    return months.map((mes, i) => {
+      const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const pago = payments
+        .filter((p) => p.status === 'pago' && p.paidAt?.startsWith(key))
+        .reduce((s, p) => s + p.amount, 0);
+      const pendente = payments
+        .filter((p) => (p.status === 'pendente' || (p.status === 'pendente' && p.dueDate < today)) && p.dueDate.startsWith(key))
+        .reduce((s, p) => s + p.amount, 0);
+      return { mes, pago, pendente };
+    });
+  }, [payments]);
   const totalLogs = logs.length;
   const activeStudents = byStudent.length;
   const thisWeek = weeklyData[weeklyData.length - 1]?.treinos ?? 0;
@@ -124,14 +190,23 @@ export default function PersonalRelatoriosPage() {
     <div className="p-5 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Relatórios</h1>
-        <button
-          onClick={handleExportPDF}
-          disabled={exporting}
-          className="flex items-center gap-2 px-3 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-medium rounded-xl transition-colors"
-        >
-          <Download size={14} />
-          {exporting ? 'Exportando...' : 'Exportar PDF'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-xl transition-colors"
+          >
+            <FileSpreadsheet size={14} />
+            Exportar CSV
+          </button>
+          <button
+            onClick={handleExportPDF}
+            disabled={exporting}
+            className="flex items-center gap-2 px-3 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-xs font-medium rounded-xl transition-colors"
+          >
+            <Download size={14} />
+            {exporting ? 'Exportando...' : 'Exportar PDF'}
+          </button>
+        </div>
       </div>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
         Visão geral da atividade dos seus alunos.
@@ -280,6 +355,53 @@ export default function PersonalRelatoriosPage() {
           </ResponsiveContainer>
         )}
       </div>
+
+      {/* Adherence chart */}
+      {adherenceData.length > 0 && (
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07] p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={16} className="text-emerald-400" />
+            <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
+              Aderência por aluno — últimas 4 semanas vs. 4 anteriores
+            </h2>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={adherenceData} barSize={24} barGap={4}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="nome" tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip contentStyle={tooltipStyle} cursor={cursorStyle} />
+              <Legend iconSize={8} wrapperStyle={{ fontSize: '11px', color: tickColor }} />
+              <Bar dataKey="recentes" fill="#6366f1" radius={[6, 6, 0, 0]} name="Últ. 4 sem." />
+              <Bar dataKey="anteriores" fill="#475569" radius={[6, 6, 0, 0]} name="4 sem. anteriores" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Financial revenue chart */}
+      {financialData.some((d) => d.pago > 0 || d.pendente > 0) && (
+        <div className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07] p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign size={16} className="text-emerald-400" />
+            <h2 className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
+              Receita mensal (últimos 6 meses)
+            </h2>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={financialData} barSize={24} barGap={4}>
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+              <XAxis dataKey="mes" tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} tickFormatter={(v) => `R$${v}`} />
+              <Tooltip contentStyle={tooltipStyle} cursor={cursorStyle} formatter={(v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+              <Legend iconSize={8} wrapperStyle={{ fontSize: '11px', color: tickColor }} />
+              <Bar dataKey="pago" fill="#10b981" radius={[6, 6, 0, 0]} name="Recebido" />
+              <Bar dataKey="pendente" fill="#f59e0b" radius={[6, 6, 0, 0]} name="Pendente" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
       </div>
     </div>
   );

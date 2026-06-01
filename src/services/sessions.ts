@@ -74,6 +74,29 @@ export async function updateSessionStatus(
   if (error) throw new Error(error.message);
 }
 
+export async function updateSession(
+  id: string,
+  params: {
+    title?: string;
+    date?: string;
+    startTime?: string;
+    endTime?: string;
+    notes?: string | null;
+  },
+): Promise<void> {
+  const { error } = await supabase
+    .from('training_sessions')
+    .update({
+      ...(params.title !== undefined && { title: params.title }),
+      ...(params.date !== undefined && { date: params.date }),
+      ...(params.startTime !== undefined && { start_time: params.startTime }),
+      ...(params.endTime !== undefined && { end_time: params.endTime }),
+      ...(params.notes !== undefined && { notes: params.notes }),
+    })
+    .eq('id', id);
+  if (error) throw new Error(error.message);
+}
+
 export async function deleteSession(id: string): Promise<void> {
   const { error } = await supabase
     .from('training_sessions')

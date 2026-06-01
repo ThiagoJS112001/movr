@@ -32,8 +32,34 @@ export default function PersonalFinanceiroPage() {
   const deletePayment = useDeletePayment();
 
   const [showForm, setShowForm] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
   const [filterStatus, setFilterStatus] = useState<PaymentStatus | 'todos'>('todos');
   const [filterStudent, setFilterStudent] = useState('');
+
+  // Bulk billing state
+  const [bulkDesc, setBulkDesc] = useState('Mensalidade');
+  const [bulkAmount, setBulkAmount] = useState('');
+  const [bulkDueDate, setBulkDueDate] = useState('');
+  const [bulkStudents, setBulkStudents] = useState<string[]>([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  async function handleBulkCreate() {
+    if (!bulkAmount || !bulkDueDate || bulkStudents.length === 0) return;
+    setBulkLoading(true);
+    let ok = 0;
+    for (const sid of bulkStudents) {
+      try {
+        await createPayment.mutateAsync({ studentId: sid, description: bulkDesc || 'Mensalidade', amount: parseFloat(bulkAmount), dueDate: bulkDueDate });
+        ok++;
+      } catch { /* continue */ }
+    }
+    setBulkLoading(false);
+    toast.success(`${ok} cobrança${ok !== 1 ? 's' : ''} criada${ok !== 1 ? 's' : ''}!`);
+    setShowBulk(false);
+    setBulkStudents([]);
+    setBulkAmount('');
+    setBulkDueDate('');
+  }
 
   // Form state
   const [fStudentId, setFStudentId]   = useState('');
@@ -131,6 +157,12 @@ export default function PersonalFinanceiroPage() {
           <h1 className="text-xl font-bold text-white">Financeiro</h1>
           <p className="text-sm text-slate-400 mt-0.5">Controle de pagamentos dos alunos</p>
         </div>
+        <button
+          onClick={() => setShowBulk(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-xl transition-colors"
+        >
+          <Plus size={16} /> Cobranças em Massa
+        </button>
         <button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-xl transition-colors"
@@ -287,6 +319,68 @@ export default function PersonalFinanceiroPage() {
               <button onClick={() => setShowForm(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-sm text-slate-300 hover:bg-white/5 transition-colors">Cancelar</button>
               <button onClick={handleCreate} disabled={createPayment.isPending} className="flex-1 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition-colors disabled:opacity-50">
                 {createPayment.isPending ? 'Criando…' : 'Criar Cobrança'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk billing modal */}
+      {showBulk && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-white/[0.06]">
+              <h2 className="text-base font-semibold text-white">Cobranças em Massa</h2>
+              <button onClick={() => setShowBulk(false)} className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 transition-colors"><X size={16} /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">Descrição</label>
+                <input value={bulkDesc} onChange={(e) => setBulkDesc(e.target.value)} className={INPUT_CLS} placeholder="Mensalidade" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Valor (R$)</label>
+                  <input type="number" min="0" step="0.01" value={bulkAmount} onChange={(e) => setBulkAmount(e.target.value)} className={INPUT_CLS} placeholder="150,00" />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Vencimento</label>
+                  <input type="date" value={bulkDueDate} onChange={(e) => setBulkDueDate(e.target.value)} className={INPUT_CLS} />
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-medium text-slate-400">Alunos</label>
+                  <button
+                    onClick={() => setBulkStudents(bulkStudents.length === students.length ? [] : students.map((s) => s.id))}
+                    className="text-xs text-violet-400 hover:text-violet-300"
+                  >
+                    {bulkStudents.length === students.length ? 'Desmarcar todos' : 'Selecionar todos'}
+                  </button>
+                </div>
+                <div className="divide-y divide-white/[0.05] border border-white/[0.07] rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+                  {students.map((s) => (
+                    <label key={s.id} className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-white/[0.04] transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={bulkStudents.includes(s.id)}
+                        onChange={(e) => setBulkStudents(e.target.checked ? [...bulkStudents, s.id] : bulkStudents.filter((id) => id !== s.id))}
+                        className="accent-violet-500"
+                      />
+                      <span className="text-sm text-slate-200">{s.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 p-5 pt-0">
+              <button onClick={() => setShowBulk(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-sm text-slate-300 hover:bg-white/5 transition-colors">Cancelar</button>
+              <button
+                onClick={handleBulkCreate}
+                disabled={bulkLoading || !bulkAmount || !bulkDueDate || bulkStudents.length === 0}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                {bulkLoading ? 'Criando…' : `Criar ${bulkStudents.length} cobrança${bulkStudents.length !== 1 ? 's' : ''}`}
               </button>
             </div>
           </div>

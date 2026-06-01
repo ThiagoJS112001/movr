@@ -42,7 +42,7 @@ const FEATURES = [
 ];
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -52,14 +52,27 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  function mapLoginError(msg: string): string {
+    const m = msg.toLowerCase();
+    if (m.includes('invalid login credentials') || m.includes('invalid credentials'))
+      return 'E-mail ou senha incorretos.';
+    if (m.includes('email not confirmed'))
+      return 'Confirme seu e-mail antes de fazer login.';
+    if (m.includes('too many requests') || m.includes('rate limit'))
+      return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+    if (m.includes('network') || m.includes('fetch'))
+      return 'Problema de conexão. Verifique sua internet e tente novamente.';
+    return 'Erro ao fazer login. Tente novamente.';
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const result = await login(email, password);
+    const result = await login(email.trim().toLowerCase(), password);
     setLoading(false);
     if (!result.success) {
-      setError(result.error ?? 'Erro ao fazer login.');
+      setError(mapLoginError(result.error ?? ''));
       return;
     }
     navigate(ROLE_ROUTES[result.role ?? ''] ?? '/aluno/dashboard');
@@ -178,6 +191,7 @@ export default function LoginPage() {
             {/* Google */}
             <button
               type="button"
+              onClick={() => loginWithGoogle()}
               className="flex items-center justify-center gap-2 bg-transparent border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/25 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl py-2.5 text-sm font-medium transition"
             >
               <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">

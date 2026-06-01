@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Mail,
@@ -36,9 +36,33 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  useEffect(() => {
+    return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
+  }, []);
+
+  function startCooldown() {
+    setCooldown(60);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) { clearInterval(cooldownRef.current!); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  function mapError(msg: string): string {
+    const m = msg.toLowerCase();
+    if (m.includes('rate limit') || m.includes('too many'))
+      return 'Muitas tentativas. Aguarde alguns minutos.';
+    if (m.includes('network') || m.includes('fetch'))
+      return 'Problema de conexão. Verifique sua internet.';
+    return 'Não foi possível enviar o e-mail. Tente novamente.';
+  }
+
+  async function sendResetEmail() {
     setError('');
     setLoading(true);
     const { error: err } = await supabase.auth.resetPasswordForEmail(email.toLowerCase().trim(), {
@@ -46,10 +70,16 @@ export default function ForgotPasswordPage() {
     });
     setLoading(false);
     if (err) {
-      setError(err.message);
+      setError(mapError(err.message));
       return;
     }
     setSent(true);
+    startCooldown();
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await sendResetEmail();
   }
 
   return (
@@ -167,6 +197,18 @@ export default function ForgotPasswordPage() {
                 >
                   Voltar para o login
                   <ArrowRight size={15} />
+                </button>
+                <button
+                  type="button"
+                  disabled={loading || cooldown > 0}
+                  onClick={sendResetEmail}
+                  className="text-sm text-indigo-400 hover:text-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {loading
+                    ? 'Reenviando…'
+                    : cooldown > 0
+                    ? `Reenviar link (${cooldown}s)`
+                    : 'Não recebi o e-mail — reenviar'}
                 </button>
               </div>
             )}

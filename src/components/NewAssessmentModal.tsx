@@ -1,47 +1,54 @@
 import { useState } from 'react';
 import { X, CalendarDays, Check, Plus } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useCreateAssessment } from '../hooks/useAssessments';
+import { useCreateAssessment, useUpdateAssessment } from '../hooks/useAssessments';
 import { toast } from 'sonner';
 import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import type { StudentAssessment } from '../types';
 
 interface Props {
   studentId: string;
   studentName: string;
   onClose: () => void;
+  /** Pass an existing assessment to enter edit mode */
+  editAssessment?: StudentAssessment;
 }
 
 const INPUT_CLS =
   'w-full bg-[#0D1025] border border-white/[0.07] rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-colors';
 
-export default function NewAssessmentModal({ studentId, studentName, onClose }: Props) {
+export default function NewAssessmentModal({ studentId, studentName, onClose, editAssessment }: Props) {
   const { user } = useAuth();
   const createAssessmentMutation = useCreateAssessment();
+  const updateAssessmentMutation = useUpdateAssessment(studentId);
+  const isEdit = !!editAssessment;
 
   const today = new Date();
 
-  const [selectedDate, setSelectedDate] = useState<Date>(today);
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    editAssessment ? new Date(editAssessment.date + 'T12:00:00') : today,
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
 
   // Dados principais
-  const [weight, setWeight] = useState('');
-  const [bodyFat, setBodyFat] = useState('');
-  const [muscleMass, setMuscleMass] = useState('');
-  const [leanMass, setLeanMass] = useState('');
+  const [weight, setWeight] = useState(editAssessment?.weight?.toString() ?? '');
+  const [bodyFat, setBodyFat] = useState(editAssessment?.bodyFat?.toString() ?? '');
+  const [muscleMass, setMuscleMass] = useState(editAssessment?.muscleMass?.toString() ?? '');
+  const [leanMass, setLeanMass] = useState(editAssessment?.leanMass?.toString() ?? '');
 
   // Medidas corporais
-  const [waist, setWaist] = useState('');
-  const [hip, setHip] = useState('');
-  const [arm, setArm] = useState('');
-  const [thigh, setThigh] = useState('');
-  const [chest, setChest] = useState('');
-  const [calf, setCalf] = useState('');
-  const [abdomen, setAbdomen] = useState('');
+  const [waist, setWaist] = useState(editAssessment?.waist?.toString() ?? '');
+  const [hip, setHip] = useState(editAssessment?.hip?.toString() ?? '');
+  const [arm, setArm] = useState(editAssessment?.arm?.toString() ?? '');
+  const [thigh, setThigh] = useState(editAssessment?.thigh?.toString() ?? '');
+  const [chest, setChest] = useState(editAssessment?.chest?.toString() ?? '');
+  const [calf, setCalf] = useState(editAssessment?.calf?.toString() ?? '');
+  const [abdomen, setAbdomen] = useState(editAssessment?.abdomen?.toString() ?? '');
 
   // Observacoes
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(editAssessment?.notes ?? '');
 
   function handleSave() {
     if (!weight && !bodyFat) {
@@ -50,9 +57,7 @@ export default function NewAssessmentModal({ studentId, studentName, onClose }: 
     }
     if (!user) return;
 
-    createAssessmentMutation.mutate({
-      studentId,
-      personalId: user.id,
+    const payload = {
       date: format(selectedDate, 'yyyy-MM-dd'),
       weight:     weight     ? parseFloat(weight)     : undefined,
       bodyFat:    bodyFat    ? parseFloat(bodyFat)    : undefined,
@@ -66,10 +71,25 @@ export default function NewAssessmentModal({ studentId, studentName, onClose }: 
       calf:       calf       ? parseFloat(calf)       : undefined,
       abdomen:    abdomen    ? parseFloat(abdomen)    : undefined,
       notes: notes.trim() || undefined,
-    });
+    };
 
-    toast.success(`Avaliacao de ${studentName} registrada!`);
-    onClose();
+    if (isEdit) {
+      updateAssessmentMutation.mutate(
+        { id: editAssessment.id, data: payload },
+        {
+          onSuccess: () => { toast.success('Avaliação atualizada!'); onClose(); },
+          onError: () => toast.error('Erro ao atualizar avaliação'),
+        },
+      );
+    } else {
+      createAssessmentMutation.mutate(
+        { studentId, personalId: user.id, ...payload },
+        {
+          onSuccess: () => { toast.success(`Avaliacao de ${studentName} registrada!`); onClose(); },
+          onError: () => toast.error('Erro ao registrar avaliação'),
+        },
+      );
+    }
   }
 
   return (
@@ -86,7 +106,7 @@ export default function NewAssessmentModal({ studentId, studentName, onClose }: 
               <CalendarDays size={20} className="text-violet-400" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Nova avaliacao</h2>
+              <h2 className="text-base font-bold text-white">{isEdit ? 'Editar avaliação' : 'Nova avaliacao'}</h2>
               <p className="text-xs text-slate-400">Registre os dados da avaliacao do aluno.</p>
             </div>
           </div>
@@ -247,10 +267,11 @@ export default function NewAssessmentModal({ studentId, studentName, onClose }: 
           </button>
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors"
+            disabled={createAssessmentMutation.isPending || updateAssessmentMutation.isPending}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold transition-colors disabled:opacity-50"
           >
             <Check size={15} />
-            Salvar avaliacao
+            {isEdit ? 'Atualizar' : 'Salvar avaliacao'}
           </button>
         </div>
       </div>

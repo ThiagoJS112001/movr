@@ -10,6 +10,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import PasswordStrengthBar from '../components/ui/PasswordStrengthBar';
 
 const PASSWORD_TIPS = [
   'Use no mínimo 8 caracteres',
@@ -17,39 +18,6 @@ const PASSWORD_TIPS = [
   'Inclua números e símbolos',
   'Evite senhas óbvias como "123456"',
 ];
-
-function StrengthBar({ password }: { password: string }) {
-  const score = [
-    password.length >= 8,
-    /[A-Z]/.test(password),
-    /[0-9]/.test(password),
-    /[^A-Za-z0-9]/.test(password),
-  ].filter(Boolean).length;
-
-  const labels = ['', 'Fraca', 'Razoável', 'Boa', 'Forte'];
-  const colors = ['', 'bg-red-500', 'bg-amber-400', 'bg-blue-400', 'bg-emerald-500'];
-  const textColors = ['', 'text-red-400', 'text-amber-400', 'text-blue-400', 'text-emerald-400'];
-
-  if (!password) return null;
-
-  return (
-    <div className="flex items-center gap-2 mt-1">
-      <div className="flex gap-1 flex-1">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-              i <= score ? colors[score] : 'bg-slate-200 dark:bg-white/10'
-            }`}
-          />
-        ))}
-      </div>
-      {score > 0 && (
-        <span className={`text-xs font-medium ${textColors[score]}`}>{labels[score]}</span>
-      )}
-    </div>
-  );
-}
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -209,7 +177,7 @@ export default function ResetPasswordPage() {
                         {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                       </button>
                     </div>
-                    <StrengthBar password={password} />
+                    <PasswordStrengthBar password={password} />
                   </div>
 
                   {/* Confirm password */}

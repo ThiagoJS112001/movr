@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import {
   ChevronLeft, ChevronRight, Plus, Clock, User,
-  CheckCircle2, XCircle, Calendar, MoreVertical, Trash2,
+  CheckCircle2, XCircle, Calendar, MoreVertical, Trash2, Pencil,
 } from 'lucide-react';
 import type { TrainingSession, SessionStatus } from '../../types';
 import NewSessionModal from '../../components/NewSessionModal';
@@ -53,6 +53,7 @@ export default function PersonalAgendaPage() {
   const [selectedDate, setSelectedDate] = useState<string>(today.toISOString().split('T')[0]);
   const [showModal, setShowModal] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [editingSession, setEditingSession] = useState<TrainingSession | null>(null);
 
   // Calendar grid
   const daysInMonth = getDaysInMonth(year, month);
@@ -256,8 +257,13 @@ export default function PersonalAgendaPage() {
                         <MoreVertical size={15} />
                       </button>
                       {menuOpenId === session.id && (
-                        <div className="absolute right-0 top-8 z-20 bg-[#141828] border border-white/10 rounded-xl shadow-xl min-w-[160px] py-1">
-                          {(['agendado','confirmado','concluido','cancelado'] as SessionStatus[]).map((s) => (
+                        <div className="absolute right-0 top-8 z-20 bg-[#141828] border border-white/10 rounded-xl shadow-xl min-w-[160px] py-1">                            <button
+                              onClick={() => { setEditingSession(session); setMenuOpenId(null); }}
+                              className="w-full text-left px-3 py-2 text-xs text-slate-300 hover:bg-white/5 flex items-center gap-2"
+                            >
+                              <Pencil size={12} /> Editar
+                            </button>
+                            <div className="border-t border-white/5 my-1" />                          {(['agendado','confirmado','concluido','cancelado'] as SessionStatus[]).map((s) => (
                             <button
                               key={s}
                               onClick={() => handleStatusChange(session.id, s)}
@@ -292,6 +298,15 @@ export default function PersonalAgendaPage() {
           defaultDate={selectedDate}
           students={students}
           onClose={() => setShowModal(false)}
+        />
+      )}
+
+      {editingSession && (
+        <NewSessionModal
+          defaultDate={editingSession.date}
+          students={students}
+          editSession={editingSession}
+          onClose={() => setEditingSession(null)}
         />
       )}
 

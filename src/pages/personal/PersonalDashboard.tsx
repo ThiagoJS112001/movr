@@ -159,6 +159,14 @@ export default function PersonalDashboard() {
     return alerts;
   }, [payments, sessions, allLogs, students, todayStr]);
 
+  // Monthly revenue
+  const totalPaidMonth = useMemo(() => {
+    const monthKey = todayStr.substring(0, 7);
+    return payments
+      .filter((p) => p.status === 'pago' && p.paidAt?.startsWith(monthKey))
+      .reduce((sum, p) => sum + p.amount, 0);
+  }, [payments, todayStr]);
+
   // Mensagens n�o lidas
   const unreadMessages = useMemo(
     () =>
@@ -230,7 +238,7 @@ export default function PersonalDashboard() {
       )}
 
       {/* �”€�”€ Stat cards �”€�”€ */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Alunos ativos */}
         <button
           onClick={() => navigate('/personal/alunos')}
@@ -292,7 +300,28 @@ export default function PersonalDashboard() {
           </div>
           <div>
             <p className="text-3xl font-bold text-slate-900 dark:text-white">{unread}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Mensagens n�o lidas</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Mensagens não lidas</p>
+          </div>
+        </button>
+
+        {/* Receita do mês */}
+        <button
+          onClick={() => navigate('/personal/financeiro')}
+          className="bg-white dark:bg-[#0D1025] border border-slate-200 dark:border-white/[0.07] rounded-2xl p-5 text-left hover:border-emerald-500/40 transition group flex flex-col gap-3"
+        >
+          <div className="flex items-center justify-between">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+              <DollarSign size={17} className="text-emerald-400" />
+            </div>
+            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
+              este mês
+            </span>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-slate-900 dark:text-white">
+              {totalPaidMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Receita do mês</p>
           </div>
         </button>
       </div>

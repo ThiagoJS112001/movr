@@ -7,6 +7,7 @@ import {
   createWorkout,
   updateWorkout,
   deleteWorkout,
+  duplicateWorkout,
   addExerciseToWorkout,
   updateExerciseInWorkout,
   removeExerciseFromWorkout,
@@ -75,6 +76,17 @@ export function useDeleteWorkout() {
   const { user } = useAuth();
   return useMutation({
     mutationFn: (id: string) => deleteWorkout(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: workoutsKey(user?.id ?? '') });
+    },
+  });
+}
+
+export function useDuplicateWorkout() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: (workoutId: string) => duplicateWorkout(workoutId, user!.id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: workoutsKey(user?.id ?? '') });
     },

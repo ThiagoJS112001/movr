@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import BrandLogo from '../components/ui/BrandLogo';
+import PasswordStrengthBar from '../components/ui/PasswordStrengthBar';
 import { ROLE_ROUTES } from '../lib/constants';
 
 type RegRole = 'personal' | 'aluno' | 'academia';
@@ -107,7 +108,7 @@ function formatPhone(value: string): string {
 }
 
 export default function RegisterPage() {
-  const { signUp, signUpAcademia } = useAuth();
+  const { signUp, signUpAcademia, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [role, setRole] = useState<RegRole>('personal');
@@ -129,20 +130,22 @@ export default function RegisterPage() {
     setError('');
     if (!terms) { setError('Você precisa aceitar os Termos de Uso para continuar.'); return; }
     if (password !== confirmPassword) { setError('As senhas não coincidem.'); return; }
-    if (password.length < 6) { setError('A senha deve ter pelo menos 6 caracteres.'); return; }
+    if (password.length < 8) { setError('A senha deve ter pelo menos 8 caracteres.'); return; }
     setLoading(true);
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     if (role === 'academia') {
-      const result = await signUpAcademia(name, email, password);
+      const result = await signUpAcademia(name, normalizedEmail, password);
       setLoading(false);
       if (!result.success) { setError(result.error ?? 'Erro ao criar conta.'); return; }
-      navigate('/academia/dashboard');
+      navigate('/completar-perfil');
     } else {
-      const result = await signUp(name, email, password, role);
+      const result = await signUp(name, normalizedEmail, password, role);
       setLoading(false);
       if (!result.success) { setError(result.error ?? 'Erro ao criar conta.'); return; }
       if (result.needsEmailConfirmation) { setEmailSent(true); return; }
-      navigate(ROLE_ROUTES[result.role ?? role] ?? '/aluno/dashboard');
+      navigate('/completar-perfil');
     }
   }
 
@@ -170,33 +173,34 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#080B18] flex flex-col items-center justify-center px-4 py-8">
-      <div className="w-full max-w-5xl bg-[#0D1025] border border-white/[0.07] rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-[1fr_320px]">
+      <div className="w-full max-w-5xl bg-[#0D1025] border border-white/[0.07] rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-[3fr_2fr]">
 
         {/* â”€â”€ LEFT: Form â”€â”€ */}
         <div className="p-8 flex flex-col">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-6">
-            <BrandLogo size={36} />
-            <span className="text-xl font-bold text-white tracking-tight">
+            <BrandLogo size={32} />
+            <span className="text-lg font-bold text-white tracking-tight">
               movr<span className="text-rose-500">.</span>
             </span>
           </div>
 
           <h2 className="text-2xl font-bold text-white mb-1">
-            Vamos começar sua{' '}
-            <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              evolução.
+            Crie sua conta{' '}
+            <span className="bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
+              e comece agora.
             </span>
           </h2>
           <p className="text-slate-400 text-sm mb-7 leading-relaxed">
-            Crie sua conta e faça parte da plataforma que conecta treinos, pessoas e resultados.
+            Junte-se ao Movr e tenha tudo que você precisa para evoluir de verdade.
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
             {/* Profile selector */}
             <div>
-              <p className="text-sm font-semibold text-slate-300 mb-3">Escolha seu perfil</p>
+              <p className="text-sm font-semibold text-slate-300 mb-1">Escolha seu perfil</p>
+              <p className="text-xs text-slate-500 mb-3">Selecione o perfil que mais combina com você para personalizarmos sua experiência.</p>
               <div className="grid grid-cols-3 gap-3">
                 {PROFILES.map((p) => {
                   const Icon = p.icon;
@@ -251,21 +255,27 @@ export default function RegisterPage() {
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Senha</label>
                   <div className="relative">
                     <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
-                    <input type={showPassword ? 'text' : 'password'} required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Digite sua senha" className={`${inputClass} pr-10`} />
-                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition">
+                    <input type={showPassword ? 'text' : 'password'} required autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 8 caracteres" className={`${inputClass} pr-10`} />
+                    <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
                       {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
                   </div>
+                  <PasswordStrengthBar password={password} />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Confirmar senha</label>
                   <div className="relative">
                     <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                     <input type={showConfirm ? 'text' : 'password'} required autoComplete="new-password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirme sua senha" className={`${inputClass} pr-10`} />
-                    <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition">
+                    <button type="button" onClick={() => setShowConfirm((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition" aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}>
                       {showConfirm ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
                   </div>
+                  {confirmPassword && (
+                    <p className={`text-xs mt-1 ${confirmPassword === password ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {confirmPassword === password ? '✓ Senhas coincidem' : '✗ Senhas não coincidem'}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">
@@ -308,7 +318,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-colors"
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-60 text-white font-semibold rounded-xl py-3 text-sm transition-all"
             >
               {loading ? 'Criando conta...' : 'Criar conta'}
             </button>
@@ -321,7 +331,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Google */}
-            <button type="button" className="flex items-center justify-center gap-2 bg-transparent border border-white/10 hover:border-white/25 text-slate-300 hover:text-white rounded-xl py-2.5 text-sm font-medium transition">
+            <button type="button" onClick={() => loginWithGoogle()} className="flex items-center justify-center gap-2 bg-transparent border border-white/10 hover:border-white/25 text-slate-300 hover:text-white rounded-xl py-2.5 text-sm font-medium transition">
               <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
                 <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
                 <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>

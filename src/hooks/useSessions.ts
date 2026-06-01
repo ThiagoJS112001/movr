@@ -3,6 +3,7 @@ import {
   fetchSessions,
   createSession,
   updateSessionStatus,
+  updateSession,
   deleteSession,
 } from '../services/sessions';
 import { useAuth } from '../contexts/AuthContext';
@@ -43,6 +44,18 @@ export function useUpdateSessionStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: SessionStatus }) =>
       updateSessionStatus(id, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: sessionsKey(user?.id ?? '') });
+    },
+  });
+}
+
+export function useUpdateSession() {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, params }: { id: string; params: Parameters<typeof updateSession>[1] }) =>
+      updateSession(id, params),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: sessionsKey(user?.id ?? '') });
     },

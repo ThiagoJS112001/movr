@@ -4,8 +4,10 @@ import {
   fetchAssessments,
   fetchMyAssessments,
   createAssessment,
+  updateAssessment,
   deleteAssessment,
   type CreateAssessmentData,
+  type UpdateAssessmentData,
 } from '../services/assessments';
 
 // ── Query Keys ────────────────────────────────────────────────────────────────
@@ -60,6 +62,21 @@ export function useDeleteAssessment(studentId: string) {
       qc.invalidateQueries({
         queryKey: assessmentsKey(studentId, user?.id ?? ''),
       });
+    },
+  });
+}
+
+export function useUpdateAssessment(studentId: string) {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateAssessmentData }) =>
+      updateAssessment(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: assessmentsKey(studentId, user?.id ?? ''),
+      });
+      qc.invalidateQueries({ queryKey: myAssessmentsKey(studentId) });
     },
   });
 }

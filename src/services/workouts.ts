@@ -163,6 +163,47 @@ export async function deleteWorkout(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export async function duplicateWorkout(id: string, personalId: string): Promise<Workout> {
+  const original = await fetchWorkoutById(id);
+  if (!original) throw new Error('Treino não encontrado');
+
+  const { data: newRow, error: wErr } = await supabase
+    .from('workouts')
+    .insert({
+      name: `${original.name} (cópia)`,
+      description: original.description ?? null,
+      personal_id: personalId,
+      status: 'rascunho',
+      level: original.level ?? null,
+      duration_minutes: original.durationMinutes ?? null,
+    })
+    .select()
+    .single();
+
+  if (wErr) throw new Error(wErr.message);
+
+  if (original.exercises.length > 0) {
+    const { error: exErr } = await supabase.from('workout_exercises').insert(
+      original.exercises.map((ex, i) => ({
+        workout_id: newRow.id,
+        exercise_id: ex.exerciseId || null,
+        exercise_name: ex.exerciseName,
+        sets: ex.sets,
+        reps: ex.reps,
+        weight: ex.weight ?? null,
+        rest_seconds: ex.restSeconds,
+        notes: ex.notes ?? null,
+        image_url: ex.imageUrl ?? null,
+        video_url: ex.videoUrl ?? null,
+        order_index: i,
+      })),
+    );
+    if (exErr) throw new Error(exErr.message);
+  }
+
+  return { ...mapWorkout(newRow as Record<string, unknown>, original.exercises), id: newRow.id };
+}
+
 // ── Workout Exercises ──────────────────────────────────────────────────────────
 
 export async function addExerciseToWorkout(

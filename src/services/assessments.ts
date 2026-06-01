@@ -95,6 +95,27 @@ export async function createAssessment(data: CreateAssessmentData): Promise<void
   if (error) throw error;
 }
 
+export type UpdateAssessmentData = Partial<Omit<CreateAssessmentData, 'studentId' | 'personalId'>>;
+
+export async function updateAssessment(id: string, data: UpdateAssessmentData): Promise<void> {
+  const { error } = await supabase.from('assessments').update({
+    ...(data.date       !== undefined && { date:        data.date }),
+    ...(data.weight     !== undefined && { weight:      data.weight     ?? null }),
+    ...(data.bodyFat    !== undefined && { body_fat:    data.bodyFat    ?? null }),
+    ...(data.muscleMass !== undefined && { muscle_mass: data.muscleMass ?? null }),
+    ...(data.leanMass   !== undefined && { lean_mass:   data.leanMass   ?? null }),
+    ...(data.chest      !== undefined && { chest:       data.chest      ?? null }),
+    ...(data.waist      !== undefined && { waist:       data.waist      ?? null }),
+    ...(data.hip        !== undefined && { hip:         data.hip        ?? null }),
+    ...(data.thigh      !== undefined && { thigh:       data.thigh      ?? null }),
+    ...(data.arm        !== undefined && { arm:         data.arm        ?? null }),
+    ...(data.calf       !== undefined && { calf:        data.calf       ?? null }),
+    ...(data.abdomen    !== undefined && { abdomen:     data.abdomen    ?? null }),
+    ...(data.notes      !== undefined && { notes:       data.notes      ?? null }),
+  }).eq('id', id);
+  if (error) throw error;
+}
+
 export async function deleteAssessment(id: string): Promise<void> {
   const { error } = await supabase.from('assessments').delete().eq('id', id);
   if (error) throw error;

@@ -1,8 +1,8 @@
 ﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useWorkouts, useCreateWorkout, useDeleteWorkout } from '../../hooks/useWorkouts';
-import { Plus, Trash2, ChevronRight, Dumbbell } from 'lucide-react';
+import { useWorkouts, useCreateWorkout, useDeleteWorkout, useDuplicateWorkout } from '../../hooks/useWorkouts';
+import { Plus, Trash2, ChevronRight, Dumbbell, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function TreinosPage() {
@@ -10,6 +10,7 @@ export default function TreinosPage() {
   const { data: workouts = [], isLoading } = useWorkouts();
   const createWorkoutMutation = useCreateWorkout();
   const deleteWorkoutMutation = useDeleteWorkout();
+  const duplicateWorkoutMutation = useDuplicateWorkout();
   const navigate = useNavigate();
 
   const [showCreate, setShowCreate] = useState(false);
@@ -85,6 +86,22 @@ export default function TreinosPage() {
                   className="text-indigo-500 hover:text-indigo-700 p-1"
                 >
                   <ChevronRight size={18} />
+                </button>
+                <button
+                  title="Duplicar treino"
+                  onClick={async () => {
+                    try {
+                      const copy = await duplicateWorkoutMutation.mutateAsync(workout.id);
+                      toast.success(`Cópia "${copy.name}" criada!`);
+                      navigate(`/personal/treinos/${copy.id}`);
+                    } catch {
+                      toast.error('Erro ao duplicar treino');
+                    }
+                  }}
+                  disabled={duplicateWorkoutMutation.isPending}
+                  className="text-slate-400 hover:text-indigo-400 p-1 disabled:opacity-50"
+                >
+                  <Copy size={16} />
                 </button>
                 <button
                   onClick={() => {

@@ -1,11 +1,14 @@
 ﻿import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, RolePrefix } from '../types';
 import { supabase } from '../lib/supabase';
+import { env } from '../lib/env';
+import { identifySentryUser } from '../lib/sentry';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string; role?: string }>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   signUp: (name: string, email: string, password: string, role: 'aluno' | 'personal') => Promise<{ success: boolean; error?: string; role?: string; needsEmailConfirmation?: boolean }>;
   signUpAcademia: (
@@ -74,6 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   // Flag to prevent onAuthStateChange from clearing user during signUp/login flows
   const signingUpRef = React.useRef(false);
+
+  // Keep Sentry user identity in sync
+  useEffect(() => {
+    identifySentryUser(user ? { id: user.id, email: user.email, role: user.role } : null);
+  }, [user]);
 
   useEffect(() => {
     // Safety net: always resolve loading within 8 seconds
@@ -275,8 +283,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  async function loginWithGoogle() {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${env.app.url}/auth/callback` },
+    });
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, signUp, signUpAcademia }}>
+    <AuthContext.Provider value={{ user, loading, login, loginWithGoogle, logout, signUp, signUpAcademia }}>
       {children}
     </AuthContext.Provider>
   );

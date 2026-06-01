@@ -18,6 +18,7 @@ const RegisterPage          = lazy(() => import('./pages/RegisterPage'));
 const ForgotPasswordPage    = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage     = lazy(() => import('./pages/ResetPasswordPage'));
 const CompletarPerfilPage   = lazy(() => import('./pages/CompletarPerfilPage'));
+const AuthCallbackPage      = lazy(() => import('./pages/AuthCallbackPage'));
 
 // Personal
 const PersonalDashboard     = lazy(() => import('./pages/personal/PersonalDashboard'));
@@ -75,6 +76,7 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
           {/* Personal routes */}
           <Route element={<ProtectedRoute requiredRole="personal" />}>

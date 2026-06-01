@@ -12,7 +12,7 @@ import {
 import { useDiets, useDietAssignments, useAssignDiet, useRemoveDietAssignment } from '../../hooks/useDiets';
 import { useExercises } from '../../hooks/useExercises';
 import { usePlanArchives } from '../../hooks/useWeeklyPlans';
-import { useAssessments, useDeleteAssessment } from '../../hooks/useAssessments';
+import { useAssessments, useDeleteAssessment, useUpdateAssessment } from '../../hooks/useAssessments';
 import type { StudentAssessment } from '../../types';
 import { toast } from 'sonner';
 import {
@@ -109,6 +109,7 @@ export default function AlunoDetalhe() {
   const { data: allArchives = [] } = usePlanArchives();
   const { data: allAssessmentsData = [] } = useAssessments(id ?? '');
   const deleteAssessmentMutation = useDeleteAssessment(id ?? '');
+  const updateAssessmentMutation = useUpdateAssessment(id ?? ''); // eslint-disable-line @typescript-eslint/no-unused-vars
 
   const [activeTab, setActiveTab] = useState<Tab>('treinos');
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
@@ -137,6 +138,7 @@ export default function AlunoDetalhe() {
 
   // New assessment modal
   const [newAssessmentOpen, setNewAssessmentOpen] = useState(false);
+  const [editingAssessment, setEditingAssessment] = useState<StudentAssessment | null>(null);
 
   // Anamnese
   const [anamneseOpen, setAnamneseOpen] = useState(false);
@@ -1203,39 +1205,62 @@ export default function AlunoDetalhe() {
                     {visibleAssessments.map((a) => {
                       const isSelected = a.id === selectedId;
                       return (
-                        <button
+                        <div
                           key={a.id}
-                          onClick={() => setSelectedAssessmentId(a.id)}
-                          className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all ${
+                          className={`flex items-center gap-2 px-3 py-3 transition-all ${
                             isSelected
                               ? 'bg-violet-500/10 border-l-2 border-violet-500'
                               : 'hover:bg-slate-700/30 border-l-2 border-transparent'
                           }`}
                         >
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-violet-500/20' : 'bg-slate-700/50'}`}>
-                            <CalendarDays size={16} className={isSelected ? 'text-violet-400' : 'text-slate-500'} />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-slate-200 mb-1.5">
-                              {new Date(a.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                            </p>
-                            <div className="flex gap-4">
-                              {a.weight != null && (
-                                <div>
-                                  <p className="text-sm font-bold text-white leading-none">{a.weight} kg</p>
-                                  <p className="text-[10px] text-slate-500 mt-0.5">Peso</p>
-                                </div>
-                              )}
-                              {a.bodyFat != null && (
-                                <div>
-                                  <p className="text-sm font-bold text-white leading-none">{a.bodyFat} %</p>
-                                  <p className="text-[10px] text-slate-500 mt-0.5">Gordura</p>
-                                </div>
-                              )}
+                          <button
+                            onClick={() => setSelectedAssessmentId(a.id)}
+                            className="flex items-center gap-3 flex-1 text-left"
+                          >
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-violet-500/20' : 'bg-slate-700/50'}`}>
+                              <CalendarDays size={16} className={isSelected ? 'text-violet-400' : 'text-slate-500'} />
                             </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-slate-200 mb-1.5">
+                                {new Date(a.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                              </p>
+                              <div className="flex gap-4">
+                                {a.weight != null && (
+                                  <div>
+                                    <p className="text-sm font-bold text-white leading-none">{a.weight} kg</p>
+                                    <p className="text-[10px] text-slate-500 mt-0.5">Peso</p>
+                                  </div>
+                                )}
+                                {a.bodyFat != null && (
+                                  <div>
+                                    <p className="text-sm font-bold text-white leading-none">{a.bodyFat} %</p>
+                                    <p className="text-[10px] text-slate-500 mt-0.5">Gordura</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            <button
+                              onClick={() => setEditingAssessment(a)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
+                              title="Editar"
+                            >
+                              <Pencil size={13} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (!confirm('Excluir esta avaliação?')) return;
+                                deleteAssessmentMutation.mutate(a.id);
+                                if (selectedId === a.id) setSelectedAssessmentId(null);
+                              }}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                              title="Excluir"
+                            >
+                              <Trash2 size={13} />
+                            </button>
                           </div>
-                          <ChevronDown size={14} className={`shrink-0 -rotate-90 ${isSelected ? 'text-violet-400' : 'text-slate-600'}`} />
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -1433,6 +1458,14 @@ export default function AlunoDetalhe() {
 
       {newAssessmentOpen && (
         <NewAssessmentModal studentId={student.id} studentName={student.name} onClose={() => setNewAssessmentOpen(false)} />
+      )}
+      {editingAssessment && (
+        <NewAssessmentModal
+          studentId={student.id}
+          studentName={student.name}
+          editAssessment={editingAssessment}
+          onClose={() => setEditingAssessment(null)}
+        />
       )}
       {anamneseOpen && (
         <AnamneseModal studentId={student.id} studentName={student.name} existing={anamnese} onClose={() => setAnamneseOpen(false)} />

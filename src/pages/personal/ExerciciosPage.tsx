@@ -3,10 +3,11 @@ import { useExercises, useCreateExercise, useUpdateExercise, useDeleteExercise }
 import {
   Plus, Search, X, Eye, Edit2, Dumbbell, Check, Play,
   ChevronLeft, ChevronRight, ArrowLeft, TrendingUp, Shield,
-  Maximize2, CheckCircle2, Info,
+  Maximize2, CheckCircle2, Info, FileUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Exercise } from '../../types';
+import ImportarExerciciosPage from './ImportarExerciciosPage';
 
 // --- Constants ----------------------------------------------------------------
 const MUSCLE_GROUPS = [
@@ -626,7 +627,7 @@ export default function ExerciciosPage() {
   const updateMutation = useUpdateExercise();
   const deleteMutation = useDeleteExercise();
 
-  const [view,     setView]     = useState<'list' | 'form'>('list');
+  const [view,     setView]     = useState<'list' | 'form' | 'import'>('list');
   const [editingEx, setEditingEx] = useState<Exercise | null>(null);
 
   const [filterGroup,     setFilterGroup]     = useState('');
@@ -687,6 +688,10 @@ export default function ExerciciosPage() {
     return Array.from({ length: Math.min(5, totalPages) }, (_, i) => start + i);
   })();
 
+  if (view === 'import') {
+    return <ImportarExerciciosPage onBack={() => setView('list')} />;
+  }
+
   if (view === 'form') {
     return (
       <ExerciseFormPage
@@ -707,13 +712,22 @@ export default function ExerciciosPage() {
           <h1 className="text-2xl font-bold text-white">Exercícios</h1>
           <p className="text-sm text-slate-400 mt-0.5">Gerencie seu catálogo de exercícios e mantenha tudo organizado.</p>
         </div>
-        <button
-          onClick={() => { setEditingEx(null); setView('form'); }}
-          className="flex items-center gap-2 bg-[#7c5cfc] hover:bg-[#6b4de6] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
-        >
-          <Plus size={15} />
-          Novo exercício
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setView('import')}
+            className="flex items-center gap-2 bg-white/[0.06] hover:bg-white/[0.1] text-slate-300 hover:text-white text-sm font-medium px-4 py-2.5 rounded-xl border border-white/[0.08] transition-colors"
+          >
+            <FileUp size={15} />
+            Importar via Excel
+          </button>
+          <button
+            onClick={() => { setEditingEx(null); setView('form'); }}
+            className="flex items-center gap-2 bg-[#7c5cfc] hover:bg-[#6b4de6] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+          >
+            <Plus size={15} />
+            Novo exercício
+          </button>
+        </div>
       </div>
 
       {/* Muscle-group filter chips */}
@@ -785,7 +799,23 @@ export default function ExerciciosPage() {
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {isLoading ? (
-                <tr><td colSpan={5} className="text-center py-16 text-slate-500 text-sm">Carregando...</td></tr>
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-14 h-10 rounded-lg bg-white/[0.06] shrink-0" />
+                        <div className="space-y-1.5">
+                          <div className="h-3.5 w-32 bg-white/[0.06] rounded" />
+                          <div className="h-2.5 w-20 bg-white/[0.04] rounded" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3"><div className="h-5 w-20 bg-white/[0.06] rounded-full" /></td>
+                    <td className="px-3 py-3"><div className="h-3.5 w-16 bg-white/[0.04] rounded" /></td>
+                    <td className="px-3 py-3"><div className="h-5 w-20 bg-white/[0.06] rounded-full" /></td>
+                    <td className="px-3 py-3"><div className="h-7 w-20 bg-white/[0.04] rounded-lg" /></td>
+                  </tr>
+                ))
               ) : paginated.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-16 text-center">
@@ -807,7 +837,7 @@ export default function ExerciciosPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-14 h-10 rounded-lg bg-[#080B18] overflow-hidden shrink-0 flex items-center justify-center">
-                          {thumb ? <img src={thumb} alt={ex.name} className="w-full h-full object-cover" /> : <Dumbbell size={16} className="text-slate-600" />}
+                          {thumb ? <img src={thumb} alt={ex.name} className="w-full h-full object-cover" loading="lazy" /> : <Dumbbell size={16} className="text-slate-600" />}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-white leading-tight">{ex.name}</p>

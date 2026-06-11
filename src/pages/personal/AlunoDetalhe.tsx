@@ -426,7 +426,15 @@ export default function AlunoDetalhe() {
               {headerMenuOpen && (
                 <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-[#0D1025] rounded-xl shadow-lg border border-slate-200 dark:border-white/[0.07] z-20 py-1.5">
                   <button
-                    onClick={() => { blockStudentMutation.mutate({ id: student.id, blocked: !blocked }); setHeaderMenuOpen(false); }}
+                    onClick={() => { navigate(`/personal/alunos/${student.id}/editar`); setHeaderMenuOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+                  >
+                    <Pencil size={14} className="text-indigo-400" />
+                    Editar aluno
+                  </button>
+                  <div className="my-1 border-t border-slate-100 dark:border-white/[0.07]" />
+                  <button
+                    onClick={() => { blockStudentMutation.mutate({ studentId: student.id, blocked: !blocked }); setHeaderMenuOpen(false); }}
                     className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors ${
                       blocked
                         ? 'text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20'
@@ -713,10 +721,10 @@ export default function AlunoDetalhe() {
         const pctFat   = panelMacroTotal > 0 ? Math.round((panelTotalFat   / panelMacroTotal) * 100) : 0;
 
         const MEAL_ICONS: Record<string, string> = {
-          'café': 'â˜€ï¸', 'cafe': 'â˜€ï¸', 'manhã': 'â˜€ï¸', 'manha': 'â˜€ï¸',
-          'almoço': 'ðŸ½ï¸', 'almoco': 'ðŸ½ï¸',
-          'tarde': 'ðŸ§ƒ', 'lanche': 'ðŸ¥™',
-          'pré': 'âš¡', 'pre': 'âš¡', 'treino': 'âš¡',
+          'café': '☀️', 'cafe': '☀️', 'manhã': '☀️', 'manha': '☀️',
+          'almoço': '🍽️', 'almoco': '🍽️',
+          'tarde': '🧃', 'lanche': '🥙',
+          'pré': '⚡', 'pre': '⚡', 'treino': '⚡',
           'pós': 'ðŸŒ™', 'pos': 'ðŸŒ™', 'jantar': 'ðŸŒ™', 'ceia': 'ðŸŒ™',
         };
         function getMealIcon(name: string): string {
@@ -724,7 +732,7 @@ export default function AlunoDetalhe() {
           for (const [key, icon] of Object.entries(MEAL_ICONS)) {
             if (n.includes(key)) return icon;
           }
-          return 'ðŸ´';
+          return '🍴';
         }
 
         return (
@@ -1426,31 +1434,31 @@ export default function AlunoDetalhe() {
 
       {/* â”€â”€ Modal: New Assessment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {/* Anamnese Tab */}
-      {activeTab === ''anamnese'' && (
+      {activeTab === 'anamnese' && (
         <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <p className="font-semibold text-white">Ficha de Sa�de</p>
-              <p className="text-xs text-slate-400">Informa��es de sa�de e prefer�ncias do aluno</p>
+              <p className="font-semibold text-white">Ficha de Saúde</p>
+              <p className="text-xs text-slate-400">Informações de saúde e preferências do aluno</p>
             </div>
             <button onClick={() => setAnamneseOpen(true)} className="flex items-center gap-2 px-3 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium rounded-xl transition-colors">
-              <Plus size={14} />{anamnese ? ''Editar'' : ''Preencher''} Anamnese
+              <Plus size={14} />{anamnese ? 'Editar' : 'Preencher'} Anamnese
             </button>
           </div>
           {!anamnese ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <Target size={32} className="text-slate-600 mb-3" />
-              <p className="text-slate-400 text-sm">Anamnese n�o preenchida</p>
+              <p className="text-slate-400 text-sm">Anamnese não preenchida</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               {anamnese.objective && <InfoRow label="Objetivo" value={anamnese.objective} />}
-              {anamnese.hasHealthIssues && <InfoRow label="Problemas de sa�de" value={anamnese.healthIssues ?? ''Sim''} highlight />}
-              {anamnese.injuries && <InfoRow label="Les�es" value={anamnese.injuries} highlight />}
+              {anamnese.hasHealthIssues && <InfoRow label="Problemas de saúde" value={anamnese.healthIssues ?? 'Sim'} highlight />}
+              {anamnese.injuries && <InfoRow label="Lesões" value={anamnese.injuries} highlight />}
               {anamnese.medications && <InfoRow label="Medicamentos" value={anamnese.medications} />}
               {anamnese.sleepHours != null && <InfoRow label="Sono" value={`${anamnese.sleepHours}h/noite`} />}
-              {anamnese.waterIntakeLiters != null && <InfoRow label="Hidrata��o" value={`${anamnese.waterIntakeLiters}L/dia`} />}
-              {anamnese.observations && <div className="sm:col-span-2"><InfoRow label="Observa��es" value={anamnese.observations} /></div>}
+              {anamnese.waterIntakeLiters != null && <InfoRow label="Hidratação" value={`${anamnese.waterIntakeLiters}L/dia`} />}
+              {anamnese.observations && <div className="sm:col-span-2"><InfoRow label="Observações" value={anamnese.observations} /></div>}
             </div>
           )}
         </div>

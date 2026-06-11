@@ -72,7 +72,7 @@ export default function LoginPage() {
     const result = await login(email.trim().toLowerCase(), password);
     setLoading(false);
     if (!result.success) {
-      setError(mapLoginError(result.error ?? ''));
+      setError(result.error ?? 'Erro ao fazer login. Tente novamente.');
       return;
     }
     navigate(ROLE_ROUTES[result.role ?? ''] ?? '/aluno/dashboard');

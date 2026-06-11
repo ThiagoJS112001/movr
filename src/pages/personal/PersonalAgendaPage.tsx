@@ -108,11 +108,11 @@ export default function PersonalAgendaPage() {
   const todayStr = today.toISOString().split('T')[0];
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-5 max-w-screen-xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">Agenda</h1>
+          <h1 className="text-2xl font-bold text-white">Agenda</h1>
           <p className="text-sm text-slate-400 mt-0.5">Gerencie suas sessões com alunos</p>
         </div>
         <button

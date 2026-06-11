@@ -150,11 +150,11 @@ export default function PersonalFinanceiroPage() {
   const activeStudents = students.filter((s) => !s.isBlocked && s.connectionStatus !== 'pending');
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6">
+    <div className="p-5 max-w-screen-xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">Financeiro</h1>
+          <h1 className="text-2xl font-bold text-white">Financeiro</h1>
           <p className="text-sm text-slate-400 mt-0.5">Controle de pagamentos dos alunos</p>
         </div>
         <button

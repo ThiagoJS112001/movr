@@ -290,7 +290,7 @@ export default function AlunosPage() {
   }
 
   return (
-    <div className="p-6 max-w-[1280px] mx-auto space-y-6">
+    <div className="p-5 max-w-screen-xl mx-auto space-y-6">
 
       {/* Header */}
       <div className="flex items-start justify-between">

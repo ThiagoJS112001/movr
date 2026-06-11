@@ -37,12 +37,6 @@ const NAV_SECTIONS = [
       { to: '/personal/chat', label: 'Chat', badge: true },
     ],
   },
-  {
-    label: 'CONTA',
-    items: [
-      { to: '/personal/perfil', label: 'Meu Perfil' },
-    ],
-  },
 ];
 
 const BOTTOM_NAV = [
@@ -141,7 +135,7 @@ export default function PersonalSidebar() {
         {/* Bottom: profile + settings + logout */}
         <div className="mt-5 pt-4 border-t border-white/[0.06] flex flex-col gap-0.5">
           <button
-            onClick={() => navigate('/completar-perfil')}
+            onClick={() => navigate('/personal/perfil')}
             className="w-full flex items-center gap-3 px-2 py-2.5 rounded-lg hover:bg-white/[0.04] transition-colors group"
           >
             <div className="w-9 h-9 rounded-full bg-[#7c5cfc]/25 border border-[#7c5cfc]/50 flex items-center justify-center text-[#7c5cfc] text-xs font-bold shrink-0 select-none">

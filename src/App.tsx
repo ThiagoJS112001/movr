@@ -24,6 +24,7 @@ const AuthCallbackPage      = lazy(() => import('./pages/AuthCallbackPage'));
 const PersonalDashboard     = lazy(() => import('./pages/personal/PersonalDashboard'));
 const AlunosPage            = lazy(() => import('./pages/personal/AlunosPage'));
 const AlunoDetalhe          = lazy(() => import('./pages/personal/AlunoDetalhe'));
+const EditAlunoPage         = lazy(() => import('./pages/personal/EditAlunoPage'));
 const ExerciciosPage        = lazy(() => import('./pages/personal/ExerciciosPage'));
 const TreinosPage           = lazy(() => import('./pages/personal/TreinosPage'));
 const TreinoDetalhe         = lazy(() => import('./pages/personal/TreinoDetalhe'));
@@ -84,6 +85,7 @@ export default function App() {
               <Route path="/personal/dashboard" element={<PersonalDashboard />} />
               <Route path="/personal/alunos" element={<AlunosPage />} />
               <Route path="/personal/alunos/:id" element={<AlunoDetalhe />} />
+              <Route path="/personal/alunos/:id/editar" element={<EditAlunoPage />} />
               <Route path="/personal/exercicios" element={<ExerciciosPage />} />
               <Route path="/personal/treinos" element={<TreinosPage />} />
               <Route path="/personal/treinos/:id" element={<TreinoDetalhe />} />

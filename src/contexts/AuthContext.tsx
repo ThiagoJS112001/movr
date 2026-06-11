@@ -143,15 +143,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: 'E-mail ou senha inválidos.' };
       }
 
-      // Buscar perfil; se falhar, tentar mais 2x com delays progressivos
+      // Buscar perfil; se falhar, tentar mais 2x com delays progressivos.
+      // Usa timeout menor nas retentativas para reduzir espera total em cold-start.
       let profile = await fetchProfile(data.session.user.id);
       if (!profile) {
-        await new Promise((r) => setTimeout(r, 1000));
-        profile = await fetchProfile(data.session.user.id);
+        await new Promise((r) => setTimeout(r, 800));
+        profile = await fetchProfile(data.session.user.id, 6000);
       }
       if (!profile) {
-        await new Promise((r) => setTimeout(r, 2000));
-        profile = await fetchProfile(data.session.user.id);
+        await new Promise((r) => setTimeout(r, 1200));
+        profile = await fetchProfile(data.session.user.id, 6000);
       }
       // Perfil ausente: trigger pode ter falhado na criação da conta.
       // Tentar criar o perfil com os metadados disponíveis.
@@ -170,7 +171,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             : 'aluno',
         });
         if (!insertError) {
-          profile = await fetchProfile(data.session.user.id);
+          profile = await fetchProfile(data.session.user.id, 6000);
+        } else {
+          // Insert falhou: perfil já existe mas o DB estava frio nas tentativas anteriores.
+          // Neste ponto o DB já foi aquecido — tentar buscar novamente.
+          await new Promise((r) => setTimeout(r, 500));
+          profile = await fetchProfile(data.session.user.id, 6000);
         }
       }
       if (!profile) {

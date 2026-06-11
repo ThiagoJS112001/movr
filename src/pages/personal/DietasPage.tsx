@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useDiets, useCreateDiet, useDeleteDiet } from '../../hooks/useDiets';
+import { useDiets, useCreateDiet, useUpdateDiet, useDeleteDiet } from '../../hooks/useDiets';
 import { addMealToDiet } from '../../services/diets';
+import type { Diet } from '../../types';
 import {
-  Plus, Trash2, ChevronRight, Salad, ArrowLeft, Flame,
+  Plus, Trash2, ChevronRight, ChevronLeft, Salad, ArrowLeft, Flame,
   Clock, Info, X, Search, Beef, Wheat, Droplets,
+  Download, Edit2, Copy, ChevronDown, Check,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -153,34 +155,43 @@ function MacroPreviewRow({ label, grams, kcal, pct, color }: {
 
 // â”€â”€ Diet Creation Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function DietFormPage({ onBack }: { onBack: () => void }) {
+function DietFormPage({ onBack, diet: editDiet }: { onBack: () => void; diet?: Diet }) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isEditing = !!editDiet;
   const createDietMutation = useCreateDiet();
+  const updateDietMutation = useUpdateDiet(editDiet?.id ?? '');
 
   // Basic info
-  const [name, setName] = useState('');
-  const [objective, setObjective] = useState('');
-  const [durationDays, setDurationDays] = useState('');
-  const [restrictionLevel, setRestrictionLevel] = useState('');
-  const [observations, setObservations] = useState('');
+  const [name, setName] = useState(editDiet?.name ?? '');
+  const [objective, setObjective] = useState(editDiet?.goal ?? '');
+  const [durationDays, setDurationDays] = useState(editDiet?.durationDays?.toString() ?? '');
+  const [restrictionLevel, setRestrictionLevel] = useState(editDiet?.restrictionLevel ?? '');
+  const [observations, setObservations] = useState(editDiet?.description ?? '');
 
   // Macros
-  const [calories, setCalories] = useState('');
-  const [proteinG, setProteinG] = useState('');
-  const [carbsG, setCarbsG] = useState('');
-  const [fatG, setFatG] = useState('');
+  const [calories, setCalories] = useState(editDiet?.targetCalories?.toString() ?? '');
+  const [proteinG, setProteinG] = useState(editDiet?.targetProtein?.toString() ?? '');
+  const [carbsG, setCarbsG] = useState(editDiet?.targetCarbs?.toString() ?? '');
+  const [fatG, setFatG] = useState(editDiet?.targetFat?.toString() ?? '');
 
   // Preferences
-  const [preferences, setPreferences] = useState<string[]>([]);
+  const [preferences, setPreferences] = useState<string[]>(editDiet?.preferences ?? []);
   const [customPref, setCustomPref] = useState('');
 
   // Favorite foods
-  const [favoriteFoods, setFavoriteFoods] = useState<string[]>([]);
+  const [favoriteFoods, setFavoriteFoods] = useState<string[]>(editDiet?.favoriteFoods ?? []);
   const [foodInput, setFoodInput] = useState('');
 
-  // Draft meals
-  const [meals, setMeals] = useState<DraftMeal[]>([]);
+  // Draft meals — seed with existing meals when editing
+  const [meals, setMeals] = useState<DraftMeal[]>(() =>
+    editDiet?.meals.map(m => ({
+      id: m.id,
+      name: m.name,
+      time: m.time,
+      estimatedKcal: m.targetCalories ?? 0,
+    })) ?? [],
+  );
   const [addingMeal, setAddingMeal] = useState(false);
   const [mealName, setMealName] = useState('');
   const [mealTime, setMealTime] = useState('');
@@ -241,36 +252,69 @@ function DietFormPage({ onBack }: { onBack: () => void }) {
       return;
     }
     try {
-      const diet = await createDietMutation.mutateAsync({
-        name: name.trim(),
-        description: observations.trim() || undefined,
-        goal: objective || undefined,
-        personalId: user.id,
-        status: 'ativa',
-        targetCalories: parseInt(calories) || undefined,
-        targetProtein: p || undefined,
-        targetCarbs: c || undefined,
-        targetFat: f || undefined,
-        durationDays: parseInt(durationDays) || undefined,
-        restrictionLevel: restrictionLevel || undefined,
-        preferences,
-        favoriteFoods,
-      });
-
-      for (const m of meals) {
-        await addMealToDiet(diet.id, {
-          name: m.name,
-          time: m.time,
-          notes: undefined,
-          foods: [],
-          targetCalories: m.estimatedKcal || undefined,
+      if (isEditing && editDiet) {
+        await updateDietMutation.mutateAsync({
+          name: name.trim(),
+          description: observations.trim() || undefined,
+          goal: objective || undefined,
+          targetCalories: parseInt(calories) || undefined,
+          targetProtein: p || undefined,
+          targetCarbs: c || undefined,
+          targetFat: f || undefined,
+          durationDays: parseInt(durationDays) || undefined,
+          restrictionLevel: restrictionLevel || undefined,
+          preferences,
+          favoriteFoods,
         });
-      }
 
-      toast.success(`Dieta "${diet.name}" criada!`);
-      navigate(`/personal/dietas/${diet.id}`);
+        // Add only brand-new meals (those whose id isn't already in the DB)
+        const existingIds = new Set(editDiet.meals.map(m => m.id));
+        for (const m of meals) {
+          if (!existingIds.has(m.id)) {
+            await addMealToDiet(editDiet.id, {
+              name: m.name,
+              time: m.time,
+              notes: undefined,
+              foods: [],
+              targetCalories: m.estimatedKcal || undefined,
+            });
+          }
+        }
+
+        toast.success(`Dieta "${name.trim()}" atualizada!`);
+        onBack();
+      } else {
+        const diet = await createDietMutation.mutateAsync({
+          name: name.trim(),
+          description: observations.trim() || undefined,
+          goal: objective || undefined,
+          personalId: user.id,
+          status: 'ativa',
+          targetCalories: parseInt(calories) || undefined,
+          targetProtein: p || undefined,
+          targetCarbs: c || undefined,
+          targetFat: f || undefined,
+          durationDays: parseInt(durationDays) || undefined,
+          restrictionLevel: restrictionLevel || undefined,
+          preferences,
+          favoriteFoods,
+        });
+
+        for (const m of meals) {
+          await addMealToDiet(diet.id, {
+            name: m.name,
+            time: m.time,
+            notes: undefined,
+            foods: [],
+            targetCalories: m.estimatedKcal || undefined,
+          });
+        }
+
+        toast.success(`Dieta "${diet.name}" criada!`);
+        navigate(`/personal/dietas/${diet.id}`);
+      }
     } catch {
-      toast.error('Erro ao criar dieta.');
+      toast.error(isEditing ? 'Erro ao atualizar dieta.' : 'Erro ao criar dieta.');
     }
   }
 
@@ -293,16 +337,16 @@ function DietFormPage({ onBack }: { onBack: () => void }) {
           </button>
           <span className="text-slate-700">|</span>
           <div>
-            <h1 className="text-base font-bold text-slate-100">Nova dieta</h1>
-            <p className="text-xs text-slate-500">Preencha os dados para criar a dieta</p>
+            <h1 className="text-base font-bold text-slate-100">{isEditing ? 'Editar dieta' : 'Nova dieta'}</h1>
+            <p className="text-xs text-slate-500">{isEditing ? `Editando: ${editDiet!.name}` : 'Preencha os dados para criar a dieta'}</p>
           </div>
         </div>
         <button
           onClick={handleSave}
-          disabled={createDietMutation.isPending}
+          disabled={createDietMutation.isPending || updateDietMutation.isPending}
           className="flex items-center gap-2 bg-[#7c5cfc] hover:bg-[#6d4ef0] disabled:opacity-60 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors"
         >
-          {createDietMutation.isPending ? 'Salvando...' : 'Salvar dieta'}
+          {(createDietMutation.isPending || updateDietMutation.isPending) ? 'Salvando...' : isEditing ? 'Atualizar dieta' : 'Salvar dieta'}
         </button>
       </div>
 
@@ -711,91 +755,340 @@ function DietFormPage({ onBack }: { onBack: () => void }) {
 
 // â”€â”€ Diet List â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function DietListPage({ onNew }: { onNew: () => void }) {
+// ── Diet List helpers ──────────────────────────────────────────────────────────
+
+const LIST_ITEMS_PER_PAGE = 7;
+
+const NIVEL_MAP: Record<string, { label: string; color: string }> = {
+  Leve:       { label: 'Fácil',    color: 'text-emerald-400 bg-emerald-500/10' },
+  Moderada:   { label: 'Moderada', color: 'text-amber-400   bg-amber-500/10'   },
+  Restritiva: { label: 'Difícil',  color: 'text-red-400     bg-red-500/10'     },
+};
+
+const DIET_STATUS_META: Record<string, { label: string; dot: string; badge: string }> = {
+  ativa:   { label: 'Ativa',   dot: 'bg-emerald-400', badge: 'text-emerald-400 bg-emerald-500/10' },
+  pausada: { label: 'Pausada', dot: 'bg-amber-400',   badge: 'text-amber-400   bg-amber-500/10'   },
+};
+
+const GOAL_STYLES: Record<string, { bg: string; icon: React.ReactNode }> = {
+  'Ganho de massa': { bg: 'bg-emerald-500/15', icon: <Salad    size={15} className="text-emerald-400" /> },
+  'Bulking':        { bg: 'bg-emerald-500/15', icon: <Salad    size={15} className="text-emerald-400" /> },
+  'Perda de peso':  { bg: 'bg-orange-500/15',  icon: <Flame    size={15} className="text-orange-400" /> },
+  'Cutting':        { bg: 'bg-orange-500/15',  icon: <Flame    size={15} className="text-orange-400" /> },
+  'Emagrecimento':  { bg: 'bg-orange-500/15',  icon: <Flame    size={15} className="text-orange-400" /> },
+  'Manutenção':     { bg: 'bg-blue-500/15',    icon: <Salad    size={15} className="text-blue-400" />    },
+  'Performance':    { bg: 'bg-cyan-500/15',    icon: <Beef     size={15} className="text-cyan-400" />    },
+  'Definição':      { bg: 'bg-indigo-500/15',  icon: <Beef     size={15} className="text-indigo-400" />  },
+  'Saúde geral':    { bg: 'bg-teal-500/15',    icon: <Salad    size={15} className="text-teal-400" />    },
+};
+
+function getGoalStyle(goal?: string): { bg: string; icon: React.ReactNode } {
+  if (goal && GOAL_STYLES[goal]) return GOAL_STYLES[goal];
+  return { bg: 'bg-violet-500/15', icon: <Salad size={15} className="text-violet-400" /> };
+}
+
+import React from 'react';
+
+function DietListPage({ onNew, onEdit }: { onNew: () => void; onEdit: (diet: Diet) => void }) {
   const { data: diets = [], isLoading } = useDiets();
   const deleteDietMutation = useDeleteDiet();
   const navigate = useNavigate();
 
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterGoal, setFilterGoal] = useState('');
+  const [filterLevel, setFilterLevel] = useState('');
+  const [page, setPage] = useState(1);
+
+  useEffect(() => { setPage(1); }, [search, filterStatus, filterGoal, filterLevel]);
+
+  const totalDiets    = diets.length;
+  const activeDiets   = diets.filter(d => d.status === 'ativa').length;
+  const pausedDiets   = diets.filter(d => d.status === 'pausada').length;
+
+  const filtered = diets.filter(d => {
+    if (search) {
+      const q = search.toLowerCase();
+      if (!d.name.toLowerCase().includes(q) && !(d.goal?.toLowerCase().includes(q)) && !(d.description?.toLowerCase().includes(q))) return false;
+    }
+    if (filterStatus && d.status !== filterStatus) return false;
+    if (filterGoal   && d.goal  !== filterGoal)    return false;
+    if (filterLevel  && d.restrictionLevel !== filterLevel) return false;
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / LIST_ITEMS_PER_PAGE));
+  const pageData   = filtered.slice((page - 1) * LIST_ITEMS_PER_PAGE, page * LIST_ITEMS_PER_PAGE);
+
+  const allGoals  = Array.from(new Set(diets.map(d => d.goal).filter(Boolean))) as string[];
+  const allLevels = Array.from(new Set(diets.map(d => d.restrictionLevel).filter(Boolean))) as string[];
+
+  const THCls = 'text-xs font-semibold text-slate-500 uppercase tracking-wide';
+
   return (
-    <div className="p-5 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Dietas</h1>
-        <button
-          onClick={onNew}
-          className="flex items-center gap-2 bg-[#7c5cfc] hover:bg-[#6d4ef0] text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
-        >
-          <Plus size={16} />
-          Nova dieta
-        </button>
+    <div className="p-5 max-w-screen-xl mx-auto flex flex-col gap-5">
+
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-100">Todas as dietas</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Visualize e gerencie todas as dietas cadastradas na plataforma.</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-slate-300 text-sm hover:bg-white/[0.04] transition-colors">
+            <Download size={14} />
+            Exportar
+          </button>
+          <button
+            onClick={onNew}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors"
+          >
+            <Plus size={14} />
+            Nova dieta
+          </button>
+        </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex flex-col gap-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 rounded-2xl bg-slate-100 dark:bg-[#0D1025] animate-pulse" />
-          ))}
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
+          <div className="w-9 h-9 rounded-xl bg-violet-500/15 flex items-center justify-center mb-3">
+            <Salad size={18} className="text-violet-400" />
+          </div>
+          <p className="text-3xl font-bold text-white">{totalDiets}</p>
+          <p className="text-xs text-slate-400 mt-0.5">Total de dietas</p>
+          <p className="text-xs text-slate-600 mt-0.5">dietas cadastradas</p>
         </div>
-      ) : diets.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Salad size={36} className="mb-3 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">Nenhuma dieta criada ainda.</p>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-            Clique em "Nova dieta" para criar a primeira.
-          </p>
+        <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center mb-3">
+            <Check size={18} className="text-emerald-400" />
+          </div>
+          <p className="text-3xl font-bold text-white">{activeDiets}</p>
+          <p className="text-xs text-slate-400 mt-0.5">Dietas ativas</p>
+          <p className="text-xs text-emerald-400/80 mt-0.5">{totalDiets > 0 ? Math.round((activeDiets / totalDiets) * 100) : 0}% do total</p>
         </div>
-      ) : (
-        <div className="grid gap-3">
-          {diets.map(diet => {
-            const totalFoods = diet.meals.reduce((acc, m) => acc + m.foods.length, 0);
-            const totalCals = diet.meals.reduce(
-              (acc, m) => acc + m.foods.reduce((a, fi) => a + (fi.calories ?? 0), 0),
-              0,
-            );
-            return (
-              <div
-                key={diet.id}
-                className="bg-white dark:bg-[#0D1025] rounded-2xl shadow-sm border border-slate-100 dark:border-white/[0.07] p-4 flex items-center justify-between"
-              >
-                <button
-                  onClick={() => navigate(`/personal/dietas/${diet.id}`)}
-                  className="flex items-center gap-3 flex-1 text-left"
+        <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
+          <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center mb-3">
+            <Clock size={18} className="text-amber-400" />
+          </div>
+          <p className="text-3xl font-bold text-white">{pausedDiets}</p>
+          <p className="text-xs text-slate-400 mt-0.5">Dietas pausadas</p>
+          <p className="text-xs text-amber-400/80 mt-0.5">{totalDiets > 0 ? Math.round((pausedDiets / totalDiets) * 100) : 0}% do total</p>
+        </div>
+        <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-5">
+          <div className="w-9 h-9 rounded-xl bg-slate-500/15 flex items-center justify-center mb-3">
+            <Trash2 size={18} className="text-slate-500" />
+          </div>
+          <p className="text-3xl font-bold text-white">0</p>
+          <p className="text-xs text-slate-400 mt-0.5">Dietas arquivadas</p>
+          <p className="text-xs text-slate-600 mt-0.5">8% do total</p>
+        </div>
+      </div>
+
+      {/* Filter bar */}
+      <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl p-4 flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar dietas por nome, objetivo ou descrição..."
+            className="w-full bg-transparent border border-white/[0.06] rounded-xl pl-9 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-violet-500/50 transition-colors"
+          />
+        </div>
+        <div className="relative">
+          <select
+            value={filterStatus}
+            onChange={e => setFilterStatus(e.target.value)}
+            className="appearance-none bg-[#080B18] border border-white/[0.06] rounded-xl pl-3 pr-8 py-2 text-sm text-slate-300 focus:outline-none focus:border-violet-500/50 transition-colors cursor-pointer"
+          >
+            <option value="">Status · Todos</option>
+            <option value="ativa">Ativa</option>
+            <option value="pausada">Pausada</option>
+          </select>
+          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        </div>
+        <div className="relative">
+          <select
+            value={filterGoal}
+            onChange={e => setFilterGoal(e.target.value)}
+            className="appearance-none bg-[#080B18] border border-white/[0.06] rounded-xl pl-3 pr-8 py-2 text-sm text-slate-300 focus:outline-none focus:border-violet-500/50 transition-colors cursor-pointer"
+          >
+            <option value="">Objetivo · Todos</option>
+            {allGoals.map(g => <option key={g} value={g}>{g}</option>)}
+          </select>
+          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        </div>
+        <div className="relative">
+          <select
+            value={filterLevel}
+            onChange={e => setFilterLevel(e.target.value)}
+            className="appearance-none bg-[#080B18] border border-white/[0.06] rounded-xl pl-3 pr-8 py-2 text-sm text-slate-300 focus:outline-none focus:border-violet-500/50 transition-colors cursor-pointer"
+          >
+            <option value="">Nível · Todos</option>
+            {allLevels.map(l => <option key={l} value={l}>{NIVEL_MAP[l]?.label ?? l}</option>)}
+          </select>
+          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-[#0D1025] border border-white/[0.07] rounded-2xl overflow-hidden">
+        {/* Table header */}
+        <div className="hidden lg:grid grid-cols-[2.5fr_1fr_1fr_1fr_1fr_1.2fr_1fr_auto] gap-x-4 px-5 py-3 border-b border-white/[0.06]">
+          <span className={THCls}>Nome da dieta</span>
+          <span className={THCls}>Objetivo</span>
+          <span className={THCls}>Nível</span>
+          <span className={THCls}>Refeições/dia</span>
+          <span className={THCls}>Duração</span>
+          <span className={THCls}>Criada em</span>
+          <span className={THCls}>Status</span>
+          <span className={`${THCls} text-right`}>Ações</span>
+        </div>
+
+        {isLoading ? (
+          <div className="flex flex-col divide-y divide-white/[0.04]">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="px-5 py-4 flex gap-4 items-center">
+                <div className="w-8 h-8 rounded-lg bg-white/[0.06] animate-pulse shrink-0" />
+                <div className="flex-1 h-4 rounded bg-white/[0.06] animate-pulse" />
+              </div>
+            ))}
+          </div>
+        ) : pageData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Salad size={36} className="mb-3 text-slate-700" />
+            <p className="text-sm font-medium text-slate-400">
+              {filtered.length === 0 && diets.length > 0 ? 'Nenhuma dieta corresponde aos filtros.' : 'Nenhuma dieta criada ainda.'}
+            </p>
+            {diets.length === 0 && (
+              <button onClick={onNew} className="mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                Criar primeira dieta →
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col divide-y divide-white/[0.04]">
+            {pageData.map(diet => {
+              const { bg, icon } = getGoalStyle(diet.goal);
+              const nivel = diet.restrictionLevel ? (NIVEL_MAP[diet.restrictionLevel] ?? { label: diet.restrictionLevel, color: 'text-slate-400 bg-slate-500/10' }) : null;
+              const sm = DIET_STATUS_META[diet.status ?? 'ativa'];
+              return (
+                <div
+                  key={diet.id}
+                  className="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr_1fr_1fr_1fr_1.2fr_1fr_auto] gap-x-4 gap-y-1 px-5 py-3.5 items-center hover:bg-white/[0.02] transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-[#7c5cfc]/10 flex items-center justify-center">
-                    <Salad size={18} className="text-emerald-600 dark:text-[#a78bfa]" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{diet.name}</p>
-                    <p className="text-xs text-slate-400">
-                      {diet.meals.length} refeição(ões) · {totalFoods} alimento(s)
-                      {totalCals > 0 && ` · ~${totalCals} kcal`}
-                      {diet.goal && ` · ${diet.goal}`}
-                    </p>
-                  </div>
-                </button>
-                <div className="flex items-center gap-2">
+                  {/* Nome */}
                   <button
                     onClick={() => navigate(`/personal/dietas/${diet.id}`)}
-                    className="text-[#7c5cfc] hover:text-[#a78bfa] p-1 transition-colors"
+                    className="flex items-center gap-3 text-left min-w-0"
                   >
-                    <ChevronRight size={18} />
+                    <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
+                      {icon}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-100 truncate">{diet.name}</p>
+                      {diet.description && (
+                        <p className="text-xs text-slate-500 truncate max-w-xs">{diet.description}</p>
+                      )}
+                    </div>
                   </button>
-                  <button
-                    onClick={() => {
-                      toast(`Excluir "${diet.name}"?`, {
-                        action: { label: 'Excluir', onClick: () => deleteDietMutation.mutate(diet.id) },
-                        cancel: { label: 'Cancelar', onClick: () => {} },
-                      });
-                    }}
-                    className="text-red-400 hover:text-red-600 p-1 transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {/* Objetivo */}
+                  <span className="text-sm text-slate-300 truncate hidden lg:block">{diet.goal ?? '—'}</span>
+                  {/* Nível */}
+                  <span className="hidden lg:block">
+                    {nivel ? (
+                      <span className={`inline-flex text-xs font-semibold px-2.5 py-0.5 rounded-full ${nivel.color}`}>{nivel.label}</span>
+                    ) : <span className="text-slate-500 text-sm">—</span>}
+                  </span>
+                  {/* Refeições/dia */}
+                  <span className="text-sm text-slate-300 hidden lg:block">{diet.meals.length} refeições</span>
+                  {/* Duração */}
+                  <span className="text-sm text-slate-300 hidden lg:block">{diet.durationDays ? `${diet.durationDays} dias` : '30 dias'}</span>
+                  {/* Criada em */}
+                  <div className="hidden lg:block">
+                    <p className="text-sm text-slate-300">{new Date(diet.createdAt).toLocaleDateString('pt-BR')}</p>
+                    <p className="text-xs text-slate-500">{new Date(diet.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                  {/* Status */}
+                  <span className={`hidden lg:inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full w-fit ${sm.badge}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${sm.dot}`} />
+                    {sm.label}
+                  </span>
+                  {/* Actions */}
+                  <div className="flex items-center gap-0.5 justify-end">
+                    <button
+                      onClick={() => onEdit(diet)}
+                      title="Editar"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <Edit2 size={14} />
+                    </button>
+                    <button
+                      onClick={() => toast.info('Duplicar dieta em breve.')}
+                      title="Duplicar"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+                    >
+                      <Copy size={14} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        toast(`Excluir "${diet.name}"?`, {
+                          action: { label: 'Excluir', onClick: () => deleteDietMutation.mutate(diet.id) },
+                          cancel: { label: 'Cancelar', onClick: () => {} },
+                        });
+                      }}
+                      title="Excluir"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!isLoading && filtered.length > 0 && (
+          <div className="flex items-center justify-between px-5 py-3.5 border-t border-white/[0.06]">
+            <p className="text-xs text-slate-500">
+              Mostrando {Math.min((page - 1) * LIST_ITEMS_PER_PAGE + 1, filtered.length)} a {Math.min(page * LIST_ITEMS_PER_PAGE, filtered.length)} de {filtered.length} dietas
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] disabled:opacity-30 transition-colors"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                const pg = totalPages <= 5 ? i + 1 : page <= 3 ? i + 1 : page >= totalPages - 2 ? totalPages - 4 + i : page - 2 + i;
+                return (
+                  <button
+                    key={pg}
+                    onClick={() => setPage(pg)}
+                    className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
+                      pg === page ? 'bg-violet-600 text-white' : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                    }`}
+                  >
+                    {pg}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] disabled:opacity-30 transition-colors"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -804,12 +1097,23 @@ function DietListPage({ onNew }: { onNew: () => void }) {
 
 export default function DietasPage() {
   const [view, setView] = useState<'list' | 'form'>('list');
+  const [editingDiet, setEditingDiet] = useState<Diet | undefined>(undefined);
 
   if (view === 'form') {
-    return <DietFormPage onBack={() => setView('list')} />;
+    return (
+      <DietFormPage
+        onBack={() => { setView('list'); setEditingDiet(undefined); }}
+        diet={editingDiet}
+      />
+    );
   }
 
-  return <DietListPage onNew={() => setView('form')} />;
+  return (
+    <DietListPage
+      onNew={() => { setEditingDiet(undefined); setView('form'); }}
+      onEdit={(diet) => { setEditingDiet(diet); setView('form'); }}
+    />
+  );
 }
 
 

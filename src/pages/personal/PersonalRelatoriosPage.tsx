@@ -187,7 +187,7 @@ export default function PersonalRelatoriosPage() {
   const cursorStyle = { fill: theme === 'dark' ? '#334155' : '#f1f5f9' };
 
   return (
-    <div className="p-5 max-w-6xl mx-auto">
+    <div className="p-5 max-w-screen-xl mx-auto">
       <div className="flex items-center justify-between mb-1">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Relatórios</h1>
         <div className="flex items-center gap-2">

@@ -153,7 +153,7 @@ export default function PersonalPerfilPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-3xl mx-auto space-y-4">
+      <div className="p-5 max-w-screen-xl mx-auto space-y-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="h-24 rounded-2xl bg-white/5 animate-pulse" />
         ))}

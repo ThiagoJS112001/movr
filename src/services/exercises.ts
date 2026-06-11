@@ -90,3 +90,31 @@ export async function deleteExercise(id: string): Promise<void> {
   const { error } = await supabase.from('exercises').delete().eq('id', id);
   if (error) throw error;
 }
+
+export async function bulkCreateExercises(
+  personalId: string,
+  exercises: Omit<Exercise, 'id'>[],
+): Promise<Exercise[]> {
+  const rows = exercises.map((data) => ({
+    personal_id: personalId,
+    name: data.name,
+    muscle_group: data.muscleGroup,
+    description: data.description ?? null,
+    equipment: data.equipment ?? null,
+    level: data.level ?? null,
+    exercise_type: data.exerciseType ?? null,
+    image_url: data.imageUrl ?? null,
+    video_url: data.videoUrl ?? null,
+    suggested_rest: data.suggestedRest ?? null,
+    suggested_sets: data.suggestedSets ?? null,
+    suggested_reps: data.suggestedReps ?? null,
+  }));
+
+  const { data, error } = await supabase
+    .from('exercises')
+    .insert(rows)
+    .select();
+
+  if (error) throw error;
+  return (data ?? []).map((r) => mapExercise(r as Record<string, unknown>));
+}

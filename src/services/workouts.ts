@@ -361,7 +361,8 @@ export async function fetchWorkoutLogs(studentId: string): Promise<WorkoutLog[]>
     .order('completed_at', { ascending: false });
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => ({
+  // Adicionado (r: any) aqui embaixo:
+  return (data ?? []).map((r: any) => ({
     id: r.id,
     assignmentId: r.assignment_id ?? '',
     workoutId: r.workout_id ?? '',
@@ -385,7 +386,8 @@ export async function fetchWorkoutLogsForPersonal(studentIds: string[]): Promise
     .limit(50);
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => ({
+  // Adicionado (r: any) aqui embaixo também:
+  return (data ?? []).map((r: any) => ({
     id: r.id,
     assignmentId: r.assignment_id ?? '',
     workoutId: r.workout_id ?? '',
@@ -398,3 +400,4 @@ export async function fetchWorkoutLogsForPersonal(studentIds: string[]): Promise
     notes: r.notes ?? undefined,
   }));
 }
+

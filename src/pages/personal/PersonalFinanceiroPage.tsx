@@ -6,7 +6,7 @@ import {
   DollarSign, Plus, Check, Trash2, AlertTriangle,
   TrendingUp, Clock, XCircle, Filter, X,
 } from 'lucide-react';
-import type { StudentPayment, PaymentStatus } from '../../types';
+import type { PaymentStatus } from '../../types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

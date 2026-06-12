@@ -16,8 +16,6 @@ import {
   DollarSign,
   Activity,
   CalendarCheck,
-  Bell,
-  User,
   AlertTriangle,
   Clock,
 } from 'lucide-react';
@@ -507,9 +505,9 @@ export default function PersonalDashboard() {
               <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700/40">
                 {unreadMessages.map((m) => (
                   <div key={m.id} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-                    <Avatar name={m.fromName} size="sm" />
+                    <Avatar name={students.find(s => s.id === m.fromId)?.name ?? 'Aluno'} size="sm" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-slate-800 dark:text-white truncate">{m.fromName}</p>
+                      <p className="text-xs font-medium text-slate-800 dark:text-white truncate">{students.find(s => s.id === m.fromId)?.name ?? 'Aluno'}</p>
                       <p className="text-[11px] text-slate-400 truncate">{m.content}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">

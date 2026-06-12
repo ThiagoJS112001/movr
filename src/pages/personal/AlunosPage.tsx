@@ -20,10 +20,6 @@ const ITEMS_PER_PAGE = 8;
 const DAYS = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'] as const;
 type DayKey = typeof DAYS[number];
 
-const DAYS_SHORT: Record<DayKey, string> = {
-  segunda: 'Seg', terca: 'Ter', quarta: 'Qua',
-  quinta: 'Qui', sexta: 'Sex', sabado: 'Sáb', domingo: 'Dom',
-};
 
 
 const AVATAR_COLORS = [
@@ -80,7 +76,7 @@ export default function AlunosPage() {
   const { data: workouts = [] } = useWorkouts();
   const assignWorkoutMutation = useAssignWorkout();
   const assignDietMutation = useAssignDiet();
-  const removeDietAssignmentMutation = useRemoveDietAssignment();
+  const _removeDietAssignmentMutation = useRemoveDietAssignment();
   const { data: logs = [] } = usePersonalWorkoutLogs();
   const { data: assignments = [] } = useAssignments();
   const { data: students = [], isLoading: studentsLoading } = useStudents();
@@ -183,10 +179,6 @@ export default function AlunosPage() {
     safePage * ITEMS_PER_PAGE,
   );
 
-  function getStudentDietAssignments(studentId: string): DietAssignment[] {
-    return dietAssignments.filter((a) => a.studentId === studentId && a.personalId === user?.id);
-  }
-
   function getLastLog(studentId: string) {
     const sl = logs.filter((l) => l.studentId === studentId);
     if (sl.length === 0) return null;
@@ -283,10 +275,6 @@ export default function AlunosPage() {
 
   function openPlanModal(studentId: string, studentName: string) {
     setPlanModal({ studentId, studentName });
-  }
-
-  function getPlanSummaryChips(_studentId: string) {
-    return null; // TODO: migrate to useWeeklyPlan per student
   }
 
   return (

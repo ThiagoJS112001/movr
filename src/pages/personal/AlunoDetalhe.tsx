@@ -31,7 +31,7 @@ import NewAssessmentModal from '../../components/NewAssessmentModal';
 import AnamneseModal from '../../components/AnamneseModal';
 import { useAnamnese } from '../../hooks/useAnamneses';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
 // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -109,7 +109,7 @@ export default function AlunoDetalhe() {
   const { data: allArchives = [] } = usePlanArchives();
   const { data: allAssessmentsData = [] } = useAssessments(id ?? '');
   const deleteAssessmentMutation = useDeleteAssessment(id ?? '');
-  const updateAssessmentMutation = useUpdateAssessment(id ?? ''); // eslint-disable-line @typescript-eslint/no-unused-vars
+  const _updateAssessmentMutation = useUpdateAssessment(id ?? '');
 
   const [activeTab, setActiveTab] = useState<Tab>('treinos');
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);
@@ -321,7 +321,7 @@ export default function AlunoDetalhe() {
     if (!selectedWorkoutId || !user) return;
     const w = myWorkouts.find((wk) => wk.id === selectedWorkoutId);
     if (!w) return;
-    assignWorkoutMutation.mutate({ workoutId: w.id, workoutName: w.name, studentId: student.id, personalId: user.id });
+    assignWorkoutMutation.mutate({ workoutId: w.id, workoutName: w.name, studentId: student!.id, personalId: user.id });
     setAssignWorkoutOpen(false);
     setSelectedWorkoutId('');
     toast.success(`"${w.name}" atribuído!`);
@@ -331,7 +331,7 @@ export default function AlunoDetalhe() {
     if (!selectedDietId || !user) return;
     const d = myDiets.find((dt) => dt.id === selectedDietId);
     if (!d) return;
-    assignDietMutation.mutate({ dietId: d.id, dietName: d.name, studentId: student.id, personalId: user.id });
+    assignDietMutation.mutate({ dietId: d.id, dietName: d.name, studentId: student!.id, personalId: user.id });
     setAssignDietOpen(false);
     setSelectedDietId('');
     toast.success(`"${d.name}" atribuída!`);
@@ -1573,7 +1573,7 @@ export default function AlunoDetalhe() {
       {viewingWorkout && (
         <WorkoutViewModal
           workout={viewingWorkout}
-          exercises={exercises}
+          exercises={catalogExercises}
           onClose={() => setViewingWorkout(null)}
         />
       )}
@@ -1582,7 +1582,7 @@ export default function AlunoDetalhe() {
       {editingWorkout && (
         <WorkoutEditModal
           workout={editingWorkout}
-          exercises={exercises}
+          exercises={catalogExercises}
           assignment={studentAssignments.find((a) => a.workoutId === editingWorkout.id)}
           onClose={() => setEditingWorkout(null)}
         />

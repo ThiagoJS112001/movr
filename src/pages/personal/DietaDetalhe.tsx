@@ -15,7 +15,7 @@ import {
 import {
   ArrowLeft, Plus, Trash2, Edit2, Check, X,
   Salad, ChevronDown, Info, Pencil,
-  GripVertical, Flame, Clock, Users, AlertTriangle,
+  GripVertical, Flame, Clock, AlertTriangle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { FoodItem } from '../../types';
@@ -219,7 +219,7 @@ export default function DietaDetalhe() {
 
   function handleSave() {
     updateDietMutation.mutate({
-      name:           nameVal.trim() || diet.name,
+      name:           nameVal.trim() || diet!.name,
       description:    descVal.trim() || undefined,
       goal:           goalVal        || undefined,
       targetCalories: parseFloat(calsVal) || undefined,
@@ -232,13 +232,13 @@ export default function DietaDetalhe() {
   }
 
   function handleDelete() {
-    deleteDietMutation.mutate(diet.id);
+    deleteDietMutation.mutate(diet!.id);
     toast.success('Dieta excluída.');
     navigate('/personal/dietas');
   }
 
   function toggleStatus() {
-    const next = diet.status === 'pausada' ? 'ativa' : 'pausada';
+    const next = diet!.status === 'pausada' ? 'ativa' : 'pausada';
     updateDietMutation.mutate({ status: next });
     toast.success(next === 'pausada' ? 'Dieta pausada.' : 'Dieta ativada.');
   }

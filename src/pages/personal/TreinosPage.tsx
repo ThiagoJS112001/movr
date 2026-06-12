@@ -27,7 +27,6 @@ export default function TreinosPage() {
         name,
         description,
         personalId: user.id,
-        exercises: [],
       });
       setName('');
       setDescription('');

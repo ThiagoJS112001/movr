@@ -114,6 +114,7 @@ export default function PersonalChatPage() {
     name: s.name,
     email: s.email ?? '',
     role: 'aluno' as const,
+    rolePrefix: 'ALN' as const,
     avatarUrl: s.avatarUrl,
   }));
 

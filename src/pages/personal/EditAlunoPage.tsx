@@ -6,7 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Camera, Trash2, Plus, X, Save, User,
+  ArrowLeft, Camera, Trash2, Plus, Save, User,
   MapPin, Phone, FileText, Calendar, AlertCircle,
 } from 'lucide-react';
 
@@ -184,7 +184,7 @@ export default function EditAlunoPage() {
           city: form.city.trim() || null,
           state: form.state.trim() || null,
           is_blocked: form.status === 'bloqueado',
-          ...(avatarUrl !== form.avatarUrl ? { avatar_url: avatarUrl } : {}),
+          avatar_url: avatarUrl,
         })
         .eq('id', id);
 

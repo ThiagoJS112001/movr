@@ -157,7 +157,6 @@ export default function PersonalRelatoriosPage() {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       months.push(d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }));
     }
-    const today = now.toISOString().split('T')[0];
     return months.map((mes, i) => {
       const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -165,7 +164,7 @@ export default function PersonalRelatoriosPage() {
         .filter((p) => p.status === 'pago' && p.paidAt?.startsWith(key))
         .reduce((s, p) => s + p.amount, 0);
       const pendente = payments
-        .filter((p) => (p.status === 'pendente' || (p.status === 'pendente' && p.dueDate < today)) && p.dueDate.startsWith(key))
+        .filter((p) => p.status === 'pendente' && p.dueDate.startsWith(key))
         .reduce((s, p) => s + p.amount, 0);
       return { mes, pago, pendente };
     });
@@ -393,7 +392,7 @@ export default function PersonalRelatoriosPage() {
               <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
               <XAxis dataKey="mes" tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: tickColor, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} tickFormatter={(v) => `R$${v}`} />
-              <Tooltip contentStyle={tooltipStyle} cursor={cursorStyle} formatter={(v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
+              <Tooltip contentStyle={tooltipStyle} cursor={cursorStyle} formatter={(v) => `R$ ${(v as number).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} />
               <Legend iconSize={8} wrapperStyle={{ fontSize: '11px', color: tickColor }} />
               <Bar dataKey="pago" fill="#10b981" radius={[6, 6, 0, 0]} name="Recebido" />
               <Bar dataKey="pendente" fill="#f59e0b" radius={[6, 6, 0, 0]} name="Pendente" />

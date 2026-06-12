@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { toast } from 'sonner';
 import {
-  User, Instagram, Phone, MapPin, Award, BookOpen,
+  User, AtSign, Phone, MapPin, Award, BookOpen,
   Briefcase, Save, Plus, X, Camera,
 } from 'lucide-react';
 
@@ -133,7 +133,7 @@ export default function PersonalPerfilPage() {
           specialties: data.specialties,
           certifications: data.certifications,
           experience_years: data.experienceYears !== '' ? Number(data.experienceYears) : null,
-          ...(avatarUrl !== data.avatarUrl ? { avatar_url: avatarUrl } : {}),
+          avatar_url: avatarUrl,
         })
         .eq('id', user.id);
 
@@ -264,7 +264,7 @@ export default function PersonalPerfilPage() {
       {/* Social */}
       <div className="bg-[#0D1025] border border-white/[0.06] rounded-2xl p-5">
         <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-4">
-          <Instagram size={12} className="inline mr-1.5" />Redes Sociais
+          <AtSign size={12} className="inline mr-1.5" />Redes Sociais
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>

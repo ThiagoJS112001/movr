@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useSessions, useUpdateSessionStatus, useDeleteSession } from '../../hooks/useSessions';
 import { useStudents } from '../../hooks/useStudents';
-import { useAuth } from '../../contexts/AuthContext';
 import { toast } from 'sonner';
 import {
-  ChevronLeft, ChevronRight, Plus, Clock, User,
-  CheckCircle2, XCircle, Calendar, MoreVertical, Trash2, Pencil,
+  ChevronLeft, ChevronRight, Plus, User,
+  CheckCircle2, Calendar, MoreVertical, Trash2, Pencil,
 } from 'lucide-react';
 import type { TrainingSession, SessionStatus } from '../../types';
 import NewSessionModal from '../../components/NewSessionModal';
@@ -41,7 +40,6 @@ const MONTHS_PT = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PersonalAgendaPage() {
-  const { user } = useAuth();
   const { data: sessions = [], isLoading } = useSessions();
   const { data: students = [] } = useStudents();
   const updateStatus = useUpdateSessionStatus();

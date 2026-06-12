@@ -30,6 +30,11 @@ export interface Database {
           amenities: string[];
           photos: string[];
           opening_hours: Json | null;
+          instagram: string | null;
+          whatsapp: string | null;
+          specialties: string[];
+          certifications: string[];
+          experience_years: number | null;
           created_at: string;
         };
         Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'created_at' | 'is_blocked' | 'has_personal' | 'has_nutrition' | 'amenities' | 'photos'> & {
@@ -41,6 +46,7 @@ export interface Database {
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>;
+        Relationships: [];
       };
 
       exercises: {
@@ -56,6 +62,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['exercises']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Database['public']['Tables']['exercises']['Insert']>;
+        Relationships: [];
       };
 
       workouts: {
@@ -71,6 +78,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['workouts']['Row'], 'id' | 'created_at' | 'status'> & { id?: string; status?: 'ativo' | 'rascunho'; created_at?: string };
         Update: Partial<Database['public']['Tables']['workouts']['Insert']>;
+        Relationships: [];
       };
 
       workout_exercises: {
@@ -90,6 +98,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['workout_exercises']['Row'], 'id' | 'rest_seconds' | 'order_index'> & { id?: string; rest_seconds?: number; order_index?: number };
         Update: Partial<Database['public']['Tables']['workout_exercises']['Insert']>;
+        Relationships: [];
       };
 
       workout_assignments: {
@@ -104,6 +113,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['workout_assignments']['Row'], 'id' | 'assigned_at' | 'scheduled_days'> & { id?: string; assigned_at?: string; scheduled_days?: string[] };
         Update: Partial<Database['public']['Tables']['workout_assignments']['Insert']>;
+        Relationships: [];
       };
 
       workout_logs: {
@@ -121,6 +131,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['workout_logs']['Row'], 'id' | 'completed_at' | 'completed_exercises' | 'exercise_weights'> & { id?: string; completed_at?: string; completed_exercises?: string[]; exercise_weights?: Json };
         Update: Partial<Database['public']['Tables']['workout_logs']['Insert']>;
+        Relationships: [];
       };
 
       diets: {
@@ -139,6 +150,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['diets']['Row'], 'id' | 'created_at' | 'status'> & { id?: string; status?: 'ativa' | 'pausada'; created_at?: string };
         Update: Partial<Database['public']['Tables']['diets']['Insert']>;
+        Relationships: [];
       };
 
       meals: {
@@ -152,6 +164,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['meals']['Row'], 'id' | 'order_index'> & { id?: string; order_index?: number };
         Update: Partial<Database['public']['Tables']['meals']['Insert']>;
+        Relationships: [];
       };
 
       food_items: {
@@ -167,6 +180,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['food_items']['Row'], 'id'> & { id?: string };
         Update: Partial<Database['public']['Tables']['food_items']['Insert']>;
+        Relationships: [];
       };
 
       diet_assignments: {
@@ -180,6 +194,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['diet_assignments']['Row'], 'id' | 'assigned_at'> & { id?: string; assigned_at?: string };
         Update: Partial<Database['public']['Tables']['diet_assignments']['Insert']>;
+        Relationships: [];
       };
 
       weekly_plans: {
@@ -192,6 +207,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['weekly_plans']['Row'], 'id' | 'updated_at'> & { id?: string; updated_at?: string };
         Update: Partial<Database['public']['Tables']['weekly_plans']['Insert']>;
+        Relationships: [];
       };
 
       weekly_plan_archives: {
@@ -204,6 +220,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['weekly_plan_archives']['Row'], 'id' | 'archived_at'> & { id?: string; archived_at?: string };
         Update: Partial<Database['public']['Tables']['weekly_plan_archives']['Insert']>;
+        Relationships: [];
       };
 
       workout_sessions: {
@@ -218,6 +235,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['workout_sessions']['Row'], 'id' | 'completed_at' | 'duration_minutes' | 'completed_exercise_ids'> & { id?: string; completed_at?: string; duration_minutes?: number; completed_exercise_ids?: string[] };
         Update: Partial<Database['public']['Tables']['workout_sessions']['Insert']>;
+        Relationships: [];
       };
 
       messages: {
@@ -231,6 +249,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['messages']['Row'], 'id' | 'sent_at' | 'read'> & { id?: string; sent_at?: string; read?: boolean };
         Update: Partial<Database['public']['Tables']['messages']['Insert']>;
+        Relationships: [];
       };
 
       friend_requests: {
@@ -243,6 +262,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['friend_requests']['Row'], 'id' | 'created_at' | 'status'> & { id?: string; status?: 'pending' | 'accepted' | 'rejected'; created_at?: string };
         Update: Partial<Database['public']['Tables']['friend_requests']['Insert']>;
+        Relationships: [];
       };
 
       student_groups: {
@@ -255,6 +275,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['student_groups']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Database['public']['Tables']['student_groups']['Insert']>;
+        Relationships: [];
       };
 
       group_members: {
@@ -264,6 +285,7 @@ export interface Database {
         };
         Insert: Database['public']['Tables']['group_members']['Row'];
         Update: Partial<Database['public']['Tables']['group_members']['Row']>;
+        Relationships: [];
       };
 
       group_messages: {
@@ -281,6 +303,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['group_messages']['Row'], 'id' | 'created_at' | 'type'> & { id?: string; type?: 'text' | 'image' | 'offer'; created_at?: string };
         Update: Partial<Database['public']['Tables']['group_messages']['Insert']>;
+        Relationships: [];
       };
 
       assessments: {
@@ -305,6 +328,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['assessments']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Database['public']['Tables']['assessments']['Insert']>;
+        Relationships: [];
       };
 
       gym_ratings: {
@@ -318,6 +342,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['gym_ratings']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Database['public']['Tables']['gym_ratings']['Insert']>;
+        Relationships: [];
       };
 
       gym_groups: {
@@ -330,6 +355,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['gym_groups']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Database['public']['Tables']['gym_groups']['Insert']>;
+        Relationships: [];
       };
 
       gym_group_members: {
@@ -340,6 +366,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['gym_group_members']['Row'], 'joined_at'> & { joined_at?: string };
         Update: Partial<Database['public']['Tables']['gym_group_members']['Insert']>;
+        Relationships: [];
       };
 
       gym_group_messages: {
@@ -353,6 +380,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['gym_group_messages']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Database['public']['Tables']['gym_group_messages']['Insert']>;
+        Relationships: [];
       };
 
       student_payments: {
@@ -371,6 +399,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['student_payments']['Row'], 'id' | 'created_at' | 'status' | 'paid_at'> & { id?: string; created_at?: string; status?: string; paid_at?: string | null };
         Update: Partial<Database['public']['Tables']['student_payments']['Insert']>;
+        Relationships: [];
       };
 
       training_sessions: {
@@ -388,6 +417,7 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['training_sessions']['Row'], 'id' | 'created_at' | 'status'> & { id?: string; created_at?: string; status?: string };
         Update: Partial<Database['public']['Tables']['training_sessions']['Insert']>;
+        Relationships: [];
       };
 
       student_anamneses: {
@@ -414,10 +444,11 @@ export interface Database {
         };
         Insert: Omit<Database['public']['Tables']['student_anamneses']['Row'], 'id' | 'created_at' | 'updated_at' | 'has_health_issues' | 'preferred_days'> & { id?: string; created_at?: string; updated_at?: string; has_health_issues?: boolean; preferred_days?: string[] };
         Update: Partial<Database['public']['Tables']['student_anamneses']['Insert']>;
+        Relationships: [];
       };
     };
 
-    Views: Record<string, never>;
+    Views: Record<string, { Row: Record<string, unknown>; Relationships: [] }>;
     Functions: {
       my_role: { Args: Record<string, never>; Returns: string };
       my_personal_id: { Args: Record<string, never>; Returns: string };

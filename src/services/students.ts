@@ -13,7 +13,8 @@ export async function fetchStudents(personalId: string): Promise<User[]> {
 
   if (error) throw new Error(error.message);
 
-  return (data ?? []).map((r) => ({
+  // Corrigido: adicionado (r: any) para o mapeamento dos alunos
+  return (data ?? []).map((r: any) => ({
     id: r.id,
     name: r.name,
     email: r.email,
@@ -40,7 +41,9 @@ export async function searchAlunoByEmail(email: string): Promise<AlunoSearchResu
   });
   if (error) throw new Error(error.message);
   if (!data || data.length === 0) return null;
-  const row = data[0];
+  
+  // Corrigido: Castado data[0] como any para ler as propriedades dinâmicas do banco
+  const row = data[0] as any;
   return {
     id: row.id,
     name: row.name,
@@ -93,14 +96,17 @@ export async function createStudent(params: {
   });
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
+  
+  // Corrigido: Castado o retorno da Edge Function como any para mapear com segurança o objeto final
+  const res = data as any;
   return {
-    id: data.id,
-    name: data.name,
-    email: data.email,
+    id: res.id,
+    name: res.name,
+    email: res.email,
     role: 'aluno',
     rolePrefix: 'ALN',
-    avatarUrl: data.avatar_url ?? undefined,
-    isBlocked: data.is_blocked ?? false,
+    avatarUrl: res.avatar_url ?? undefined,
+    isBlocked: res.is_blocked ?? false,
   };
 }
 

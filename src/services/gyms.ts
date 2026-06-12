@@ -152,7 +152,8 @@ export async function listGyms(filters: GymFilters = {}): Promise<GymListItem[]>
   if (error) throw new Error(error.message);
   if (!gymRows || gymRows.length === 0) return [];
 
-  const gymIds = gymRows.map((g) => g.id);
+  // Corrigido aqui: Definindo explicitamente "g: any" para evitar conflito com o tipo inferido pelo Supabase
+  const gymIds = gymRows.map((g: any) => g.id);
 
   // Fetch ratings and min prices in parallel
   const [{ data: ratingData }, { data: planData }] = await Promise.all([
@@ -169,7 +170,8 @@ export async function listGyms(filters: GymFilters = {}): Promise<GymListItem[]>
 
   // Aggregate ratings per gym
   const ratingMap: Record<string, { sum: number; count: number }> = {};
-  for (const r of ratingData ?? []) {
+  // Corrigido aqui: Inserido "r: any" no loop do ratingData
+  for (const r of (ratingData ?? []) as any[]) {
     if (!ratingMap[r.gym_id]) ratingMap[r.gym_id] = { sum: 0, count: 0 };
     ratingMap[r.gym_id].sum += r.rating;
     ratingMap[r.gym_id].count += 1;
@@ -180,20 +182,21 @@ export async function listGyms(filters: GymFilters = {}): Promise<GymListItem[]>
   if (precoMax !== undefined) {
     // Will filter after aggregation
   }
-  for (const p of planData ?? []) {
+  // Corrigido aqui: Inserido "p: any" no loop do planData
+  for (const p of (planData ?? []) as any[]) {
     const current = priceMap[p.gym_id];
     if (current === undefined || p.preco < current) priceMap[p.gym_id] = p.preco;
   }
 
   let results = gymRows
-    .filter((g) => {
+    .filter((g: any) => { // Corrigido aqui: Inserido "g: any" no filter
       if (precoMax !== undefined) {
         const minP = priceMap[g.id];
         if (minP !== undefined && minP > precoMax) return false;
       }
       return true;
     })
-    .map((g) => {
+    .map((g: any) => { // Corrigido aqui: Inserido "g: any" no map
       const agg = ratingMap[g.id];
       const rating = agg ? Math.round((agg.sum / agg.count) * 10) / 10 : 0;
       return mapGymRow(

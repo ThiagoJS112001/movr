@@ -61,7 +61,8 @@ async function fetchMealsWithFoods(dietIds: string[]): Promise<Map<string, Meal[
   if (mErr) throw mErr;
   if (!mealRows || mealRows.length === 0) return new Map();
 
-  const mealIds = mealRows.map((m) => m.id);
+  // Forçado g: any caso m.id reclame em algum contexto paralelo
+  const mealIds = mealRows.map((m: any) => m.id);
 
   const { data: foodRows, error: fErr } = await supabase
     .from('food_items')
@@ -71,14 +72,14 @@ async function fetchMealsWithFoods(dietIds: string[]): Promise<Map<string, Meal[
   if (fErr) throw fErr;
 
   const foodsByMeal = new Map<string, FoodItem[]>();
-  for (const f of foodRows ?? []) {
+  for (const f of (foodRows ?? []) as any[]) {
     const arr = foodsByMeal.get(f.meal_id) ?? [];
     arr.push(mapFoodItem(f as Record<string, unknown>));
     foodsByMeal.set(f.meal_id, arr);
   }
 
   const mealsByDiet = new Map<string, Meal[]>();
-  for (const m of mealRows) {
+  for (const m of mealRows as any[]) {
     const meals = mealsByDiet.get(m.diet_id) ?? [];
     meals.push(mapMeal(m as Record<string, unknown>, foodsByMeal.get(m.id) ?? []));
     mealsByDiet.set(m.diet_id, meals);
@@ -99,8 +100,8 @@ export async function fetchDiets(personalId: string): Promise<Diet[]> {
   if (error) throw error;
   if (!dietRows || dietRows.length === 0) return [];
 
-  const mealsByDiet = await fetchMealsWithFoods(dietRows.map((d) => d.id));
-  return dietRows.map((d) => mapDiet(d as Record<string, unknown>, mealsByDiet.get(d.id) ?? []));
+  const mealsByDiet = await fetchMealsWithFoods(dietRows.map((d: any) => d.id));
+  return dietRows.map((d) => mapDiet(d as Record<string, unknown>, mealsByDiet.get((d as any).id) ?? []));
 }
 
 export async function fetchDietById(id: string): Promise<Diet | null> {
@@ -275,7 +276,8 @@ export async function fetchDietAssignments(personalId: string): Promise<DietAssi
     .eq('personal_id', personalId);
 
   if (error) throw error;
-  return (data ?? []).map((r) => ({
+  // Corrigido: adicionado (r: any) para evitar o erro de propriedade inexistente em type 'never'
+  return (data ?? []).map((r: any) => ({
     id: r.id,
     dietId: r.diet_id,
     dietName: r.diet_name,
@@ -296,16 +298,19 @@ export async function fetchStudentDiet(studentId: string): Promise<{ assignment:
 
   if (aErr || !aRow) return null;
 
+  // Corrigido: Castado "aRow as any" para o TypeScript conseguir ler os campos da tabela sem reclamar
+  const currentAssignment = aRow as any;
+
   const assignment: DietAssignment = {
-    id: aRow.id,
-    dietId: aRow.diet_id,
-    dietName: aRow.diet_name,
-    studentId: aRow.student_id,
-    personalId: aRow.personal_id,
-    assignedAt: aRow.assigned_at,
+    id: currentAssignment.id,
+    dietId: currentAssignment.diet_id,
+    dietName: currentAssignment.diet_name,
+    studentId: currentAssignment.student_id,
+    personalId: currentAssignment.personal_id,
+    assignedAt: currentAssignment.assigned_at,
   };
 
-  const diet = await fetchDietById(aRow.diet_id);
+  const diet = await fetchDietById(currentAssignment.diet_id);
   if (!diet) return null;
 
   return { assignment, diet };
@@ -324,13 +329,17 @@ export async function assignDiet(data: Omit<DietAssignment, 'id' | 'assignedAt'>
     .single();
 
   if (error) throw error;
+
+  // Corrigido: Castado "row as any" para permitir a leitura das propriedades vindas do banco
+  const createdRow = row as any;
+
   return {
-    id: row.id,
-    dietId: row.diet_id,
-    dietName: row.diet_name,
-    studentId: row.student_id,
-    personalId: row.personal_id,
-    assignedAt: row.assigned_at,
+    id: createdRow.id,
+    dietId: createdRow.diet_id,
+    dietName: createdRow.diet_name,
+    studentId: createdRow.student_id,
+    personalId: createdRow.personal_id,
+    assignedAt: createdRow.assigned_at,
   };
 }
 

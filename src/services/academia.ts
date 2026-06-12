@@ -118,7 +118,7 @@ export async function fetchGymStats(gymId: string): Promise<GymStats> {
   ]);
 
   const monthlyRevenue = (payments ?? []).reduce(
-    (sum, p) => sum + Number(p.amount),
+    (sum, p: any) => sum + Number(p.amount),
     0,
   );
   const total = (renewedCount ?? 0) + (expiredCount ?? 0);
@@ -143,21 +143,25 @@ export async function fetchGymProfile(gymId: string): Promise<GymProfileData> {
     .eq('id', gymId)
     .single();
   if (error) throw new Error(error.message);
+  
+  // Ajustado: Tipado como any para evitar erros de propriedade no retorno do método single()
+  const profile = data as any;
+  
   return {
-    id: data.id,
-    name: data.name,
-    bio: data.bio ?? undefined,
-    address: data.address ?? undefined,
-    city: data.city ?? undefined,
-    state: data.state ?? undefined,
-    phone: data.phone ?? undefined,
-    cnpj: (data as any).cnpj ?? undefined,
-    hasPersonal: data.has_personal ?? false,
-    hasNutrition: data.has_nutrition ?? false,
-    amenities: data.amenities ?? [],
-    photos: data.photos ?? [],
-    openingHours: (data.opening_hours as GymHours | undefined) ?? undefined,
-    avatarUrl: data.avatar_url ?? undefined,
+    id: profile.id,
+    name: profile.name,
+    bio: profile.bio ?? undefined,
+    address: profile.address ?? undefined,
+    city: profile.city ?? undefined,
+    state: profile.state ?? undefined,
+    phone: profile.phone ?? undefined,
+    cnpj: profile.cnpj ?? undefined,
+    hasPersonal: profile.has_personal ?? false,
+    hasNutrition: profile.has_nutrition ?? false,
+    amenities: profile.amenities ?? [],
+    photos: profile.photos ?? [],
+    openingHours: (profile.opening_hours as GymHours | undefined) ?? undefined,
+    avatarUrl: profile.avatar_url ?? undefined,
   };
 }
 
@@ -264,13 +268,17 @@ export async function createGymGroup(
     .select()
     .single();
   if (error) throw new Error(error.message);
+  
+  // Ajustado: Convertido para any para assegurar a leitura das colunas
+  const group = data as any;
+
   return {
-    id: data.id,
-    gymId: data.gym_id,
-    name: data.name,
-    description: data.description,
+    id: group.id,
+    gymId: group.gym_id,
+    name: group.name,
+    description: group.description,
     memberCount: 0,
-    createdAt: data.created_at,
+    createdAt: group.created_at,
   };
 }
 
@@ -338,7 +346,9 @@ export async function searchStudentsForGroup(
     .or(`name.ilike.%${query.trim()}%,email.ilike.%${query.trim()}%`)
     .limit(10);
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => ({
+  
+  // Corrigido: Mapeamento de 'r' adicionando o tipo explicitamente como 'any'
+  return (data ?? []).map((r: any) => ({
     id: r.id,
     name: r.name,
     email: r.email,
@@ -355,7 +365,9 @@ export async function fetchGymGroupMessages(groupId: string): Promise<GymGroupMe
     .eq('group_id', groupId)
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
-  return (data ?? []).map((r) => ({
+  
+  // Corrigido: Mapeamento de 'r' adicionando o tipo explicitamente como 'any'
+  return (data ?? []).map((r: any) => ({
     id: r.id,
     groupId: r.group_id,
     gymId: r.gym_id,

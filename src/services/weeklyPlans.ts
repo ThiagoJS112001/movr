@@ -61,7 +61,7 @@ export async function setWeeklyPlan(
 
 export async function fetchPlanArchives(personalId: string): Promise<WeeklyPlanArchive[]> {
   const { data, error } = await supabase
-    .from('plan_archives')
+    .from('weekly_plan_archives')
     .select('*')
     .eq('personal_id', personalId)
     .order('archived_at', { ascending: false });
@@ -76,7 +76,7 @@ export async function archiveWeeklyPlan(
   studentName: string,
   days: WeeklyDay[],
 ): Promise<void> {
-  const { error } = await supabase.from('plan_archives').insert({
+  const { error } = await supabase.from('weekly_plan_archives').insert({
     student_id: studentId,
     personal_id: personalId,
     student_name: studentName,
@@ -87,6 +87,6 @@ export async function archiveWeeklyPlan(
 }
 
 export async function deletePlanArchive(id: string): Promise<void> {
-  const { error } = await supabase.from('plan_archives').delete().eq('id', id);
+  const { error } = await supabase.from('weekly_plan_archives').delete().eq('id', id);
   if (error) throw error;
 }

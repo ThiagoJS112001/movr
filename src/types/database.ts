@@ -316,12 +316,117 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['gym_ratings']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
         Update: Partial<Database['public']['Tables']['gym_ratings']['Insert']>;
       };
+
+      gym_groups: {
+        Row: {
+          id: string;
+          gym_id: string;
+          name: string;
+          description: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['gym_groups']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
+        Update: Partial<Database['public']['Tables']['gym_groups']['Insert']>;
+      };
+
+      gym_group_members: {
+        Row: {
+          group_id: string;
+          student_id: string;
+          joined_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['gym_group_members']['Row'], 'joined_at'> & { joined_at?: string };
+        Update: Partial<Database['public']['Tables']['gym_group_members']['Insert']>;
+      };
+
+      gym_group_messages: {
+        Row: {
+          id: string;
+          group_id: string;
+          gym_id: string;
+          gym_name: string;
+          content: string;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['gym_group_messages']['Row'], 'id' | 'created_at'> & { id?: string; created_at?: string };
+        Update: Partial<Database['public']['Tables']['gym_group_messages']['Insert']>;
+      };
+
+      student_payments: {
+        Row: {
+          id: string;
+          personal_id: string;
+          student_id: string;
+          amount: number;
+          description: string;
+          due_date: string;
+          paid_at: string | null;
+          status: string;
+          payment_method: string | null;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['student_payments']['Row'], 'id' | 'created_at' | 'status' | 'paid_at'> & { id?: string; created_at?: string; status?: string; paid_at?: string | null };
+        Update: Partial<Database['public']['Tables']['student_payments']['Insert']>;
+      };
+
+      training_sessions: {
+        Row: {
+          id: string;
+          personal_id: string;
+          student_id: string;
+          title: string;
+          date: string;
+          start_time: string;
+          end_time: string;
+          status: string;
+          notes: string | null;
+          created_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['training_sessions']['Row'], 'id' | 'created_at' | 'status'> & { id?: string; created_at?: string; status?: string };
+        Update: Partial<Database['public']['Tables']['training_sessions']['Insert']>;
+      };
+
+      student_anamneses: {
+        Row: {
+          id: string;
+          personal_id: string;
+          student_id: string;
+          objective: string | null;
+          activity_level: string | null;
+          has_health_issues: boolean;
+          health_issues: string | null;
+          medications: string | null;
+          injuries: string | null;
+          sleep_hours: number | null;
+          stress_level: number | null;
+          water_intake_liters: number | null;
+          previous_training: string | null;
+          training_years: number | null;
+          preferred_days: string[];
+          preferred_time: string | null;
+          observations: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database['public']['Tables']['student_anamneses']['Row'], 'id' | 'created_at' | 'updated_at' | 'has_health_issues' | 'preferred_days'> & { id?: string; created_at?: string; updated_at?: string; has_health_issues?: boolean; preferred_days?: string[] };
+        Update: Partial<Database['public']['Tables']['student_anamneses']['Insert']>;
+      };
     };
 
     Views: Record<string, never>;
     Functions: {
       my_role: { Args: Record<string, never>; Returns: string };
       my_personal_id: { Args: Record<string, never>; Returns: string };
+      find_aluno_by_email: {
+        Args: { search_email: string };
+        Returns: {
+          id: string;
+          name: string;
+          avatar_url: string | null;
+          already_linked: boolean;
+        }[];
+      };
     };
     Enums: Record<string, never>;
   };

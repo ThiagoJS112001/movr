@@ -1,0 +1,301 @@
+# Movr - Production-Ready .gitignore
+# Based on best practices for Node.js + React + TypeScript + Supabase projects
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔴 CRITICAL - SECURITY SENSITIVE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Environment variables - NEVER commit
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging.local
+
+# IDE secrets
+.idea/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+
+# SSH keys and credentials
+*.pem
+*.key
+*.pub
+*.ppk
+id_rsa*
+id_ed25519*
+authorized_keys
+
+# AWS credentials
+~/.aws/
+.aws/credentials
+.aws/config
+
+# API Keys and tokens (if accidentally added)
+**/api-key.json
+**/credentials.json
+**/service-account.json
+**/private-key.pem
+
+# Database dumps with data
+*.dump
+*.sql.gz
+backup-*.sql
+database-*.sql
+.db
+*.sqlite3-journal
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📦 Build Artifacts & Dependencies
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+package-lock.json  # If using npm ci in production
+yarn.lock          # If using Yarn
+pnpm-lock.yaml     # If using PNPM
+
+# Build output
+dist/
+dist-ssr/
+build/
+out/
+.next/
+.nuxt/
+coverage/
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔧 Development & Local Files
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Local overrides
+*.local
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.~*
+
+# Editor temp files
+*.sublime-project
+*.sublime-workspace
+*.code-workspace
+.vim/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# IDE
+.idea/
+.idea_modules/
+*.iml
+*.iws
+*.ipr
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+desktop.ini
+Thumbs.db
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📊 Logs & Temporary Files
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+.temp/
+cache/
+.cache/
+.vite/
+
+# Supabase temp files
+supabase/.temp/
+supabase/migrations/local/
+supabase/.env.local
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🧪 Testing
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Jest
+.nyc_output/
+coverage/
+*.lcov
+
+# Vitest
+.vitest/
+
+# Playwright/Cypress
+test-results/
+playwright-report/
+cypress/videos/
+cypress/screenshots/
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📦 Package Manager
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# NPM
+.npmrc
+npm-shrinkwrap.json
+.npm
+.eslintcache
+.node_repl_history
+*.tsbuildinfo
+
+# Yarn
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🏗️ Build Tools
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Vite
+dist/
+.vite/
+
+# Rollup
+.cache/
+rollup.config.*.mjs.timestamp-*
+
+# tsc
+*.tsbuildinfo
+
+# ESLint
+.eslintcache
+
+# Prettier
+.prettierignore
+.prettierrc
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🐳 Docker & Virtualization
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Docker
+Dockerfile.local
+docker-compose.local.yml
+.dockerignore
+.docker/
+
+# Kubernetes
+k8s/local/
+*.local.yaml
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🔒 Security & Sensitive Data
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Secrets manager files
+.env.vault
+.vault
+secrets/
+*.gpg
+*.asc
+*.enc
+
+# Private files
+private/
+secret/
+confidential/
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📱 Platform Specific
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# macOS
+.AppleDouble
+.LSOverride
+._*
+.com.apple.timemachine.donotpresent
+
+# Windows
+ehthumbs.db
+Icon?
+Thumbs.db
+
+# Linux
+.nfs*
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 🎯 Project Specific (Movr)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Supabase migrations (local)
+supabase/migrations/**
+!supabase/migrations/schema.sql
+
+# Local development database
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated files
+src/types/database.ts.bak
+src/generated/
+
+# Build artifacts
+dist/
+build/
+
+# Analytics / Monitoring
+.sentry/
+sentry.properties
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 📎 EXCEPTIONS - Files to Keep
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Keep env example
+!.env.example
+
+# Keep important configs
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# Keep essential files
+!.gitkeep
+!.github/
+!.husky/
+
+# Keep docs
+!README.md
+!docs/
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# END OF .gitignore
+# ═══════════════════════════════════════════════════════════════════════════════

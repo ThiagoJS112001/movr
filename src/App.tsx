@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuth } from './contexts/AuthContext';
-import { PageSkeleton } from './components/ui';
 import { ROLE_ROUTES } from './lib/constants';
 
 // Layouts & guard â€” small, needed immediately, keep eager
@@ -10,7 +9,17 @@ import PersonalLayout from './components/layout/PersonalLayout';
 import AlunoLayout from './components/layout/AlunoLayout';
 import AcademiaLayout from './components/layout/AcademiaLayout';
 import ProtectedRoute from './components/ProtectedRoute';
-
+// Error fallback for lazy loading
+function SuspenseErrorFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="text-center text-white">
+        <p className="mb-4">Carregando...</p>
+        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
+      </div>
+    </div>
+  );
+}
 // â”€â”€ Lazy pages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Auth (kept lazy too â€” user may land on dashboard directly)
 const LoginPage             = lazy(() => import('./pages/LoginPage'));
@@ -70,7 +79,7 @@ function RootRedirect() {
 export default function App() {
   return (
     <>
-      <Suspense fallback={<PageSkeleton />}>
+      <Suspense fallback={<SuspenseErrorFallback />}>
         <Routes>
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<LoginPage />} />

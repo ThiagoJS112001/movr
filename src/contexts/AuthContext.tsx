@@ -84,19 +84,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   useEffect(() => {
+    console.log('[AuthContext] Initializing auth...');
     // Safety net: always resolve loading within 8 seconds
-    const safetyTimer = setTimeout(() => setLoading(false), 8000);
+    const safetyTimer = setTimeout(() => {
+      console.log('[AuthContext] Safety timer fired, setting loading=false');
+      setLoading(false);
+    }, 8000);
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('[AuthContext] getSession returned:', !!session);
       if (session?.user) {
         const profile = await fetchProfile(session.user.id);
+        console.log('[AuthContext] fetchProfile returned:', !!profile);
         if (profile) setUser(profile);
       }
+      clearTimeout(safetyTimer);
+      setLoading(false);
+    }).catch(err => {
+      console.error('[AuthContext] getSession error:', err);
       clearTimeout(safetyTimer);
       setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[AuthContext] onAuthStateChange event:', event);
       // Se o login/signup está sendo gerenciado diretamente, ignorar o listener
       // para evitar race condition de fetchProfile duplicado.
       if (signingUpRef.current) return;

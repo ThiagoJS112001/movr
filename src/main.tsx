@@ -13,9 +13,24 @@ import ErrorBoundary from './components/ErrorBoundary.tsx'
 import NotificationsBootstrap from './components/NotificationsBootstrap.tsx'
 import { initSentry } from './lib/sentry.ts'
 
-initSentry();
+console.log('[MAIN] App starting...');
 
-createRoot(document.getElementById('root')!).render(
+try {
+  initSentry();
+  console.log('[MAIN] Sentry initialized');
+} catch (e) {
+  console.error('[MAIN] Sentry error:', e);
+}
+
+const root = document.getElementById('root');
+if (!root) {
+  console.error('[MAIN] Root element not found');
+  throw new Error('Root element not found');
+}
+
+console.log('[MAIN] Creating React root...');
+
+createRoot(root).render(
   <StrictMode>
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -34,3 +49,5 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 )
+
+console.log('[MAIN] App rendered');

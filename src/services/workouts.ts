@@ -346,7 +346,7 @@ export async function addWorkoutLog(log: Omit<WorkoutLog, 'id'>): Promise<void> 
     student_id: log.studentId,
     completed_at: log.completedAt,
     completed_exercises: log.completedExercises,
-    exercise_weights: (log.exerciseWeights as Record<string, unknown>) ?? {},
+    exercise_weights: (log.exerciseWeights as any) ?? {},
     duration_minutes: log.durationMinutes ?? null,
     notes: log.notes ?? null,
   });

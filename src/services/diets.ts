@@ -134,7 +134,7 @@ export async function createDiet(data: Omit<Diet, 'id' | 'createdAt' | 'meals'>)
       restriction_level: data.restrictionLevel ?? null,
       preferences: data.preferences ?? [],
       favorite_foods: data.favoriteFoods ?? [],
-    })
+    } as any)
     .select()
     .single();
 
@@ -182,7 +182,7 @@ export async function addMealToDiet(dietId: string, meal: Omit<Meal, 'id'>): Pro
       notes: meal.notes ?? null,
       target_calories: meal.targetCalories ?? null,
       order_index: count ?? 0,
-    })
+    } as any)
     .select()
     .single();
 

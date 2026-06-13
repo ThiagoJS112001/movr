@@ -10,7 +10,6 @@ import {
   Users,
   Clock,
   MessageCircle,
-  ChevronDown,
 } from 'lucide-react';
 import { useTrainerById } from '../../hooks/useTrainers';
 import { Skeleton } from '../../components/ui';

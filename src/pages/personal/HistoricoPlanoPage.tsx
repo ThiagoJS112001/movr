@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents } from '../../hooks/useStudents';
 import { useExercises } from '../../hooks/useExercises';
-import { usePlanArchives, useDeletePlanArchive } from '../../hooks/useWeeklyPlans';
+import { usePlanArchives } from '../../hooks/useWeeklyPlans';
 import { Archive, ChevronDown, ChevronUp, ArrowLeft, Search } from 'lucide-react';
 import type { WeeklyPlanArchive } from '../../types';
 
@@ -24,7 +24,6 @@ export default function HistoricoPlanoPage() {
   const { data: weeklyPlanArchives = [] } = usePlanArchives();
   const { data: exercises = [] } = useExercises();
   const { data: students = [] } = useStudents();
-  const _deleteArchiveMutation = useDeletePlanArchive();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 

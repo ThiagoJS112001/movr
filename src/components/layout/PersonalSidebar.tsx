@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Settings, LogOut, Calendar, DollarSign, UserCircle } from 'lucide-react';
+import { Settings, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTotalUnread } from '../../hooks/useMessages';
@@ -106,7 +106,7 @@ export default function PersonalSidebar() {
                   {label}
                 </p>
                 <div className="flex flex-col gap-0.5">
-                  {visibleItems.map(({ to, label: itemLabel, badge }) => (
+                  {(visibleItems as any).map(({ to, label: itemLabel, badge }: any) => (
                     <NavLink
                       key={to}
                       to={to}

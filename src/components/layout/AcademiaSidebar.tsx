@@ -121,7 +121,7 @@ export default function AcademiaSidebar() {
         {footer}
       </aside>
 
-      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && <SettingsModal open={settingsOpen} navItems={[]} accent="indigo" onClose={() => setSettingsOpen(false)} />}
     </>
   );
 }

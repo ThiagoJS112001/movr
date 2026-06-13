@@ -51,7 +51,7 @@ export async function setWeeklyPlan(
   const { error } = await supabase
     .from('weekly_plans')
     .upsert(
-      { student_id: studentId, personal_id: personalId, days, updated_at: new Date().toISOString() },
+      { student_id: studentId, personal_id: personalId, days, updated_at: new Date().toISOString() } as any,
       { onConflict: 'student_id,personal_id' },
     );
   if (error) throw error;
@@ -80,9 +80,9 @@ export async function archiveWeeklyPlan(
     student_id: studentId,
     personal_id: personalId,
     student_name: studentName,
-    days,
+    days: days as any,
     archived_at: new Date().toISOString(),
-  });
+  } as any);
   if (error) throw error;
 }
 

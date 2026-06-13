@@ -12,7 +12,7 @@ import {
 import { useDiets, useDietAssignments, useAssignDiet, useRemoveDietAssignment } from '../../hooks/useDiets';
 import { useExercises } from '../../hooks/useExercises';
 import { usePlanArchives } from '../../hooks/useWeeklyPlans';
-import { useAssessments, useDeleteAssessment, useUpdateAssessment } from '../../hooks/useAssessments';
+import { useAssessments, useDeleteAssessment } from '../../hooks/useAssessments';
 import type { StudentAssessment } from '../../types';
 import { toast } from 'sonner';
 import {
@@ -109,7 +109,6 @@ export default function AlunoDetalhe() {
   const { data: allArchives = [] } = usePlanArchives();
   const { data: allAssessmentsData = [] } = useAssessments(id ?? '');
   const deleteAssessmentMutation = useDeleteAssessment(id ?? '');
-  const _updateAssessmentMutation = useUpdateAssessment(id ?? '');
 
   const [activeTab, setActiveTab] = useState<Tab>('treinos');
   const [headerMenuOpen, setHeaderMenuOpen] = useState(false);

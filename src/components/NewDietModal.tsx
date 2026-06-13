@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { useCreateDiet, useAssignDiet as useAssignDietMutation } from '../hooks/useDiets';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
-import type { Meal } from '../types';
 
 const GOALS = [
   { key: 'hipertrofia',   label: 'Hipertrofia',  Icon: TrendingUp   },
@@ -99,20 +98,12 @@ export default function NewDietModal({ studentId, studentName, onClose }: Props)
     }
     if (!user) return;
 
-    const dietMeals: Meal[] = meals.map((m) => ({
-      id: m.id,
-      name: m.name,
-      time: m.time,
-      foods: [],
-    }));
-
     const diet = await createDietMutation.mutateAsync({
       name:            name.trim(),
       description:     notes.trim() || undefined,
       goal:            goal || undefined,
       personalId:      user.id,
       status:          'ativa',
-      meals:           dietMeals,
       targetCalories:  parseFloat(targetCals)  || undefined,
       targetProtein:   protG   || undefined,
       targetCarbs:     carbG   || undefined,

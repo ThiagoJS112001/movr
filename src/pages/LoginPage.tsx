@@ -13,7 +13,6 @@ import {
   Sun,
   ArrowRight,
 } from 'lucide-react';
-import BrandLogo from '../components/ui/BrandLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ROLE_ROUTES } from '../lib/constants';
@@ -52,19 +51,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  function mapLoginError(msg: string): string {
-    const m = msg.toLowerCase();
-    if (m.includes('invalid login credentials') || m.includes('invalid credentials'))
-      return 'E-mail ou senha incorretos.';
-    if (m.includes('email not confirmed'))
-      return 'Confirme seu e-mail antes de fazer login.';
-    if (m.includes('too many requests') || m.includes('rate limit'))
-      return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
-    if (m.includes('network') || m.includes('fetch'))
-      return 'Problema de conexão. Verifique sua internet e tente novamente.';
-    return 'Erro ao fazer login. Tente novamente.';
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -72,7 +58,17 @@ export default function LoginPage() {
     const result = await login(email.trim().toLowerCase(), password);
     setLoading(false);
     if (!result.success) {
-      setError(result.error ?? 'Erro ao fazer login. Tente novamente.');
+      const errorMsg = result.error?.toLowerCase() ?? '';
+      let displayError = 'Erro ao fazer login. Tente novamente.';
+      if (errorMsg.includes('invalid login credentials') || errorMsg.includes('invalid credentials'))
+        displayError = 'E-mail ou senha incorretos.';
+      else if (errorMsg.includes('email not confirmed'))
+        displayError = 'Confirme seu e-mail antes de fazer login.';
+      else if (errorMsg.includes('too many requests') || errorMsg.includes('rate limit'))
+        displayError = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+      else if (errorMsg.includes('network') || errorMsg.includes('fetch'))
+        displayError = 'Problema de conexão. Verifique sua internet e tente novamente.';
+      setError(displayError);
       return;
     }
     navigate(ROLE_ROUTES[result.role ?? ''] ?? '/aluno/dashboard');

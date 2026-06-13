@@ -54,7 +54,7 @@ export async function createExercise(
       suggested_reps: data.suggestedReps ?? null,
       primary_muscles: data.primaryMuscles ?? null,
       secondary_muscles: data.secondaryMuscles ?? null,
-    })
+    } as any)
     .select()
     .single();
 
@@ -80,7 +80,7 @@ export async function updateExercise(id: string, data: Partial<Exercise>): Promi
       ...(data.suggestedReps !== undefined && { suggested_reps: data.suggestedReps ?? null }),
       ...(data.primaryMuscles !== undefined && { primary_muscles: data.primaryMuscles ?? null }),
       ...(data.secondaryMuscles !== undefined && { secondary_muscles: data.secondaryMuscles ?? null }),
-    })
+    } as any)
     .eq('id', id);
 
   if (error) throw error;
@@ -112,7 +112,7 @@ export async function bulkCreateExercises(
 
   const { data, error } = await supabase
     .from('exercises')
-    .insert(rows)
+    .insert(rows as any)
     .select();
 
   if (error) throw error;

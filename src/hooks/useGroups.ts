@@ -106,6 +106,9 @@ export function useSendGroupMessage(groupId: string) {
         from_name: user!.name,
         content: trimmed,
         type: 'text',
+        image_url: null,
+        offer_gym_id: null,
+        offer_gym_name: null,
       });
       if (error) throw error;
     },
@@ -125,7 +128,7 @@ export function useCreateGroup() {
       // Create group
       const { data: group, error: e1 } = await supabase
         .from('student_groups')
-        .insert({ name, created_by: user!.id })
+        .insert({ name, description: null, created_by: user!.id })
         .select('id')
         .single();
       if (e1) throw e1;

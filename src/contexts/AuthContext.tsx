@@ -161,15 +161,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const fallbackName =
           (meta.name as string | undefined) ??
           (data.session.user.email ?? '').split('@')[0];
-        const fallbackRole: string = (meta.role as string | undefined) ?? 'aluno';
+        const roleValue: string = (meta.role as string | undefined) ?? 'aluno';
+        const fallbackRole: 'personal' | 'aluno' | 'academia' = ['personal', 'aluno', 'academia'].includes(roleValue) ? (roleValue as 'personal' | 'aluno' | 'academia') : 'aluno';
         const { error: insertError } = await supabase.from('profiles').insert({
           id: data.session.user.id,
           name: fallbackName,
           email: data.session.user.email ?? '',
-          role: ['personal', 'aluno', 'academia'].includes(fallbackRole)
-            ? fallbackRole
-            : 'aluno',
-        });
+          role: fallbackRole,
+        } as any);
         if (!insertError) {
           profile = await fetchProfile(data.session.user.id, 6000);
         } else {

@@ -181,9 +181,10 @@ export async function listTrainers(filters: TrainerFilters = {}): Promise<Traine
   // Aggregate ratings per personal_profile
   const ratingMap: Record<string, { sum: number; count: number }> = {};
   for (const r of ratingData ?? []) {
-    if (!ratingMap[r.personal_id]) ratingMap[r.personal_id] = { sum: 0, count: 0 };
-    ratingMap[r.personal_id].sum += r.rating;
-    ratingMap[r.personal_id].count += 1;
+    const ratingRecord = r as any;
+    if (!ratingMap[ratingRecord.personal_id]) ratingMap[ratingRecord.personal_id] = { sum: 0, count: 0 };
+    ratingMap[ratingRecord.personal_id].sum += ratingRecord.rating;
+    ratingMap[ratingRecord.personal_id].count += 1;
   }
 
   // Determine today's day_of_week for "Disponível hoje" badge

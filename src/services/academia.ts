@@ -183,7 +183,7 @@ export async function updateGymProfile(
   if (updates.photos !== undefined) payload.photos = updates.photos;
   if (updates.openingHours !== undefined) payload.opening_hours = updates.openingHours;
 
-  const { error } = await supabase.from('profiles').update(payload).eq('id', gymId);
+  const { error } = await supabase.from('profiles').update(payload as any).eq('id', gymId);
   if (error) throw new Error(error.message);
 }
 

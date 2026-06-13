@@ -168,7 +168,6 @@ export default function NewWorkoutModal({ studentId, studentName, onClose }: Pro
     const workout = await createWorkoutMutation.mutateAsync({
       name: name.trim(),
       personalId: user.id,
-      exercises: selectedExercises,
       status,
       level: 'intermediario',
       durationMinutes: estimateDuration(selectedExercises.length),

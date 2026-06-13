@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, User, ArrowRight, CheckCircle2, Moon, Star, MessageCircle, TrendingUp, X } from 'lucide-react';
+import { Bell, User, ArrowRight, CheckCircle2, Star, MessageCircle, TrendingUp, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { useConfirmConnection, useRejectConnection } from '../../hooks/useStudents';

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import emailjs from '@emailjs/browser';
 import { useAuth } from '../../contexts/AuthContext';
 import { useStudents, useCreateStudent, useBlockStudent, useSearchAluno, useInviteStudent } from '../../hooks/useStudents';
-import { useDiets, useDietAssignments, useAssignDiet, useRemoveDietAssignment } from '../../hooks/useDiets';
+import { useDiets, useAssignDiet } from '../../hooks/useDiets';
 import { usePersonalWorkoutLogs, useAssignments, useWorkouts, useAssignWorkout } from '../../hooks/useWorkouts';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -12,15 +12,9 @@ import {
   UserPlus, CalendarDays, X, Mail, Clock,
   ChevronLeft, ChevronRight, Download, ChevronDown, Users, Dumbbell,
 } from 'lucide-react';
-import type { DietAssignment } from '../../types';
 import WeeklyPlanModal from '../../components/WeeklyPlanModal';
 
 const ITEMS_PER_PAGE = 8;
-
-const DAYS = ['segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado', 'domingo'] as const;
-type DayKey = typeof DAYS[number];
-
-
 
 const AVATAR_COLORS = [
   'bg-violet-600',
@@ -72,11 +66,9 @@ function getPaginationRange(current: number, total: number): (number | '...')[] 
 export default function AlunosPage() {
   const { user } = useAuth();
   const { data: diets = [] } = useDiets();
-  const { data: dietAssignments = [] } = useDietAssignments();
   const { data: workouts = [] } = useWorkouts();
   const assignWorkoutMutation = useAssignWorkout();
   const assignDietMutation = useAssignDiet();
-  const _removeDietAssignmentMutation = useRemoveDietAssignment();
   const { data: logs = [] } = usePersonalWorkoutLogs();
   const { data: assignments = [] } = useAssignments();
   const { data: students = [], isLoading: studentsLoading } = useStudents();

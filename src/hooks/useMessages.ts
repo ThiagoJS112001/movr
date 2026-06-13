@@ -9,7 +9,6 @@ import {
   sendMessage,
   markConversationRead,
   type Message,
-  type BasicProfile,
 } from '../services/messages';
 
 // ── Query Keys ────────────────────────────────────────────────────────────────

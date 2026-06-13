@@ -7,7 +7,7 @@ import {
   MapPin,
   Phone,
   Globe,
-  Instagram,
+  Share2,
   Clock,
   Dumbbell,
   CheckCircle2,
@@ -342,7 +342,7 @@ export default function GymPerfilPage() {
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-violet-600 transition-colors"
             >
-              <Instagram className="w-3.5 h-3.5" />
+              <Share2 className="w-3.5 h-3.5" />
               {gym.instagram}
             </a>
           )}

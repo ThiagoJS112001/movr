@@ -34,7 +34,7 @@ export const registerSchema = z
     confirmPassword: z.string().min(1, 'Confirme sua senha.'),
     birthdate: z.string().optional(),
     phone: z.string().optional(),
-    terms: z.literal(true, { errorMap: () => ({ message: 'Você precisa aceitar os Termos de Uso.' }) }),
+    terms: z.literal(true).refine((val) => val === true, { message: 'Você precisa aceitar os Termos de Uso.' }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'As senhas não coincidem.',

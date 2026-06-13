@@ -158,7 +158,6 @@ export default function WorkoutEditModal({ workout, exercises, assignment, onClo
     }
     updateWorkoutMutation.mutate({
         name: name.trim(),
-        exercises: localExercises,
         durationMinutes: estimateDuration(localExercises.length),
     });
     if (assignment) {

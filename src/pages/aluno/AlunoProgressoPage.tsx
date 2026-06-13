@@ -1,6 +1,6 @@
 ﻿import { useMemo, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useWorkoutLogs, useStudentAssignments, useStudentWorkouts } from '../../hooks/useWorkouts';
+import { useWorkoutLogs } from '../../hooks/useWorkouts';
 import { useMyAssessments } from '../../hooks/useAssessments';
 import {
   BarChart, Bar, LineChart, Line,

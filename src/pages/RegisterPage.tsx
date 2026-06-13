@@ -18,7 +18,6 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import BrandLogo from '../components/ui/BrandLogo';
 import PasswordStrengthBar from '../components/ui/PasswordStrengthBar';
-import { ROLE_ROUTES } from '../lib/constants';
 
 type RegRole = 'personal' | 'aluno' | 'academia';
 

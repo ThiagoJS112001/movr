@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef, useMemo } from 'react';
-import { Plus, Send, Users, User, ChevronLeft, X, Check, Search, Phone, MoreVertical, Smile, Paperclip, Edit } from 'lucide-react';
+import { Plus, Send, Users, ChevronLeft, X, Check, Search, Phone, MoreVertical, Smile, Paperclip, Edit } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   useMyPersonalId,

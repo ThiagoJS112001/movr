@@ -5,7 +5,16 @@
 
 function required(key: string): string {
   const value = import.meta.env[key] as string | undefined;
-  if (!value) throw new Error(`[env] Missing required environment variable: ${key}`);
+  if (!value) {
+    const msg = `[env] Missing required environment variable: ${key}
+    
+Available keys: ${Object.keys(import.meta.env)
+      .filter((k) => k.startsWith('VITE_'))
+      .join(', ') || '(none)'}
+
+Make sure .env or .env.production is present and loaded.`;
+    throw new Error(msg);
+  }
   return value;
 }
 
